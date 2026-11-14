@@ -1,0 +1,15 @@
+# Pasta com seus PDFs e livros de RPG (não sobe pro GitHub)
+referencias/
+
+# Pastas pesadas do Next.js / Node (são baixadas automaticamente depois)
+node_modules/
+.next/
+out/
+
+# Arquivos de senhas e configurações secretas
+.env
+.env.local
+
+# Banco de dados local (para os dados de teste não irem para o código)
+*.db
+*.db-journal
