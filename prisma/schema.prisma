@@ -12,14 +12,16 @@ datasource db {
 }
 
 model Campaign {
-  id        String   @id @default(cuid())
-  name      String
-  systemId  String   // Ex: "feiticeiros-e-maldicoes"
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String       @id @default(cuid())
+  name             String
+  systemId         String       // Ex: "feiticeiros-e-maldicoes"
+  activeProjection String?      // JSON com a mídia atualmente projetada no telão
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 
-  characters Character[]
-  sessions   Session[]
+  characters       Character[]
+  sessions         Session[]
+  mediaAssets      MediaAsset[]
 }
 
 model Character {
@@ -46,6 +48,19 @@ model Session {
   notes      String   @default("") // Bloco de notas rápido do mestre
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model MediaAsset {
+  id         String   @id @default(cuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  title      String
+  url        String   // Caminho local ("/uploads/...") ou URL web externa
+  category   String   @default("SCENE") // "SCENE" | "NPC" | "MAP" | "HANDOUT"
+  notes      String?
+
+  createdAt  DateTime @default(now())
 }
 
 model DiceLog {

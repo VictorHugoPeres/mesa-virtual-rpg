@@ -3,19 +3,22 @@
 import { useState } from "react";
 import { calculatePhysicalRoll } from "./diceParser";
 import { RollRequest, useDice } from "./DiceContext";
-import { Check, Sparkles, AlertTriangle, Dice5 } from "lucide-react";
+import { postBroadcastEvent } from "@/core/sync/broadcast";
+import { SyncEvent, DiceRollEventData } from "@/core/sync/syncTypes";
+import { Sparkles, AlertTriangle, Dice5, Tv } from "lucide-react";
 
 interface PhysicalInputTabProps {
   request: RollRequest | null;
   onSuccess: () => void;
 }
 
-export function PhysicalInputTab({ request, onSuccess }: PhysicalInputTabProps) {
+export function PhysicalInputTab({ request }: PhysicalInputTabProps) {
   const { notifyRollSaved } = useDice();
   const [physicalValue, setPhysicalValue] = useState<string>("");
   const [isD20, setIsD20] = useState(
     !request?.defaultDice || request.defaultDice.includes("d20")
   );
+  const [showOnTv, setShowOnTv] = useState(true);
   const [submitted, setSubmitted] = useState<ReturnType<
     typeof calculatePhysicalRoll
   > | null>(null);
@@ -33,6 +36,30 @@ export function PhysicalInputTab({ request, onSuccess }: PhysicalInputTabProps) 
     setSubmitted(calc);
     setIsSaving(true);
 
+    const formulaStr = `${isD20 ? "1d20" : "Dado Físico"}${mod !== 0 ? (mod >= 0 ? `+${mod}` : mod) : ""}`;
+
+    // Dispara via BroadcastChannel para resposta instantânea na tela da TV
+    if (showOnTv && request?.campaignId) {
+      const syncEvent: SyncEvent<DiceRollEventData> = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+        type: "DICE_ROLL",
+        campaignId: request.campaignId,
+        payload: {
+          roller: request.roller || "Mestre",
+          formula: formulaStr,
+          rawRoll: JSON.stringify([numVal]),
+          modifier: mod,
+          total: calc.total,
+          label: request.label || "Dado Físico",
+          isCritical: calc.isCritical,
+          isFumble: calc.isFumble,
+          mode: "PHYSICAL_INPUT",
+        },
+        timestamp: Date.now(),
+      };
+      postBroadcastEvent(request.campaignId, syncEvent);
+    }
+
     try {
       await fetch("/api/rolls", {
         method: "POST",
@@ -43,12 +70,13 @@ export function PhysicalInputTab({ request, onSuccess }: PhysicalInputTabProps) 
           characterId: request?.characterId,
           roller: request?.roller || "Mestre",
           label: request?.label || "Dado Físico",
-          formula: `${isD20 ? "1d20" : "Dado Físico"}${mod >= 0 ? `+${mod}` : mod}`,
+          formula: formulaStr,
           rawRoll: JSON.stringify([numVal]),
           modifier: mod,
           total: calc.total,
           isCritical: calc.isCritical,
           isFumble: calc.isFumble,
+          showOnTv,
         }),
       });
       notifyRollSaved();
@@ -96,23 +124,34 @@ export function PhysicalInputTab({ request, onSuccess }: PhysicalInputTabProps) 
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-xs text-[var(--text-secondary)] pt-1">
-        <label className="flex items-center gap-2 cursor-pointer">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-secondary)] pt-1">
+        <label className="flex items-center gap-1.5 cursor-pointer select-none">
           <input
             type="checkbox"
             checked={isD20}
             onChange={(e) => setIsD20(e.target.checked)}
-            className="rounded border-[var(--border-default)] accent-blue-600"
+            className="rounded border-[var(--border-default)] accent-blue-600 cursor-pointer"
           />
           <span>Verificar Crítico/Falha (d20)</span>
         </label>
 
-        {preview && (
-          <span className="font-semibold text-sm">
-            Total Previsto: <strong className="text-white">{preview.total}</strong>
-          </span>
-        )}
+        <label className="flex items-center gap-1.5 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={showOnTv}
+            onChange={(e) => setShowOnTv(e.target.checked)}
+            className="rounded border-[var(--border-default)] accent-emerald-600 cursor-pointer"
+          />
+          <Tv className="w-3.5 h-3.5 text-emerald-400" />
+          <span>Telão</span>
+        </label>
       </div>
+
+      {preview && (
+        <div className="text-right text-xs text-[var(--text-secondary)]">
+          Total Previsto: <strong className="text-white text-sm">{preview.total}</strong>
+        </div>
+      )}
 
       <button
         type="submit"

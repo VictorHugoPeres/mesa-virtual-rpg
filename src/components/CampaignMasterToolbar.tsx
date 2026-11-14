@@ -2,6 +2,7 @@
 
 import { useDice } from "@/core/dice/DiceContext";
 import { useCompendium } from "@/core/compendium/CompendiumContext";
+import { ProjectionToolbar } from "@/core/projection/ProjectionToolbar";
 import { Dices, History, BookOpen } from "lucide-react";
 
 interface CampaignMasterToolbarProps {
@@ -14,6 +15,9 @@ export function CampaignMasterToolbar({ campaignId }: CampaignMasterToolbarProps
 
   return (
     <div className="flex flex-wrap items-center gap-2">
+      {/* Controles de Projeção na TV / Telão */}
+      <ProjectionToolbar campaignId={campaignId} />
+
       <button
         type="button"
         onClick={() =>

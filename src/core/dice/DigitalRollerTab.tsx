@@ -3,14 +3,16 @@
 import { useState } from "react";
 import { rollDigitalDice, RollResult } from "./diceParser";
 import { RollRequest, useDice } from "./DiceContext";
-import { Dices, Sparkles, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { postBroadcastEvent } from "@/core/sync/broadcast";
+import { SyncEvent, DiceRollEventData } from "@/core/sync/syncTypes";
+import { Dices, Sparkles, AlertTriangle, Tv } from "lucide-react";
 
 interface DigitalRollerTabProps {
   request: RollRequest | null;
   onSuccess: () => void;
 }
 
-export function DigitalRollerTab({ request, onSuccess }: DigitalRollerTabProps) {
+export function DigitalRollerTab({ request }: DigitalRollerTabProps) {
   const { notifyRollSaved } = useDice();
   const defaultDiceType = request?.defaultDice || "1d20";
   const defaultMod = request?.modifier ?? 0;
@@ -23,6 +25,7 @@ export function DigitalRollerTab({ request, onSuccess }: DigitalRollerTabProps) 
   const [rollMode, setRollMode] = useState<"normal" | "advantage" | "disadvantage">(
     "normal"
   );
+  const [showOnTv, setShowOnTv] = useState(true);
   const [result, setResult] = useState<RollResult | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -30,6 +33,28 @@ export function DigitalRollerTab({ request, onSuccess }: DigitalRollerTabProps) 
     const res = rollDigitalDice(formula, rollMode);
     setResult(res);
     setIsSaving(true);
+
+    // Se houver campanha e a opção de TV estiver marcada, dispara instantaneamente no BroadcastChannel
+    if (showOnTv && request?.campaignId) {
+      const syncEvent: SyncEvent<DiceRollEventData> = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+        type: "DICE_ROLL",
+        campaignId: request.campaignId,
+        payload: {
+          roller: request.roller || "Mestre",
+          formula: res.formula,
+          rawRoll: JSON.stringify(res.rolls),
+          modifier: res.modifier,
+          total: res.total,
+          label: request.label || "Rolagem Livre",
+          isCritical: res.isCritical,
+          isFumble: res.isFumble,
+          mode: "DIGITAL",
+        },
+        timestamp: Date.now(),
+      };
+      postBroadcastEvent(request.campaignId, syncEvent);
+    }
 
     try {
       await fetch("/api/rolls", {
@@ -47,6 +72,7 @@ export function DigitalRollerTab({ request, onSuccess }: DigitalRollerTabProps) 
           total: res.total,
           isCritical: res.isCritical,
           isFumble: res.isFumble,
+          showOnTv,
         }),
       });
       notifyRollSaved();
@@ -109,21 +135,34 @@ export function DigitalRollerTab({ request, onSuccess }: DigitalRollerTabProps) 
         ))}
       </div>
 
-      {/* Atalhos rápidos de dados */}
-      <div className="flex flex-wrap gap-1.5 pt-1">
-        {dicePresets.map((d) => (
-          <button
-            key={d}
-            type="button"
-            onClick={() => {
-              const mod = request?.modifier ?? 0;
-              setFormula(mod !== 0 ? `${d}${mod >= 0 ? `+${mod}` : mod}` : d);
-            }}
-            className="px-2.5 py-1 text-xs rounded bg-[var(--bg-secondary)] hover:bg-[var(--bg-card-hover)] border border-[var(--border-default)] text-[var(--text-secondary)] font-mono cursor-pointer"
-          >
-            {d}
-          </button>
-        ))}
+      {/* Atalhos rápidos de dados e Opção de TV */}
+      <div className="flex items-center justify-between pt-1">
+        <div className="flex flex-wrap gap-1.5">
+          {dicePresets.map((d) => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => {
+                const mod = request?.modifier ?? 0;
+                setFormula(mod !== 0 ? `${d}${mod >= 0 ? `+${mod}` : mod}` : d);
+              }}
+              className="px-2 py-1 text-xs rounded bg-[var(--bg-secondary)] hover:bg-[var(--bg-card-hover)] border border-[var(--border-default)] text-[var(--text-secondary)] font-mono cursor-pointer"
+            >
+              {d}
+            </button>
+          ))}
+        </div>
+
+        <label className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={showOnTv}
+            onChange={(e) => setShowOnTv(e.target.checked)}
+            className="rounded border-[var(--border-default)] accent-blue-600 cursor-pointer"
+          />
+          <Tv className="w-3.5 h-3.5 text-blue-400" />
+          <span className="hidden sm:inline">Telão</span>
+        </label>
       </div>
 
       {/* Destaque Visual do Resultado */}

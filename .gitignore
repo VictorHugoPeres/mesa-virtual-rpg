@@ -17,5 +17,6 @@ out/
 # Cache de build do TypeScript
 *.tsbuildinfo
 
-# Cache de build do TypeScript
-*.tsbuildinfo
+# Uploads locais de imagens do mestre (mantendo apenas .gitkeep)
+public/uploads/*
+!public/uploads/.gitkeep

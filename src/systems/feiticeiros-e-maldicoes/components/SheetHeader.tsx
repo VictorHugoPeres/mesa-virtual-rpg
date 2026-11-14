@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useDice } from "@/core/dice/DiceContext";
 import { useCompendium } from "@/core/compendium/CompendiumContext";
+import { ProjectionToolbar } from "@/core/projection/ProjectionToolbar";
 import { FMCharacterData } from "../types";
 
 interface SheetHeaderProps {
@@ -76,8 +77,11 @@ export function SheetHeader({
         </div>
       </div>
 
-      {/* Ações: Rolador, Histórico, Compêndio e Salvamento */}
+      {/* Ações: Telão/Cenas, Rolador, Histórico, Compêndio e Salvamento */}
       <div className="flex flex-wrap items-center gap-2.5">
+        {/* Controles de Projeção na TV */}
+        <ProjectionToolbar campaignId={campaignId} />
+
         <button
           type="button"
           onClick={() =>

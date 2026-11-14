@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { syncBus } from "@/core/sync/eventEmitter";
+import { SyncEvent, DiceRollEventData } from "@/core/sync/syncTypes";
 
 export async function GET(req: Request) {
   try {
@@ -44,6 +46,7 @@ export async function POST(req: Request) {
       label,
       isCritical,
       isFumble,
+      showOnTv = true,
     } = body;
 
     if (!mode || !roller || !formula || total === undefined) {
@@ -68,6 +71,29 @@ export async function POST(req: Request) {
         isFumble: Boolean(isFumble),
       },
     });
+
+    // Se solicitado para exibir no telão e houver campanha associada, emite evento de sync
+    if (showOnTv && campaignId) {
+      const syncEvent: SyncEvent<DiceRollEventData> = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+        type: "DICE_ROLL",
+        campaignId,
+        payload: {
+          roller: log.roller,
+          formula: log.formula,
+          rawRoll: log.rawRoll,
+          modifier: log.modifier,
+          total: log.total,
+          label: log.label,
+          isCritical: log.isCritical,
+          isFumble: log.isFumble,
+          mode: log.mode,
+        },
+        timestamp: Date.now(),
+      };
+
+      syncBus.emit(`campaign:${campaignId}`, syncEvent);
+    }
 
     return NextResponse.json({ roll: log }, { status: 201 });
   } catch (error) {
