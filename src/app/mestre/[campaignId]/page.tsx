@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Swords, User, ScrollText } from "lucide-react";
+import { ArrowLeft, Swords, User, ScrollText, ArrowUpRight } from "lucide-react";
+import { NewCharacterModal } from "@/components/NewCharacterModal";
 import {
   parseCharacterData,
   ATTRIBUTE_LABELS,
@@ -65,10 +66,13 @@ export default async function MestrePage({
 
       {/* Grid com personagens */}
       <section className="mb-10">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <User className="w-5 h-5 text-[var(--accent-blue)]" />
-          Personagens ({campaign.characters.length})
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <User className="w-5 h-5 text-[var(--accent-blue)]" />
+            Personagens ({campaign.characters.length})
+          </h2>
+          <NewCharacterModal campaignId={campaign.id} />
+        </div>
 
         {campaign.characters.length === 0 ? (
           <p className="text-[var(--text-muted)] text-sm">
@@ -85,15 +89,21 @@ export default async function MestrePage({
               }
 
               return (
-                <div
+                <Link
                   key={char.id}
-                  className="p-5 rounded-xl border border-[var(--border-default)]
+                  href={`/mestre/${campaign.id}/fichas/${char.id}`}
+                  className="group block p-5 rounded-xl border border-[var(--border-default)]
                              bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)]
-                             transition-all duration-200"
+                             hover:border-blue-500/50 transition-all duration-200"
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <h3 className="text-base font-semibold">{char.name}</h3>
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="text-base font-semibold group-hover:text-blue-400 transition-colors">
+                          {char.name}
+                        </h3>
+                        <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-blue-400" />
+                      </div>
                       {sheet && (
                         <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                           Nível {sheet.level} · {sheet.specialization} ·{" "}
@@ -170,7 +180,7 @@ export default async function MestrePage({
                       </div>
                     </>
                   )}
-                </div>
+                </Link>
               );
             })}
           </div>

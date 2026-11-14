@@ -1,5 +1,5 @@
-import { XP_TABLE } from "./types";
-import type { AttributeKey, FMCharacterData } from "./types";
+import { XP_TABLE, SPEC_TABLE } from "./types";
+import type { AttributeKey, FMCharacterData, Specialization } from "./types";
 
 // ────────────────────────────────────────────
 // Funções puras de cálculo — F&M v2.0
@@ -103,4 +103,37 @@ export function getGradeForLevel(level: number): string {
   if (level <= 13) return "2° Grau";
   if (level <= 18) return "1° Grau";
   return "Grau Especial";
+}
+
+/**
+ * Calcula o PV Máximo sugerido pelas regras oficiais:
+ * Nível 1: hpBase + CON mod
+ * Níveis subsequentes: (nível - 1) * (hpPerLevel + CON mod)
+ */
+export function calcSuggestedHP(
+  specialization: Specialization,
+  level: number,
+  conMod: number
+): number {
+  const spec = SPEC_TABLE[specialization] || SPEC_TABLE["Lutador"];
+  const lvl1 = spec.hpBase + conMod;
+  if (level <= 1) return Math.max(1, lvl1);
+  return Math.max(1, lvl1 + (level - 1) * (spec.hpPerLevel + conMod));
+}
+
+/**
+ * Calcula o PE Máximo sugerido pelas regras oficiais.
+ */
+export function calcSuggestedPE(
+  specialization: Specialization,
+  level: number,
+  keyAttrMod: number
+): number {
+  const spec = SPEC_TABLE[specialization] || SPEC_TABLE["Lutador"];
+  if (spec.pePerLevel === 0) return 0; // Restringido
+  let total = level * spec.pePerLevel;
+  if (spec.addsAttributeToPE) {
+    total += keyAttrMod;
+  }
+  return Math.max(0, total);
 }

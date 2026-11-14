@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Swords, Users, Calendar, Plus } from "lucide-react";
+import { Swords, Users, Calendar } from "lucide-react";
+import { NewCampaignModal } from "@/components/NewCampaignModal";
 
 export const dynamic = "force-dynamic";
 
@@ -30,16 +31,7 @@ export default async function HomePage() {
       <section>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold">Campanhas</h2>
-          <button
-            disabled
-            title="Em breve: Criar nova campanha"
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
-                       bg-[var(--bg-card)] border border-[var(--border-default)]
-                       text-[var(--text-muted)] cursor-not-allowed opacity-50"
-          >
-            <Plus className="w-4 h-4" />
-            Nova Campanha
-          </button>
+          <NewCampaignModal />
         </div>
 
         {campaigns.length === 0 ? (
