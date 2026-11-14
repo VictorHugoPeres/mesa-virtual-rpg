@@ -1,0 +1,64 @@
+// Prisma schema — Mesa Virtual RPG
+// Banco: SQLite local (dev.db). O campo `data` em Character armazena JSON
+// serializado como String, validado via Zod no TypeScript.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Campaign {
+  id        String   @id @default(cuid())
+  name      String
+  systemId  String   // Ex: "feiticeiros-e-maldicoes"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  characters Character[]
+  sessions   Session[]
+}
+
+model Character {
+  id         String   @id @default(cuid())
+  name       String
+  type       String   @default("PC") // "PC" | "NPC" | "THREAT"
+  avatarUrl  String?
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  // JSON serializado como String — validado com Zod no app
+  data       String   @default("{}")
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  number     Int      @default(1)
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  notes      String   @default("") // Bloco de notas rápido do mestre
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model DiceLog {
+  id           String   @id @default(cuid())
+  mode         String   // "DIGITAL" | "PHYSICAL_INPUT"
+  characterId  String?
+  roller       String   // Nome de quem rolou
+  formula      String   // Ex: "1d20+5", "2d8+3"
+  rawRoll      String   // Resultado(s) natural do dado, ex: "[17]" ou "[3, 6]"
+  modifier     Int      @default(0)
+  total        Int
+  label        String?  // Ex: "Atletismo", "Ataque — Espada Curta"
+  isCritical   Boolean  @default(false)
+  isFumble     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}

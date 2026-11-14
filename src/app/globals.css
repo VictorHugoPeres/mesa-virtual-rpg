@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #141414;
+  --bg-card: #1a1a1a;
+  --bg-card-hover: #222222;
+  --border-default: #2a2a2a;
+  --border-accent: #3b3b3b;
+  --text-primary: #ededed;
+  --text-secondary: #a0a0a0;
+  --text-muted: #666666;
+  --accent-red: #dc2626;
+  --accent-red-dim: #991b1b;
+  --accent-blue: #2563eb;
+  --accent-purple: #7c3aed;
+  --accent-green: #16a34a;
+  --accent-amber: #d97706;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* Scrollbar sutil para dark mode */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-accent);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

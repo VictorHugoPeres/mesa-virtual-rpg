@@ -13,3 +13,9 @@ out/
 # Banco de dados local (para os dados de teste não irem para o código)
 *.db
 *.db-journal
+
+# Cache de build do TypeScript
+*.tsbuildinfo
+
+# Cache de build do TypeScript
+*.tsbuildinfo
