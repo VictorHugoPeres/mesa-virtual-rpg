@@ -1,14 +1,48 @@
 "use client";
 
 import { FMCharacterData } from "@/systems/feiticeiros-e-maldicoes";
-import { Plus, Trash2 } from "lucide-react";
+import { useDice } from "@/core/dice/DiceContext";
+import { Plus, Trash2, Swords, Sparkles } from "lucide-react";
 
 interface WeaponsTableProps {
   data: FMCharacterData;
   onChange: (updater: (prev: FMCharacterData) => FMCharacterData) => void;
+  characterName?: string;
+  characterId?: string;
+  campaignId?: string;
 }
 
-export function WeaponsTable({ data, onChange }: WeaponsTableProps) {
+export function WeaponsTable({
+  data,
+  onChange,
+  characterName,
+  characterId,
+  campaignId,
+}: WeaponsTableProps) {
+  const { openRoller } = useDice();
+
+  function handleRollAttack(name: string, bonus: number) {
+    openRoller({
+      label: `Ataque: ${name}`,
+      modifier: bonus,
+      defaultDice: "1d20",
+      roller: characterName || "Personagem",
+      characterId,
+      campaignId,
+    });
+  }
+
+  function handleRollDamage(name: string, damageFormula: string) {
+    openRoller({
+      label: `Dano: ${name}`,
+      modifier: 0,
+      defaultDice: damageFormula.trim() || "1d6",
+      roller: characterName || "Personagem",
+      characterId,
+      campaignId,
+    });
+  }
+
   return (
     <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)]">
       <div className="flex items-center justify-between mb-4">
@@ -53,6 +87,7 @@ export function WeaponsTable({ data, onChange }: WeaponsTableProps) {
                 <th className="py-2 px-2 text-center">Crítico</th>
                 <th className="py-2 px-2">Tipo</th>
                 <th className="py-2 px-2">Alcance</th>
+                <th className="py-2 px-2 text-center">Rolagens</th>
                 <th className="py-2 px-2 text-right"></th>
               </tr>
             </thead>
@@ -71,7 +106,7 @@ export function WeaponsTable({ data, onChange }: WeaponsTableProps) {
                           return { ...prev, weapons };
                         });
                       }}
-                      className="w-full px-2 py-1 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)]"
+                      className="w-full px-2 py-1 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)] font-medium"
                     />
                   </td>
                   <td className="py-2 px-2 text-center">
@@ -133,7 +168,7 @@ export function WeaponsTable({ data, onChange }: WeaponsTableProps) {
                           return { ...prev, weapons };
                         });
                       }}
-                      className="w-24 px-2 py-1 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)]"
+                      className="w-20 px-2 py-1 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)]"
                     />
                   </td>
                   <td className="py-2 px-2">
@@ -149,8 +184,28 @@ export function WeaponsTable({ data, onChange }: WeaponsTableProps) {
                           return { ...prev, weapons };
                         });
                       }}
-                      className="w-24 px-2 py-1 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)]"
+                      className="w-20 px-2 py-1 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)]"
                     />
+                  </td>
+                  <td className="py-2 px-2 text-center">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => handleRollAttack(w.name, w.attackBonus)}
+                        className="px-2 py-1 text-[11px] font-bold rounded bg-blue-900/40 border border-blue-700/60 text-blue-300 hover:bg-blue-800/60 transition-all cursor-pointer flex items-center gap-1"
+                        title="Rolar Ataque (1d20 + bônus)"
+                      >
+                        <Swords className="w-3 h-3" /> Acerto
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRollDamage(w.name, w.damage)}
+                        className="px-2 py-1 text-[11px] font-bold rounded bg-rose-900/40 border border-rose-700/60 text-rose-300 hover:bg-rose-800/60 transition-all cursor-pointer flex items-center gap-1"
+                        title="Rolar Dano da Arma"
+                      >
+                        <Sparkles className="w-3 h-3" /> Dano
+                      </button>
+                    </div>
                   </td>
                   <td className="py-2 px-2 text-right">
                     <button

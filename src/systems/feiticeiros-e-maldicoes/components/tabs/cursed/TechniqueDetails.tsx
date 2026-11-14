@@ -8,14 +8,25 @@ import {
   getModifier,
   getProficiencyBonus,
 } from "@/systems/feiticeiros-e-maldicoes";
-import { Sparkles } from "lucide-react";
+import { useDice } from "@/core/dice/DiceContext";
+import { Sparkles, Dices } from "lucide-react";
 
 interface TechniqueDetailsProps {
   data: FMCharacterData;
   onChange: (updater: (prev: FMCharacterData) => FMCharacterData) => void;
+  characterName?: string;
+  characterId?: string;
+  campaignId?: string;
 }
 
-export function TechniqueDetails({ data, onChange }: TechniqueDetailsProps) {
+export function TechniqueDetails({
+  data,
+  onChange,
+  characterName,
+  characterId,
+  campaignId,
+}: TechniqueDetailsProps) {
+  const { openRoller } = useDice();
   const prof = getProficiencyBonus(data.level);
   const cp = data.cursedProfile;
 
@@ -23,6 +34,17 @@ export function TechniqueDetails({ data, onChange }: TechniqueDetailsProps) {
   const techAttrMod = getModifier(data.attributes[techAttr] ?? 10);
   const calcDC = 8 + prof + techAttrMod;
   const calcAttack = prof + techAttrMod;
+
+  function handleRollSpellAttack() {
+    openRoller({
+      label: `Acerto Mágico: ${cp.techniqueName || "Técnica Amaldiçoada"}`,
+      modifier: calcAttack,
+      defaultDice: "1d20",
+      roller: characterName || "Personagem",
+      characterId,
+      campaignId,
+    });
+  }
 
   return (
     <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)]">
@@ -94,7 +116,7 @@ export function TechniqueDetails({ data, onChange }: TechniqueDetailsProps) {
         </div>
       </div>
 
-      {/* Cards de CD e Ataque Mágico */}
+      {/* Cards de CD e Ataque Mágico Clicável */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] mb-4">
         <div className="text-center">
           <p className="text-[10px] uppercase font-bold text-[var(--text-muted)]">
@@ -106,19 +128,28 @@ export function TechniqueDetails({ data, onChange }: TechniqueDetailsProps) {
           </p>
         </div>
 
-        <div className="text-center">
-          <p className="text-[10px] uppercase font-bold text-[var(--text-muted)]">
-            Acerto de Feitiço
-          </p>
+        {/* Acerto Mágico Clicável */}
+        <button
+          type="button"
+          onClick={handleRollSpellAttack}
+          className="text-center p-1.5 rounded-lg border border-transparent hover:border-green-500/50 hover:bg-[var(--bg-card)] transition-all cursor-pointer group"
+          title="Clique para rolar Acerto Mágico (1d20 + bônus)"
+        >
+          <div className="flex items-center justify-center gap-1">
+            <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] group-hover:text-green-300">
+              Acerto de Feitiço
+            </p>
+            <Dices className="w-3 h-3 text-green-400 opacity-60 group-hover:opacity-100" />
+          </div>
           <p className="text-2xl font-bold text-green-400">
             {calcAttack >= 0 ? `+${calcAttack}` : calcAttack}
           </p>
           <p className="text-[10px] text-[var(--text-muted)]">
-            1d20 + Maestria (+{prof}) + Mod ({techAttrMod >= 0 ? `+${techAttrMod}` : techAttrMod})
+            1d20 + Maestria (+{prof}) + Mod
           </p>
-        </div>
+        </button>
 
-        <div className="text-center col-span-2">
+        <div className="text-center col-span-2 flex flex-col justify-center">
           <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">
             Funcionamento Básico
           </p>

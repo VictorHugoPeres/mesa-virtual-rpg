@@ -10,13 +10,26 @@ import {
   calcInitiative,
   calcAttention,
 } from "@/systems/feiticeiros-e-maldicoes";
+import { useDice } from "@/core/dice/DiceContext";
+import { Dices } from "lucide-react";
 
 interface AttributesGridProps {
   data: FMCharacterData;
   onChange: (updater: (prev: FMCharacterData) => FMCharacterData) => void;
+  characterName?: string;
+  characterId?: string;
+  campaignId?: string;
 }
 
-export function AttributesGrid({ data, onChange }: AttributesGridProps) {
+export function AttributesGrid({
+  data,
+  onChange,
+  characterName,
+  characterId,
+  campaignId,
+}: AttributesGridProps) {
+  const { openRoller } = useDice();
+
   function handleAttributeChange(key: AttributeKey, val: number) {
     const clamped = Math.max(0, Math.min(30, val || 0));
     onChange((prev) => {
@@ -33,10 +46,21 @@ export function AttributesGrid({ data, onChange }: AttributesGridProps) {
     });
   }
 
+  function handleRollAttribute(key: AttributeKey, mod: number) {
+    openRoller({
+      label: `Teste de ${ATTRIBUTE_LABELS[key]} (${key})`,
+      modifier: mod,
+      defaultDice: "1d20",
+      roller: characterName || "Personagem",
+      characterId,
+      campaignId,
+    });
+  }
+
   return (
     <div>
       <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-3">
-        Atributos Base
+        Atributos Base (Clique no modificador para rolar)
       </h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
         {ATTRIBUTE_KEYS.map((key) => {
@@ -58,17 +82,23 @@ export function AttributesGrid({ data, onChange }: AttributesGridProps) {
                 onChange={(e) =>
                   handleAttributeChange(key, parseInt(e.target.value) || 0)
                 }
-                className="w-16 text-center text-2xl font-bold py-0.5 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)] mx-auto mb-1"
+                className="w-16 text-center text-2xl font-bold py-0.5 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)] mx-auto mb-1.5"
               />
-              <div
-                className={`text-sm font-bold py-0.5 rounded ${
+
+              {/* Botão de rolagem com o modificador */}
+              <button
+                type="button"
+                onClick={() => handleRollAttribute(key, mod)}
+                className={`w-full flex items-center justify-center gap-1 text-sm font-bold py-1 px-2 rounded cursor-pointer transition-all ${
                   mod >= 0
-                    ? "text-green-400 bg-green-950/30"
-                    : "text-red-400 bg-red-950/30"
+                    ? "text-green-400 bg-green-950/30 hover:bg-green-900/50 hover:text-green-300"
+                    : "text-red-400 bg-red-950/30 hover:bg-red-900/50 hover:text-red-300"
                 }`}
+                title={`Rolar 1d20 ${mod >= 0 ? `+ ${mod}` : `- ${Math.abs(mod)}`}`}
               >
-                {mod >= 0 ? `+${mod}` : mod}
-              </div>
+                <Dices className="w-3.5 h-3.5" />
+                <span>{mod >= 0 ? `+${mod}` : mod}</span>
+              </button>
             </div>
           );
         })}

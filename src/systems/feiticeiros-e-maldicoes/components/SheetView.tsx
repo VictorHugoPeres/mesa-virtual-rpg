@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import Link from "next/link";
 import {
   FMCharacterData,
   parseCharacterData,
@@ -11,17 +10,13 @@ import { TabCursedProfile } from "./tabs/TabCursedProfile";
 import { TabInventory } from "./tabs/TabInventory";
 import { TabInvocations } from "./tabs/TabInvocations";
 import { TabTraining } from "./tabs/TabTraining";
+import { SheetHeader } from "./SheetHeader";
 import {
-  ArrowLeft,
   User,
   Sparkles,
   Package,
   Ghost,
   Dumbbell,
-  Save,
-  CheckCircle2,
-  Loader2,
-  AlertCircle,
 } from "lucide-react";
 
 interface SheetViewProps {
@@ -128,80 +123,19 @@ export function SheetView({
 
   return (
     <div className="min-h-screen p-4 sm:p-6 max-w-6xl mx-auto space-y-6">
-      {/* ────────────────────────────────────────────────────────── */}
-      {/* BARRA SUPERIOR DE AÇÕES & STATUS */}
-      {/* ────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border-default)]">
-        <div className="flex items-center gap-3">
-          <Link
-            href={`/mestre/${campaignId}`}
-            className="p-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-            title="Voltar ao Painel da Campanha"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
+      {/* Barra Superior Modular */}
+      <SheetHeader
+        name={name}
+        setName={setName}
+        type={type}
+        campaignId={campaignId}
+        characterId={characterId}
+        data={data}
+        saveStatus={saveStatus}
+        onManualSave={() => saveToDatabase(name, type, data)}
+      />
 
-          <div>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Nome do Personagem"
-                className="text-2xl font-bold bg-transparent border-b border-transparent hover:border-[var(--border-accent)] focus:border-blue-500 focus:outline-none transition-colors"
-              />
-              <span
-                className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
-                  type === "PC"
-                    ? "bg-blue-900/60 text-blue-300 border border-blue-700"
-                    : "bg-red-900/60 text-red-300 border border-red-700"
-                }`}
-              >
-                {type}
-              </span>
-            </div>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">
-              {data.origin} · {data.specialization} · Nível {data.level} · {data.grade}
-            </p>
-          </div>
-        </div>
-
-        {/* Status de salvamento e botão manual */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
-            {saveStatus === "saving" && (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400" />
-                <span>Salvando...</span>
-              </>
-            )}
-            {saveStatus === "saved" && (
-              <>
-                <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
-                <span className="text-green-400">Salvo no banco</span>
-              </>
-            )}
-            {saveStatus === "error" && (
-              <>
-                <AlertCircle className="w-3.5 h-3.5 text-red-400" />
-                <span className="text-red-400">Erro ao salvar</span>
-              </>
-            )}
-          </div>
-
-          <button
-            onClick={() => saveToDatabase(name, type, data)}
-            disabled={saveStatus === "saving"}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] border border-[var(--border-default)] text-[var(--text-primary)] transition-colors cursor-pointer disabled:opacity-50"
-          >
-            <Save className="w-3.5 h-3.5" /> Salvar Agora
-          </button>
-        </div>
-      </div>
-
-      {/* ────────────────────────────────────────────────────────── */}
-      {/* NAVEGAÇÃO ENTRE AS 5 ABAS */}
-      {/* ────────────────────────────────────────────────────────── */}
+      {/* Navegação entre as 5 Abas */}
       <div className="flex overflow-x-auto gap-1 border-b border-[var(--border-default)] pb-px">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
@@ -222,15 +156,25 @@ export function SheetView({
         })}
       </div>
 
-      {/* ────────────────────────────────────────────────────────── */}
-      {/* CONTEÚDO DA ABA ATIVA */}
-      {/* ────────────────────────────────────────────────────────── */}
+      {/* Conteúdo da Aba Ativa */}
       <div>
         {activeTab === "personal" && (
-          <TabPersonal data={data} onChange={setData} />
+          <TabPersonal
+            data={data}
+            onChange={setData}
+            characterName={name}
+            characterId={characterId}
+            campaignId={campaignId}
+          />
         )}
         {activeTab === "cursed" && (
-          <TabCursedProfile data={data} onChange={setData} />
+          <TabCursedProfile
+            data={data}
+            onChange={setData}
+            characterName={name}
+            characterId={characterId}
+            campaignId={campaignId}
+          />
         )}
         {activeTab === "inventory" && (
           <TabInventory data={data} onChange={setData} />

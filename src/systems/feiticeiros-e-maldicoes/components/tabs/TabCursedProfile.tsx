@@ -9,13 +9,28 @@ import { DomainExpansionCard } from "./cursed/DomainExpansionCard";
 interface TabCursedProfileProps {
   data: FMCharacterData;
   onChange: (updater: (prev: FMCharacterData) => FMCharacterData) => void;
+  characterName?: string;
+  characterId?: string;
+  campaignId?: string;
 }
 
-export function TabCursedProfile({ data, onChange }: TabCursedProfileProps) {
+export function TabCursedProfile({
+  data,
+  onChange,
+  characterName,
+  characterId,
+  campaignId,
+}: TabCursedProfileProps) {
   return (
     <div className="space-y-6">
       {/* 1. Técnica Amaldiçoada & Atributos Mágicos */}
-      <TechniqueDetails data={data} onChange={onChange} />
+      <TechniqueDetails
+        data={data}
+        onChange={onChange}
+        characterName={characterName}
+        characterId={characterId}
+        campaignId={campaignId}
+      />
 
       {/* 2. Níveis de Aptidão Amaldiçoada (0 a 5) */}
       <AptitudesTracker data={data} onChange={onChange} />

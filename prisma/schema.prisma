@@ -50,8 +50,9 @@ model Session {
 
 model DiceLog {
   id           String   @id @default(cuid())
-  mode         String   // "DIGITAL" | "PHYSICAL_INPUT"
+  campaignId   String?
   characterId  String?
+  mode         String   // "DIGITAL" | "PHYSICAL_INPUT"
   roller       String   // Nome de quem rolou
   formula      String   // Ex: "1d20+5", "2d8+3"
   rawRoll      String   // Resultado(s) natural do dado, ex: "[17]" ou "[3, 6]"
