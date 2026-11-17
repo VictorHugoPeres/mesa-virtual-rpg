@@ -16,6 +16,7 @@ model Campaign {
   name             String
   systemId         String       // Ex: "feiticeiros-e-maldicoes"
   activeProjection String?      // JSON com a mídia atualmente projetada no telão
+  activeCombat     String?      // JSON com o estado atual do combate (iniciativa)
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 

@@ -1,14 +1,17 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Swords, User, ScrollText } from "lucide-react";
+import { ArrowLeft, Swords, User } from "lucide-react";
 import { NewCharacterModal } from "@/components/NewCharacterModal";
 import { CampaignMasterToolbar } from "@/components/CampaignMasterToolbar";
 import { CampaignCharacterCard } from "@/components/CampaignCharacterCard";
+import { InitiativePanel } from "@/core/initiative/InitiativePanel";
+import { SessionNotes } from "@/core/notes/SessionNotes";
+import { MasterBestiaryWrapper } from "@/components/MasterBestiaryWrapper";
 
 export const dynamic = "force-dynamic";
 
-export default async function MestrePage({
+export default async function MasterPage({
   params,
 }: {
   params: Promise<{ campaignId: string }>;
@@ -25,19 +28,33 @@ export default async function MestrePage({
 
   if (!campaign) return notFound();
 
+  // Garante que haja pelo menos uma sessão para as anotações
+  let latestSession = campaign.sessions[0];
+  if (!latestSession) {
+    latestSession = await prisma.session.create({
+      data: {
+        campaignId: campaign.id,
+        number: 1,
+        notes: "Sessão 1 — Início da campanha.",
+      },
+    });
+  }
+
   const systemLabel =
     campaign.systemId === "feiticeiros-e-maldicoes"
       ? "Feiticeiros e Maldições"
       : campaign.systemId;
 
+  // Separa jogadores das ameaças do bestiário
+  const playerCharacters = campaign.characters.filter((c) => c.type !== "THREAT");
+
   return (
-    <main className="min-h-screen p-6 max-w-5xl mx-auto">
+    <main className="min-h-screen p-6 max-w-6xl mx-auto space-y-6">
       {/* Topo / Breadcrumb + Barra de Ferramentas */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-[var(--text-secondary)]
-                     hover:text-[var(--text-primary)] transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Voltar às Campanhas
@@ -47,8 +64,8 @@ export default async function MestrePage({
       </div>
 
       {/* Header da campanha */}
-      <header className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
+      <header className="pb-4 border-b border-[var(--border-default)]">
+        <div className="flex items-center gap-3 mb-1">
           <Swords className="w-7 h-7 text-red-500" />
           <h1 className="text-2xl font-bold">{campaign.name}</h1>
         </div>
@@ -63,54 +80,62 @@ export default async function MestrePage({
         </p>
       </header>
 
-      {/* Grid com personagens */}
-      <section className="mb-10">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <User className="w-5 h-5 text-[var(--accent-blue)]" />
-            Personagens ({campaign.characters.length})
-          </h2>
-          <NewCharacterModal campaignId={campaign.id} />
-        </div>
+      {/* 1. Tracker de Iniciativa e Combate */}
+      <InitiativePanel
+        campaignId={campaign.id}
+        characters={campaign.characters}
+      />
 
-        {campaign.characters.length === 0 ? (
-          <p className="text-[var(--text-muted)] text-sm">
-            Nenhum personagem cadastrado nesta campanha.
-          </p>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {campaign.characters.map((char) => (
-              <CampaignCharacterCard
-                key={char.id}
-                campaignId={campaign.id}
-                char={char}
-              />
-            ))}
+      {/* 2. Grid com Personagens e Anotações da Sessão */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Coluna 1 & 2: Personagens da Campanha */}
+        <section className="lg:col-span-2 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-semibold flex items-center gap-2">
+              <User className="w-5 h-5 text-[var(--accent-blue)]" />
+              Personagens Jogadores ({playerCharacters.length})
+            </h2>
+            <NewCharacterModal campaignId={campaign.id} />
           </div>
-        )}
-      </section>
 
-      {/* Última sessão */}
-      {campaign.sessions.length > 0 && (
-        <section>
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <ScrollText className="w-5 h-5 text-[var(--accent-green)]" />
-            Última Sessão
-          </h2>
-          <div className="p-5 rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)]">
-            <p className="text-sm font-medium mb-1">
-              Sessão #{campaign.sessions[0].number}
-            </p>
-            <p className="text-sm text-[var(--text-secondary)] whitespace-pre-wrap">
-              {campaign.sessions[0].notes || "Sem anotações."}
-            </p>
-          </div>
+          {playerCharacters.length === 0 ? (
+            <div className="p-6 rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] text-center">
+              <p className="text-[var(--text-muted)] text-sm">
+                Nenhum personagem cadastrado nesta campanha.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {playerCharacters.map((char) => (
+                <CampaignCharacterCard
+                  key={char.id}
+                  campaignId={campaign.id}
+                  char={char}
+                />
+              ))}
+            </div>
+          )}
         </section>
-      )}
+
+        {/* Coluna 3: Anotações da Sessão Atual com Autosave */}
+        <section className="lg:col-span-1">
+          <SessionNotes
+            sessionId={latestSession.id}
+            initialNotes={latestSession.notes}
+            sessionNumber={latestSession.number}
+          />
+        </section>
+      </div>
+
+      {/* Gaveta do Bestiário de Ameaças */}
+      <MasterBestiaryWrapper
+        campaignId={campaign.id}
+        characters={campaign.characters}
+      />
 
       {/* Footer */}
-      <footer className="mt-16 text-center text-xs text-[var(--text-muted)]">
-        Painel do Mestre — Feiticeiros e Maldições
+      <footer className="mt-12 pt-6 border-t border-[var(--border-default)] text-center text-xs text-[var(--text-muted)]">
+        Painel do Mestre — Feiticeiros e Maldições RPG
       </footer>
     </main>
   );

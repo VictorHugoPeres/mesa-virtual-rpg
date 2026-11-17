@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { TelaoView } from "@/core/telao/TelaoView";
-import { ProjectionData } from "@/core/sync/syncTypes";
+import { ProjectionData, InitiativeDisplayData } from "@/core/sync/syncTypes";
+import { combatToTvData } from "@/core/initiative/initiativeTypes";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,7 @@ export default async function TelaoPage({
       id: true,
       name: true,
       activeProjection: true,
+      activeCombat: true,
     },
   });
 
@@ -32,11 +34,22 @@ export default async function TelaoPage({
     }
   }
 
+  let initialCombat: InitiativeDisplayData | null = null;
+  if (campaign.activeCombat) {
+    try {
+      const parsed = JSON.parse(campaign.activeCombat);
+      initialCombat = combatToTvData(parsed);
+    } catch {
+      initialCombat = null;
+    }
+  }
+
   return (
     <TelaoView
       campaignId={campaign.id}
       campaignName={campaign.name}
       initialProjection={initialProjection}
+      initialCombat={initialCombat}
     />
   );
 }

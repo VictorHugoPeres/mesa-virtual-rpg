@@ -15,7 +15,7 @@ export async function POST(
     const body = await req.json();
 
     const name = String(body.name || "").trim();
-    const type = body.type === "NPC" ? "NPC" : "PC";
+    const type = body.type === "THREAT" ? "THREAT" : body.type === "NPC" ? "NPC" : "PC";
     const specialization = (body.specialization || "Lutador") as Specialization;
     const origin = (body.origin || "Inato") as Origin;
 
@@ -37,15 +37,22 @@ export async function POST(
       );
     }
 
-    const initialSheet = createDefaultCharacter(name, type, specialization, origin);
-    initialSheet.campaign = campaign.name;
+    let finalDataString: string;
+    if (body.data) {
+      finalDataString = typeof body.data === "string" ? body.data : JSON.stringify(body.data);
+    } else {
+      const initialSheet = createDefaultCharacter(name, type === "THREAT" ? "NPC" : type, specialization, origin);
+      initialSheet.campaign = campaign.name;
+      finalDataString = JSON.stringify(initialSheet);
+    }
 
     const character = await prisma.character.create({
       data: {
         name,
         type,
         campaignId,
-        data: JSON.stringify(initialSheet),
+        avatarUrl: body.avatarUrl || null,
+        data: finalDataString,
       },
     });
 

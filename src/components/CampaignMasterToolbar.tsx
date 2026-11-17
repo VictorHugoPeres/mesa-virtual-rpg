@@ -3,7 +3,7 @@
 import { useDice } from "@/core/dice/DiceContext";
 import { useCompendium } from "@/core/compendium/CompendiumContext";
 import { ProjectionToolbar } from "@/core/projection/ProjectionToolbar";
-import { Dices, History, BookOpen } from "lucide-react";
+import { Dices, History, BookOpen, Skull } from "lucide-react";
 
 interface CampaignMasterToolbarProps {
   campaignId: string;
@@ -15,7 +15,22 @@ export function CampaignMasterToolbar({ campaignId }: CampaignMasterToolbarProps
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {/* Controles de Projeção na TV / Telão */}
+        {/* Botão Bestiário */}
+        <button
+          type="button"
+          onClick={() => {
+            const ev = new CustomEvent('open-bestiary');
+            window.dispatchEvent(ev);
+          }}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
+                     bg-red-600/20 text-red-300 border border-red-500/30 hover:bg-red-600/30
+                     transition-all cursor-pointer shadow-xs"
+          title="Abrir Bestiário de Ameaças"
+        >
+          <Skull className="w-3.5 h-3.5 text-red-400" />
+          Bestiário
+        </button>
+
       <ProjectionToolbar campaignId={campaignId} />
 
       <button

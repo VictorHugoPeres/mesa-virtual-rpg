@@ -1,4 +1,4 @@
-export type SyncEventType = "PROJECTION_UPDATE" | "DICE_ROLL";
+export type SyncEventType = "PROJECTION_UPDATE" | "DICE_ROLL" | "INITIATIVE_UPDATE";
 
 export interface ProjectionData {
   mediaUrl: string | null;
@@ -16,6 +16,27 @@ export interface DiceRollEventData {
   isCritical: boolean;
   isFumble: boolean;
   mode: string; // "DIGITAL" | "PHYSICAL_INPUT"
+}
+
+export type HealthStatus = "Saudável" | "Ferido" | "Crítico" | "Gravemente Ferido" | "Derrotado";
+
+export interface InitiativeDisplayParticipant {
+  id: string;
+  name: string;
+  type: "PC" | "NPC" | "THREAT";
+  initiative: number;
+  // PCs mostram HP exato; threats/NPCs mostram apenas status
+  hpPercent?: number;         // só para PCs (barra visual)
+  healthStatus: HealthStatus; // todos recebem status textual
+  conditions: string[];
+  isCurrentTurn: boolean;
+}
+
+export interface InitiativeDisplayData {
+  isActive: boolean;
+  round: number;
+  participants: InitiativeDisplayParticipant[];
+  showOnTv: boolean;
 }
 
 export interface SyncEvent<T = unknown> {
