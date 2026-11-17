@@ -1,7 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { TelaoView } from "@/core/telao/TelaoView";
-import { ProjectionData, InitiativeDisplayData } from "@/core/sync/syncTypes";
+import {
+  ProjectionData,
+  InitiativeDisplayData,
+  AudioBGMEventData,
+} from "@/core/sync/syncTypes";
 import { combatToTvData } from "@/core/initiative/initiativeTypes";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +24,7 @@ export default async function TelaoPage({
       name: true,
       activeProjection: true,
       activeCombat: true,
+      activeAudio: true,
     },
   });
 
@@ -44,12 +49,22 @@ export default async function TelaoPage({
     }
   }
 
+  let initialAudio: AudioBGMEventData | null = null;
+  if (campaign.activeAudio) {
+    try {
+      initialAudio = JSON.parse(campaign.activeAudio);
+    } catch {
+      initialAudio = null;
+    }
+  }
+
   return (
     <TelaoView
       campaignId={campaign.id}
       campaignName={campaign.name}
       initialProjection={initialProjection}
       initialCombat={initialCombat}
+      initialAudio={initialAudio}
     />
   );
 }

@@ -8,6 +8,7 @@ import { CampaignCharacterCard } from "@/components/CampaignCharacterCard";
 import { InitiativePanel } from "@/core/initiative/InitiativePanel";
 import { SessionNotes } from "@/core/notes/SessionNotes";
 import { MasterBestiaryWrapper } from "@/components/MasterBestiaryWrapper";
+import { MasterAudioSection } from "@/core/audio/MasterAudioSection";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +80,9 @@ export default async function MasterPage({
           {campaign.sessions.length === 1 ? "sessão" : "sessões"}
         </p>
       </header>
+
+      {/* Mesa de Som e Player de Música Ambiente */}
+      <MasterAudioSection campaignId={campaign.id} />
 
       {/* 1. Tracker de Iniciativa e Combate */}
       <InitiativePanel

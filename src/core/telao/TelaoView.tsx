@@ -7,11 +7,13 @@ import {
   ProjectionData,
   DiceRollEventData,
   InitiativeDisplayData,
+  AudioBGMEventData,
 } from "../sync/syncTypes";
 import { TelaoStandby } from "./TelaoStandby";
 import { TelaoProjection } from "./TelaoProjection";
 import { TelaoDiceBanner } from "./TelaoDiceBanner";
 import { TelaoInitiativePanel } from "./TelaoInitiativePanel";
+import { TelaoAudioReceiver } from "./TelaoAudioReceiver";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { combatToTvData } from "../initiative/initiativeTypes";
 
@@ -20,6 +22,7 @@ interface TelaoViewProps {
   campaignName: string;
   initialProjection: ProjectionData | null;
   initialCombat?: InitiativeDisplayData | null;
+  initialAudio?: AudioBGMEventData | null;
 }
 
 export function TelaoView({
@@ -27,6 +30,7 @@ export function TelaoView({
   campaignName,
   initialProjection,
   initialCombat = null,
+  initialAudio = null,
 }: TelaoViewProps) {
   const [projection, setProjection] = useState<ProjectionData | null>(initialProjection);
   const [currentDiceRoll, setCurrentDiceRoll] = useState<DiceRollEventData | null>(null);
@@ -132,6 +136,12 @@ export function TelaoView({
 
       {/* Painel de Ordem de Iniciativa na TV */}
       <TelaoInitiativePanel initiative={initiativeData} />
+
+      {/* Receptor de Áudio da TV (BGM & SFX) */}
+      <TelaoAudioReceiver
+        campaignId={campaignId}
+        initialAudio={initialAudio}
+      />
     </div>
   );
 }

@@ -39,7 +39,7 @@ export function ProjectionManagerModal({
   const fetchMedia = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/media?campaignId=${campaignId}`);
+      const res = await fetch(`/api/media?campaignId=${campaignId}&type=image`);
       if (res.ok) {
         const data = await res.json();
         setMediaList(data.media || []);

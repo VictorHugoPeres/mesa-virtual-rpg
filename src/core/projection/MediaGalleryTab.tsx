@@ -26,9 +26,12 @@ export function MediaGalleryTab({
 }: MediaGalleryTabProps) {
   const [categoryFilter, setCategoryFilter] = useState("TODOS");
 
-  const filteredList = mediaList.filter((m) =>
-    categoryFilter === "TODOS" ? true : m.category === categoryFilter
-  );
+  const filteredList = mediaList.filter((m) => {
+    const cat = (m.category || "").toUpperCase();
+    if (cat.startsWith("BGM_") || cat === "SFX" || cat === "AUDIO" || cat === "MUSIC") return false;
+    if (/\.(mp3|ogg|wav|aac|flac|m4a)($|\?)/i.test(m.url)) return false;
+    return categoryFilter === "TODOS" ? true : m.category === categoryFilter;
+  });
 
   return (
     <div>

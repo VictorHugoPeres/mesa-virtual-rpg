@@ -1,4 +1,9 @@
-export type SyncEventType = "PROJECTION_UPDATE" | "DICE_ROLL" | "INITIATIVE_UPDATE";
+export type SyncEventType =
+  | "PROJECTION_UPDATE"
+  | "DICE_ROLL"
+  | "INITIATIVE_UPDATE"
+  | "AUDIO_UPDATE"
+  | "AUDIO_SFX_PLAY";
 
 export interface ProjectionData {
   mediaUrl: string | null;
@@ -37,6 +42,27 @@ export interface InitiativeDisplayData {
   round: number;
   participants: InitiativeDisplayParticipant[];
   showOnTv: boolean;
+}
+
+export type AudioOutputTarget = "MASTER_PC" | "TV_TELAO";
+
+export interface AudioBGMEventData {
+  trackUrl: string | null;
+  trackTitle: string | null;
+  trackCategory?: string | null;
+  isPlaying: boolean;
+  volume: number; // 0 a 1
+  loop: boolean;
+  outputTarget: AudioOutputTarget;
+  currentTime?: number;
+}
+
+export interface AudioSFXEventData {
+  id: string;
+  url: string; // url ou identificador de som sintetizado (ex: "synth:sword", etc)
+  title: string;
+  volume: number; // 0 a 1
+  timestamp: number;
 }
 
 export interface SyncEvent<T = unknown> {
