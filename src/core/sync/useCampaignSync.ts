@@ -10,6 +10,7 @@ interface UseCampaignSyncOptions {
 }
 
 export function useCampaignSync({ campaignId, onEvent }: UseCampaignSyncOptions) {
+  const hasListener = Boolean(onEvent);
   const processedEvents = useRef<Set<string>>(new Set());
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
@@ -31,9 +32,9 @@ export function useCampaignSync({ campaignId, onEvent }: UseCampaignSyncOptions)
     }
   }, []);
 
-  // 1. Conexão via BroadcastChannel (mesmo navegador/PC)
+  // 1. Conexão via BroadcastChannel (mesmo navegador/PC) - apenas se houver listener
   useEffect(() => {
-    if (!campaignId) return;
+    if (!campaignId || !hasListener) return;
 
     const channel = createBroadcastChannel(campaignId);
     if (!channel) return;
@@ -48,11 +49,11 @@ export function useCampaignSync({ campaignId, onEvent }: UseCampaignSyncOptions)
       channel.removeEventListener("message", onMessage);
       channel.close();
     };
-  }, [campaignId, handleIncomingEvent]);
+  }, [campaignId, hasListener, handleIncomingEvent]);
 
-  // 2. Conexão via Server-Sent Events (rede local / outros dispositivos)
+  // 2. Conexão via Server-Sent Events (rede local / outros dispositivos) - apenas se houver listener
   useEffect(() => {
-    if (!campaignId || typeof window === "undefined") return;
+    if (!campaignId || !hasListener || typeof window === "undefined") return;
 
     let eventSource: EventSource | null = null;
     let retryTimer: NodeJS.Timeout | null = null;
@@ -85,7 +86,7 @@ export function useCampaignSync({ campaignId, onEvent }: UseCampaignSyncOptions)
       if (retryTimer) clearTimeout(retryTimer);
       if (eventSource) eventSource.close();
     };
-  }, [campaignId, handleIncomingEvent]);
+  }, [campaignId, hasListener, handleIncomingEvent]);
 
   // 3. Emissor híbrido (BroadcastChannel + SSE POST)
   const emit = useCallback(

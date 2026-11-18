@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, Upload, Link2, Loader2, Map as MapIcon } from "lucide-react";
+import { Plus, X, Upload, Link2, Loader2, Map as MapIcon, Image as ImageIcon } from "lucide-react";
+import { GalleryMediaPicker } from "./GalleryMediaPicker";
 
 interface AddMapModalProps {
   campaignId: string;
@@ -11,11 +12,12 @@ interface AddMapModalProps {
 }
 
 export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapModalProps) {
-  const [tab, setTab] = useState<"upload" | "url">("upload");
+  const [tab, setTab] = useState<"upload" | "url" | "gallery">("upload");
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
+  const [selectedGalleryUrl, setSelectedGalleryUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const [gridSize, setGridSize] = useState(50);
+  const [gridSize, setGridSize] = useState<number>(50);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -23,13 +25,16 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      setError("Informe o nome do mapa.");
+      return;
+    }
 
     setLoading(true);
     setError("");
 
     try {
-      let finalImageUrl = url.trim();
+      let finalImageUrl = "";
 
       if (tab === "upload") {
         if (!file) throw new Error("Selecione um arquivo de imagem.");
@@ -45,24 +50,31 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
         });
 
         if (!resUpload.ok) {
-          const data = await resUpload.json();
-          throw new Error(data.error || "Erro no upload do mapa");
+          const data = await resUpload.json().catch(() => ({}));
+          throw new Error(data.error || "Erro ao fazer upload da imagem");
         }
 
         const dataUpload = await resUpload.json();
-        finalImageUrl = dataUpload.media?.url;
-      } else {
-        if (!finalImageUrl) throw new Error("Informe a URL da imagem.");
+        if (!dataUpload.media?.url) {
+          throw new Error("URL da imagem não retornada pelo servidor.");
+        }
+        finalImageUrl = dataUpload.media.url;
+      } else if (tab === "url") {
+        if (!url.trim()) throw new Error("Informe a URL da imagem.");
+        finalImageUrl = url.trim();
+      } else if (tab === "gallery") {
+        if (!selectedGalleryUrl) throw new Error("Selecione uma imagem da galeria.");
+        finalImageUrl = selectedGalleryUrl;
       }
 
-      // Cria o registro TacticalMap
+      // Cria o registro TacticalMap no SQLite
       const resMap = await fetch(`/api/campaigns/${campaignId}/maps`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: title.trim(),
           imageUrl: finalImageUrl,
-          gridSize,
+          gridSize: Number(gridSize) || 50,
           gridEnabled: true,
           gridColor: "#ffffff",
           gridOpacity: 0.25,
@@ -71,17 +83,18 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
       });
 
       if (!resMap.ok) {
-        const data = await resMap.json();
-        throw new Error(data.error || "Erro ao criar mapa");
+        const data = await resMap.json().catch(() => ({}));
+        throw new Error(data.error || "Erro ao salvar o mapa.");
       }
 
       onSuccess();
       onClose();
       setTitle("");
       setUrl("");
+      setSelectedGalleryUrl("");
       setFile(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao cadastrar mapa");
+      setError(err instanceof Error ? err.message : "Erro ao cadastrar mapa.");
     } finally {
       setLoading(false);
     }
@@ -89,7 +102,7 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="w-full max-w-md bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl shadow-2xl overflow-hidden flex flex-col">
+      <div className="w-full max-w-lg bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Cabeçalho */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border-default)]">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
@@ -115,7 +128,7 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
                 : "border-transparent text-[var(--text-secondary)] hover:text-white"
             }`}
           >
-            <Upload className="w-3.5 h-3.5" /> Upload de Imagem
+            <Upload className="w-3.5 h-3.5" /> Upload
           </button>
           <button
             type="button"
@@ -128,10 +141,21 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
           >
             <Link2 className="w-3.5 h-3.5" /> Link / URL Web
           </button>
+          <button
+            type="button"
+            onClick={() => setTab("gallery")}
+            className={`flex-1 py-2.5 font-semibold text-center border-b-2 flex items-center justify-center gap-1.5 transition-colors ${
+              tab === "gallery"
+                ? "border-emerald-500 text-emerald-400 bg-[var(--bg-card)]"
+                : "border-transparent text-[var(--text-secondary)] hover:text-white"
+            }`}
+          >
+            <ImageIcon className="w-3.5 h-3.5" /> Da Galeria
+          </button>
         </div>
 
         {/* Formulário */}
-        <form onSubmit={handleSubmit} className="p-4 space-y-3.5 text-xs">
+        <form onSubmit={handleSubmit} className="p-4 space-y-3.5 text-xs overflow-y-auto">
           {error && (
             <div className="p-2.5 rounded-lg bg-red-950/70 border border-red-800 text-red-200">
               {error}
@@ -146,7 +170,7 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
               type="text"
               required
               placeholder="Ex: Templo Subterrâneo, Estação de Shibuya..."
-              value={title}
+              value={title || ""}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full bg-[var(--bg-input)] border border-[var(--border-default)] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-xs"
             />
@@ -160,13 +184,13 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
               type="number"
               min="20"
               max="150"
-              value={gridSize}
+              value={gridSize || 50}
               onChange={(e) => setGridSize(Number(e.target.value) || 50)}
               className="w-full bg-[var(--bg-input)] border border-[var(--border-default)] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-xs"
             />
           </div>
 
-          {tab === "upload" ? (
+          {tab === "upload" && (
             <div>
               <label className="block text-[var(--text-secondary)] font-medium mb-1">
                 Arquivo de Imagem (PNG, JPG, WEBP)
@@ -179,7 +203,9 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
                 className="w-full text-xs text-white/80 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-emerald-600/30 file:text-emerald-300 hover:file:bg-emerald-600/50"
               />
             </div>
-          ) : (
+          )}
+
+          {tab === "url" && (
             <div>
               <label className="block text-[var(--text-secondary)] font-medium mb-1">
                 URL da Imagem
@@ -188,9 +214,25 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
                 type="url"
                 required
                 placeholder="https://exemplo.com/mapa.jpg"
-                value={url}
+                value={url || ""}
                 onChange={(e) => setUrl(e.target.value)}
                 className="w-full bg-[var(--bg-input)] border border-[var(--border-default)] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-xs"
+              />
+            </div>
+          )}
+
+          {tab === "gallery" && (
+            <div>
+              <label className="block text-[var(--text-secondary)] font-medium mb-1.5">
+                Selecione uma imagem já enviada para a campanha:
+              </label>
+              <GalleryMediaPicker
+                campaignId={campaignId}
+                selectedUrl={selectedGalleryUrl}
+                onSelect={(selectedUrl, itemTitle) => {
+                  setSelectedGalleryUrl(selectedUrl);
+                  if (!title.trim() && itemTitle) setTitle(itemTitle);
+                }}
               />
             </div>
           )}
@@ -206,7 +248,7 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
             <button
               type="submit"
               disabled={loading || !title.trim()}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg font-semibold bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-40"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg font-semibold bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-40 cursor-pointer"
             >
               {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               {loading ? "Criando..." : "Criar Mapa"}

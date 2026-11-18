@@ -4,7 +4,8 @@ export type SyncEventType =
   | "INITIATIVE_UPDATE"
   | "AUDIO_UPDATE"
   | "AUDIO_SFX_PLAY"
-  | "MAP_UPDATE";
+  | "MAP_UPDATE"
+  | "MAP_ELEMENTS_UPDATE";
 
 export interface ProjectionData {
   mediaUrl: string | null;
@@ -82,6 +83,7 @@ export interface TacticalMapSyncData {
   gridOpacity: number; // 0 a 1
   metersPerGrid: number;
   cameraState: CameraState;
+  elementsData?: string;
   isProjected: boolean;
 }
 

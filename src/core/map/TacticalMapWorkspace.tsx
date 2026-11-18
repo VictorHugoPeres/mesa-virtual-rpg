@@ -1,20 +1,16 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import {
-  Map as MapIcon,
-  Plus,
-  Tv,
-  EyeOff,
-  X,
-  ExternalLink,
-  ChevronDown,
-} from "lucide-react";
+import { Map as MapIcon, Plus } from "lucide-react";
 import { TacticalMapData, CameraState, DEFAULT_CAMERA } from "./mapTypes";
 import { MapCanvas } from "./MapCanvas";
+import { MapHeaderBar } from "./MapHeaderBar";
 import { GridControlsOverlay } from "./GridControlsOverlay";
 import { CameraControlsOverlay } from "./CameraControlsOverlay";
 import { AddMapModal } from "./AddMapModal";
+import { AddElementDrawer } from "./elements/AddElementDrawer";
+import { ElementsLayer } from "./elements/ElementsLayer";
+import { useTacticalElements } from "./elements/useTacticalElements";
 import { useCampaignSync } from "../sync/useCampaignSync";
 import { TacticalMapSyncData } from "../sync/syncTypes";
 
@@ -34,9 +30,28 @@ export function TacticalMapWorkspace({
   const [camera, setCamera] = useState<CameraState>(DEFAULT_CAMERA);
   const [isProjected, setIsProjected] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showElementsDrawer, setShowElementsDrawer] = useState(false);
 
   const { emit } = useCampaignSync({ campaignId });
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const cameraSyncTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const selectedMap = maps.find((m) => m.id === selectedMapId) || maps[0];
+
+  const {
+    elements,
+    selectedElementId,
+    setSelectedElementId,
+    addElement,
+    updateElement,
+    updateElementVisual,
+    commitElementMove,
+    deleteElement,
+  } = useTacticalElements({
+    campaignId,
+    selectedMap,
+    isProjected,
+  });
 
   const loadMaps = useCallback(async () => {
     try {
@@ -53,7 +68,6 @@ export function TacticalMapWorkspace({
     }
   }, [campaignId, selectedMapId]);
 
-  // Carrega mapas e verifica se há projeção ativa
   useEffect(() => {
     if (!isOpen) return;
     loadMaps();
@@ -76,8 +90,6 @@ export function TacticalMapWorkspace({
     checkActiveMap();
   }, [isOpen, campaignId, loadMaps]);
 
-  const selectedMap = maps.find((m) => m.id === selectedMapId) || maps[0];
-
   // Sincroniza projeção com o Telão
   const broadcastMapState = useCallback(
     async (map: TacticalMapData, projected: boolean, cam: CameraState) => {
@@ -91,6 +103,7 @@ export function TacticalMapWorkspace({
         gridOpacity: map.gridOpacity,
         metersPerGrid: map.metersPerGrid,
         cameraState: cam,
+        elementsData: JSON.stringify(elements),
         isProjected: projected,
       };
 
@@ -106,7 +119,7 @@ export function TacticalMapWorkspace({
         console.warn("Erro ao salvar mapa ativo no banco:", err);
       }
     },
-    [campaignId, emit]
+    [campaignId, emit, elements]
   );
 
   function toggleProjection() {
@@ -126,7 +139,6 @@ export function TacticalMapWorkspace({
       broadcastMapState(updated, true, camera);
     }
 
-    // Salva no banco com debounce
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(async () => {
       try {
@@ -144,7 +156,10 @@ export function TacticalMapWorkspace({
   function handleCameraChange(newCam: CameraState) {
     setCamera(newCam);
     if (isProjected && selectedMap) {
-      broadcastMapState(selectedMap, true, newCam);
+      if (cameraSyncTimerRef.current) clearTimeout(cameraSyncTimerRef.current);
+      cameraSyncTimerRef.current = setTimeout(() => {
+        broadcastMapState(selectedMap, true, newCam);
+      }, 120);
     }
   }
 
@@ -152,92 +167,22 @@ export function TacticalMapWorkspace({
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[#050508] text-white animate-in fade-in duration-200">
-      {/* Top Bar do Tabuleiro */}
-      <header className="h-14 px-4 bg-zinc-950/90 border-b border-white/10 flex items-center justify-between gap-4 z-30 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-emerald-950/80 border border-emerald-700/60 text-emerald-400">
-            <MapIcon className="w-5 h-5" />
-          </div>
+      <MapHeaderBar
+        maps={maps}
+        selectedMapId={selectedMapId || ""}
+        onSelectMapId={(id) => {
+          setSelectedMapId(id);
+          setCamera(DEFAULT_CAMERA);
+          setIsProjected(false);
+        }}
+        onOpenAddModal={() => setShowAddModal(true)}
+        onOpenElementsDrawer={() => setShowElementsDrawer(true)}
+        isProjected={isProjected}
+        onToggleProjection={toggleProjection}
+        campaignId={campaignId}
+        onClose={onClose}
+      />
 
-          {/* Seletor de Mapa */}
-          {maps.length > 0 ? (
-            <select
-              value={selectedMapId}
-              onChange={(e) => {
-                setSelectedMapId(e.target.value);
-                setCamera(DEFAULT_CAMERA);
-                setIsProjected(false);
-              }}
-              className="bg-zinc-900 border border-white/15 rounded-lg px-3 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-emerald-500 cursor-pointer max-w-[200px] sm:max-w-[260px] truncate"
-            >
-              {maps.map((m) => (
-                <option key={m.id} value={m.id} className="bg-zinc-900 text-white">
-                  {m.title}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <span className="text-xs text-zinc-400 font-medium">Nenhum mapa criado</span>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600/30 transition-colors cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" /> Novo Mapa
-          </button>
-        </div>
-
-        {/* Controles de Projeção no Telão */}
-        <div className="flex items-center gap-2">
-          {selectedMap && (
-            <button
-              type="button"
-              onClick={toggleProjection}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                isProjected
-                  ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 ring-2 ring-emerald-400/50"
-                  : "bg-zinc-800 text-zinc-300 hover:text-white border border-white/10"
-              }`}
-              title={isProjected ? "Ocultar mapa do Telão" : "Projetar mapa no Telão da TV"}
-            >
-              {isProjected ? (
-                <>
-                  <EyeOff className="w-3.5 h-3.5" />
-                  <span>Projetando no Telão</span>
-                  <span className="w-2 h-2 rounded-full bg-white animate-ping ml-0.5" />
-                </>
-              ) : (
-                <>
-                  <Tv className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Projetar na TV</span>
-                </>
-              )}
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => window.open(`/telao/${campaignId}`, "_blank")}
-            className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-            title="Abrir Telão da TV em nova janela"
-          >
-            <ExternalLink className="w-4 h-4" />
-          </button>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer ml-2"
-            title="Fechar Tabuleiro"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-      </header>
-
-      {/* Área do Tabuleiro */}
       <div className="relative flex-1 w-full h-full overflow-hidden">
         {selectedMap ? (
           <>
@@ -249,7 +194,22 @@ export function TacticalMapWorkspace({
               gridOpacity={selectedMap.gridOpacity}
               camera={camera}
               onCameraChange={handleCameraChange}
-            />
+              onClick={() => setSelectedElementId(null)}
+            >
+              <ElementsLayer
+                campaignId={campaignId}
+                elements={elements}
+                gridSize={selectedMap.gridSize}
+                cameraZoom={camera.zoom}
+                selectedElementId={selectedElementId}
+                onSelectElement={setSelectedElementId}
+                onUpdateElement={updateElement}
+                onLocalMove={updateElementVisual}
+                onCommitMove={commitElementMove}
+                onDeleteElement={deleteElement}
+                interactive={true}
+              />
+            </MapCanvas>
 
             <GridControlsOverlay
               gridEnabled={selectedMap.gridEnabled}
@@ -272,7 +232,7 @@ export function TacticalMapWorkspace({
             <button
               type="button"
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-500 transition-colors shadow-lg"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-500 transition-colors shadow-lg cursor-pointer"
             >
               <Plus className="w-4 h-4" /> Criar Primeiro Mapa
             </button>
@@ -285,6 +245,17 @@ export function TacticalMapWorkspace({
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onSuccess={loadMaps}
+      />
+
+      <AddElementDrawer
+        campaignId={campaignId}
+        isOpen={showElementsDrawer}
+        onClose={() => setShowElementsDrawer(false)}
+        onAddElement={addElement}
+        spawnPosition={{
+          x: Math.round(-camera.panX / camera.zoom + 250),
+          y: Math.round(-camera.panY / camera.zoom + 200),
+        }}
       />
     </div>
   );

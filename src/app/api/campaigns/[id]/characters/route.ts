@@ -6,6 +6,27 @@ import {
   Origin,
 } from "@/systems/feiticeiros-e-maldicoes";
 
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: campaignId } = await params;
+    const characters = await prisma.character.findMany({
+      where: { campaignId },
+      orderBy: { name: "asc" },
+    });
+
+    return NextResponse.json({ characters });
+  } catch (error) {
+    console.error("Erro ao buscar personagens:", error);
+    return NextResponse.json(
+      { error: "Erro interno ao buscar personagens." },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }

@@ -84,7 +84,7 @@ export function GridControlsOverlay({
               min="20"
               max="150"
               step="2"
-              value={gridSize}
+              value={gridSize ?? 50}
               onChange={(e) => onChange({ gridSize: Number(e.target.value) })}
               className="w-full accent-emerald-500 cursor-pointer"
             />
@@ -94,14 +94,14 @@ export function GridControlsOverlay({
           <div>
             <div className="flex justify-between font-semibold mb-1">
               <span className="text-zinc-400">Opacidade</span>
-              <span className="font-mono text-emerald-400">{Math.round(gridOpacity * 100)}%</span>
+              <span className="font-mono text-emerald-400">{Math.round((gridOpacity ?? 0.25) * 100)}%</span>
             </div>
             <input
               type="range"
               min="0.05"
               max="1"
               step="0.05"
-              value={gridOpacity}
+              value={gridOpacity ?? 0.25}
               onChange={(e) => onChange({ gridOpacity: Number(e.target.value) })}
               className="w-full accent-emerald-500 cursor-pointer"
             />
@@ -117,7 +117,7 @@ export function GridControlsOverlay({
                   type="button"
                   onClick={() => onChange({ gridColor: p.value })}
                   className={`w-6 h-6 rounded-full border transition-all cursor-pointer ${
-                    gridColor.toLowerCase() === p.value.toLowerCase()
+                    (gridColor || "#ffffff").toLowerCase() === p.value.toLowerCase()
                       ? "ring-2 ring-emerald-400 scale-110"
                       : "border-white/30 hover:scale-105"
                   }`}
@@ -127,7 +127,7 @@ export function GridControlsOverlay({
               ))}
               <input
                 type="color"
-                value={gridColor}
+                value={gridColor || "#ffffff"}
                 onChange={(e) => onChange({ gridColor: e.target.value })}
                 className="w-6 h-6 rounded border border-white/30 bg-transparent cursor-pointer ml-auto"
                 title="Cor customizada"
@@ -143,7 +143,7 @@ export function GridControlsOverlay({
                 type="number"
                 step="0.5"
                 min="0.5"
-                value={metersPerGrid}
+                value={metersPerGrid ?? 1.5}
                 onChange={(e) => onChange({ metersPerGrid: Number(e.target.value) || 1.5 })}
                 className="w-14 bg-zinc-800 border border-zinc-700 rounded px-1.5 py-0.5 text-center font-bold text-white focus:outline-none focus:border-emerald-500"
               />

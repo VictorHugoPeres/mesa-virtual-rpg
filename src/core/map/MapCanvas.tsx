@@ -12,6 +12,8 @@ interface MapCanvasProps {
   camera: CameraState;
   onCameraChange: (newCam: CameraState) => void;
   interactive?: boolean;
+  children?: React.ReactNode;
+  onClick?: () => void;
 }
 
 export function MapCanvas({
@@ -23,11 +25,19 @@ export function MapCanvas({
   camera,
   onCameraChange,
   interactive = true,
+  children,
+  onClick,
 }: MapCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const dragDistanceRef = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+  const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [imageUrl]);
 
   // Previne zoom da página ao usar scroll no canvas
   useEffect(() => {
@@ -57,7 +67,6 @@ export function MapCanvas({
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
 
-        // Mantém o ponto do cursor estável durante o zoom
         const panX = mouseX - (mouseX - camera.panX) * (newZoom / camera.zoom);
         const panY = mouseY - (mouseY - camera.panY) * (newZoom / camera.zoom);
 
@@ -69,27 +78,31 @@ export function MapCanvas({
     [camera, interactive, onCameraChange]
   );
 
-  // Início do arrasto (Pan)
   const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
     if (!interactive) return;
-    // Permite arrastar com botão esquerdo ou do meio
     if (e.button === 0 || e.button === 1) {
       setIsDragging(true);
       setDragStart({ x: e.clientX - camera.panX, y: e.clientY - camera.panY });
+      dragDistanceRef.current = 0;
     }
   };
 
-  // Movimento durante o arrasto
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     if (!interactive || !isDragging) return;
+    dragDistanceRef.current += Math.abs(e.movementX) + Math.abs(e.movementY);
     const newPanX = e.clientX - dragStart.x;
     const newPanY = e.clientY - dragStart.y;
     onCameraChange({ ...camera, panX: newPanX, panY: newPanY });
   };
 
-  // Fim do arrasto
   const handleMouseUp = () => {
     setIsDragging(false);
+  };
+
+  const handleClick = (e: MouseEvent<HTMLDivElement>) => {
+    // Se arrastou (pan), não desmarca
+    if (dragDistanceRef.current > 6) return;
+    if (onClick) onClick();
   };
 
   return (
@@ -100,6 +113,7 @@ export function MapCanvas({
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onClick={handleClick}
       className={`relative w-full h-full overflow-hidden bg-[#07070a] select-none ${
         interactive ? (isDragging ? "cursor-grabbing" : "cursor-grab") : ""
       }`}
@@ -112,7 +126,7 @@ export function MapCanvas({
         }}
       >
         {/* Imagem Base do Mapa */}
-        {imageUrl ? (
+        {imageUrl && !imageError ? (
           <img
             src={imageUrl}
             alt="Mapa Tático"
@@ -121,11 +135,19 @@ export function MapCanvas({
               const img = e.currentTarget;
               setImageSize({ width: img.naturalWidth, height: img.naturalHeight });
             }}
+            onError={() => setImageError(true)}
             className="block max-w-none pointer-events-none shadow-2xl"
           />
         ) : (
-          <div className="w-[1200px] h-[800px] bg-zinc-900 flex items-center justify-center text-zinc-500 font-medium">
-            Nenhuma imagem carregada para o mapa.
+          <div className="w-[1200px] h-[800px] bg-zinc-900 border border-red-950 flex flex-col items-center justify-center text-zinc-500 font-medium p-6 text-center">
+            <span className="text-sm font-bold text-red-400 mb-1">
+              {imageError ? "Falha ao carregar a imagem do mapa." : "Nenhuma imagem carregada para o mapa."}
+            </span>
+            <span className="text-xs text-zinc-500 max-w-md">
+              {imageError
+                ? `Não foi possível carregar a imagem de "${imageUrl}". Verifique se o link é válido ou envie um arquivo local.`
+                : "Cadastre um mapa com imagem válida."}
+            </span>
           </div>
         )}
 
@@ -160,6 +182,9 @@ export function MapCanvas({
             />
           </svg>
         )}
+
+        {/* Camada de Elementos (Tokens e Objetos) */}
+        {children}
       </div>
     </div>
   );

@@ -55,6 +55,12 @@ export function TelaoView({
       setInitiativeData(event.payload as InitiativeDisplayData | null);
     } else if (event.type === "MAP_UPDATE") {
       setMapData(event.payload as TacticalMapSyncData | null);
+    } else if (event.type === "MAP_ELEMENTS_UPDATE") {
+      const payload = event.payload as { mapId: string; elementsData: string };
+      setMapData((prev) => {
+        if (!prev || prev.id !== payload.mapId) return prev;
+        return { ...prev, elementsData: payload.elementsData };
+      });
     }
   }, []);
 

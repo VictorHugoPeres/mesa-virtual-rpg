@@ -24,7 +24,16 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(bytes);
 
     const ext = path.extname(file.name) || ".png";
-    const cleanFileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
+    const baseName = path.basename(file.name, ext);
+    const sanitizedBase = baseName
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // remove acentos
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, "-") // troca espaços e caracteres especiais por -
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+
+    const cleanFileName = `${Date.now()}-${sanitizedBase || "midia"}${ext.toLowerCase()}`;
     const uploadDir = path.join(process.cwd(), "public", "uploads");
 
     // Garante que o diretório existe
