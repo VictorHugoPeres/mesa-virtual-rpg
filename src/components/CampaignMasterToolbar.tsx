@@ -3,7 +3,7 @@
 import { useDice } from "@/core/dice/DiceContext";
 import { useCompendium } from "@/core/compendium/CompendiumContext";
 import { ProjectionToolbar } from "@/core/projection/ProjectionToolbar";
-import { Dices, History, BookOpen, Skull, Music } from "lucide-react";
+import { Dices, History, BookOpen, Skull, Music, Map as MapIcon } from "lucide-react";
 
 interface CampaignMasterToolbarProps {
   campaignId: string;
@@ -45,6 +45,22 @@ export function CampaignMasterToolbar({ campaignId }: CampaignMasterToolbarProps
         >
           <Music className="w-3.5 h-3.5 text-pink-400" />
           Mesa de Som
+        </button>
+
+        {/* Botão Tabuleiro Tático */}
+        <button
+          type="button"
+          onClick={() => {
+            const ev = new CustomEvent('open-tactical-map');
+            window.dispatchEvent(ev);
+          }}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
+                     bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600/30
+                     transition-all cursor-pointer shadow-xs"
+          title="Abrir Tabuleiro Tático (Grid & Mapas)"
+        >
+          <MapIcon className="w-3.5 h-3.5 text-emerald-400" />
+          Mapa Tático
         </button>
 
       <ProjectionToolbar campaignId={campaignId} />

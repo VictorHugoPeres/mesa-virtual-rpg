@@ -9,6 +9,7 @@ import { InitiativePanel } from "@/core/initiative/InitiativePanel";
 import { SessionNotes } from "@/core/notes/SessionNotes";
 import { MasterBestiaryWrapper } from "@/components/MasterBestiaryWrapper";
 import { MasterAudioSection } from "@/core/audio/MasterAudioSection";
+import { MasterMapWrapper } from "@/core/map/MasterMapWrapper";
 
 export const dynamic = "force-dynamic";
 
@@ -136,6 +137,9 @@ export default async function MasterPage({
         campaignId={campaign.id}
         characters={campaign.characters}
       />
+
+      {/* Workspace do Tabuleiro Tático */}
+      <MasterMapWrapper campaignId={campaign.id} />
 
       {/* Footer */}
       <footer className="mt-12 pt-6 border-t border-[var(--border-default)] text-center text-xs text-[var(--text-muted)]">

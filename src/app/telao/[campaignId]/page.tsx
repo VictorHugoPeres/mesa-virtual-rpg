@@ -5,6 +5,7 @@ import {
   ProjectionData,
   InitiativeDisplayData,
   AudioBGMEventData,
+  TacticalMapSyncData,
 } from "@/core/sync/syncTypes";
 import { combatToTvData } from "@/core/initiative/initiativeTypes";
 
@@ -25,6 +26,7 @@ export default async function TelaoPage({
       activeProjection: true,
       activeCombat: true,
       activeAudio: true,
+      activeMap: true,
     },
   });
 
@@ -58,6 +60,15 @@ export default async function TelaoPage({
     }
   }
 
+  let initialMap: TacticalMapSyncData | null = null;
+  if (campaign.activeMap) {
+    try {
+      initialMap = JSON.parse(campaign.activeMap);
+    } catch {
+      initialMap = null;
+    }
+  }
+
   return (
     <TelaoView
       campaignId={campaign.id}
@@ -65,6 +76,7 @@ export default async function TelaoPage({
       initialProjection={initialProjection}
       initialCombat={initialCombat}
       initialAudio={initialAudio}
+      initialMap={initialMap}
     />
   );
 }

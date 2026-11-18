@@ -18,12 +18,14 @@ model Campaign {
   activeProjection String?      // JSON com a mídia atualmente projetada no telão
   activeCombat     String?      // JSON com o estado atual do combate (iniciativa)
   activeAudio      String?      // JSON com o estado da música ambiente/mesa de som
+  activeMap        String?      // JSON com o mapa tático atualmente projetado no telão
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 
   characters       Character[]
   sessions         Session[]
   mediaAssets      MediaAsset[]
+  tacticalMaps     TacticalMap[]
 }
 
 model Character {
@@ -79,4 +81,23 @@ model DiceLog {
   isCritical   Boolean  @default(false)
   isFumble     Boolean  @default(false)
   createdAt    DateTime @default(now())
+}
+
+model TacticalMap {
+  id            String   @id @default(cuid())
+  campaignId    String
+  campaign      Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  title         String
+  imageUrl      String
+  gridEnabled   Boolean  @default(true)
+  gridSize      Int      @default(50)
+  gridColor     String   @default("#ffffff")
+  gridOpacity   Float    @default(0.2)
+  metersPerGrid Float    @default(1.5)
+  cameraState   String   @default("{\"zoom\":1,\"panX\":0,\"panY\":0}")
+  elementsData  String   @default("[]")
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

@@ -3,7 +3,8 @@ export type SyncEventType =
   | "DICE_ROLL"
   | "INITIATIVE_UPDATE"
   | "AUDIO_UPDATE"
-  | "AUDIO_SFX_PLAY";
+  | "AUDIO_SFX_PLAY"
+  | "MAP_UPDATE";
 
 export interface ProjectionData {
   mediaUrl: string | null;
@@ -63,6 +64,25 @@ export interface AudioSFXEventData {
   title: string;
   volume: number; // 0 a 1
   timestamp: number;
+}
+
+export interface CameraState {
+  zoom: number;
+  panX: number;
+  panY: number;
+}
+
+export interface TacticalMapSyncData {
+  id: string;
+  title: string;
+  imageUrl: string;
+  gridEnabled: boolean;
+  gridSize: number; // tamanho da célula em pixels
+  gridColor: string;
+  gridOpacity: number; // 0 a 1
+  metersPerGrid: number;
+  cameraState: CameraState;
+  isProjected: boolean;
 }
 
 export interface SyncEvent<T = unknown> {

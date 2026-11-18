@@ -8,12 +8,14 @@ import {
   DiceRollEventData,
   InitiativeDisplayData,
   AudioBGMEventData,
+  TacticalMapSyncData,
 } from "../sync/syncTypes";
 import { TelaoStandby } from "./TelaoStandby";
 import { TelaoProjection } from "./TelaoProjection";
 import { TelaoDiceBanner } from "./TelaoDiceBanner";
 import { TelaoInitiativePanel } from "./TelaoInitiativePanel";
 import { TelaoAudioReceiver } from "./TelaoAudioReceiver";
+import { TelaoMapViewer } from "./TelaoMapViewer";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { combatToTvData } from "../initiative/initiativeTypes";
 
@@ -23,6 +25,7 @@ interface TelaoViewProps {
   initialProjection: ProjectionData | null;
   initialCombat?: InitiativeDisplayData | null;
   initialAudio?: AudioBGMEventData | null;
+  initialMap?: TacticalMapSyncData | null;
 }
 
 export function TelaoView({
@@ -31,12 +34,14 @@ export function TelaoView({
   initialProjection,
   initialCombat = null,
   initialAudio = null,
+  initialMap = null,
 }: TelaoViewProps) {
   const [projection, setProjection] = useState<ProjectionData | null>(initialProjection);
   const [currentDiceRoll, setCurrentDiceRoll] = useState<DiceRollEventData | null>(null);
   const [initiativeData, setInitiativeData] = useState<InitiativeDisplayData | null>(
     initialCombat
   );
+  const [mapData, setMapData] = useState<TacticalMapSyncData | null>(initialMap);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(false);
 
@@ -48,32 +53,36 @@ export function TelaoView({
       setCurrentDiceRoll(event.payload as DiceRollEventData);
     } else if (event.type === "INITIATIVE_UPDATE") {
       setInitiativeData(event.payload as InitiativeDisplayData | null);
+    } else if (event.type === "MAP_UPDATE") {
+      setMapData(event.payload as TacticalMapSyncData | null);
     }
   }, []);
 
   useCampaignSync({ campaignId, onEvent: handleSyncEvent });
 
-  // Busca dados iniciais de projeção e combate caso a janela abra depois
+  // Busca dados iniciais caso a janela abra depois
   useEffect(() => {
     async function fetchInitial() {
       try {
-        const [projRes, combatRes] = await Promise.all([
+        const [projRes, combatRes, mapRes] = await Promise.all([
           fetch(`/api/campaigns/${campaignId}/projection`),
           fetch(`/api/campaigns/${campaignId}/combat`),
+          fetch(`/api/campaigns/${campaignId}/maps/active`),
         ]);
 
         if (projRes.ok) {
           const data = await projRes.json();
-          if (data.activeProjection) {
-            setProjection(data.activeProjection);
-          }
+          if (data.activeProjection) setProjection(data.activeProjection);
         }
 
         if (combatRes.ok) {
           const data = await combatRes.json();
-          if (data.combatState) {
-            setInitiativeData(combatToTvData(data.combatState));
-          }
+          if (data.combatState) setInitiativeData(combatToTvData(data.combatState));
+        }
+
+        if (mapRes.ok) {
+          const data = await mapRes.json();
+          if (data.activeMap) setMapData(data.activeMap);
         }
       } catch (err) {
         console.warn("Erro ao buscar dados iniciais do Telão:", err);
@@ -119,20 +128,25 @@ export function TelaoView({
         </button>
       </div>
 
-      {/* Banner de Rolagem de Dados (Overlay) */}
+      {/* Banner de Rolagem de Dados (Overlay no topo) */}
       <TelaoDiceBanner
         roll={currentDiceRoll}
         onDismiss={() => setCurrentDiceRoll(null)}
       />
 
-      {/* Conteúdo Central: Mídia Projetada OU Standby Elegante */}
-      <div className={`relative flex-1 ${initiativeData?.showOnTv ? "pb-36" : ""}`}>
-        {projection && projection.mediaUrl ? (
-          <TelaoProjection projection={projection} />
-        ) : (
-          <TelaoStandby campaignName={campaignName} />
-        )}
-      </div>
+      {/* Mapa Tático Projetado (Renderizado se o mestre estiver projetando) */}
+      {mapData?.isProjected && <TelaoMapViewer mapData={mapData} />}
+
+      {/* Conteúdo Central: Mídia Projetada OU Standby (quando nenhum mapa estiver projetado) */}
+      {!mapData?.isProjected && (
+        <div className={`relative flex-1 ${initiativeData?.showOnTv ? "pb-36" : ""}`}>
+          {projection && projection.mediaUrl ? (
+            <TelaoProjection projection={projection} />
+          ) : (
+            <TelaoStandby campaignName={campaignName} />
+          )}
+        </div>
+      )}
 
       {/* Painel de Ordem de Iniciativa na TV */}
       <TelaoInitiativePanel initiative={initiativeData} />
