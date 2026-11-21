@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { CombatParticipant, CONDITION_LIST } from "./initiativeTypes";
-import { Shield, Heart, Zap, Trash2, Plus, X, ChevronRight } from "lucide-react";
+import { Shield, Heart, Zap, Trash2, Plus, X, ChevronRight, Skull, Swords, ExternalLink } from "lucide-react";
 
 interface ParticipantRowProps {
   participant: CombatParticipant;
   isCurrentTurn: boolean;
   onUpdate: (updated: CombatParticipant) => void;
   onRemove: (id: string) => void;
+  campaignId?: string;
+  onOpenThreatSheet?: (participant: CombatParticipant) => void;
 }
 
 export function ParticipantRow({
@@ -16,6 +18,8 @@ export function ParticipantRow({
   isCurrentTurn,
   onUpdate,
   onRemove,
+  campaignId,
+  onOpenThreatSheet,
 }: ParticipantRowProps) {
   const [showConditionPicker, setShowConditionPicker] = useState(false);
 
@@ -79,10 +83,25 @@ export function ParticipantRow({
           </div>
 
           <div>
-            <div className="flex items-center gap-2">
-              <span className={`text-sm font-bold ${isDead ? "line-through text-red-400" : "text-white"}`}>
-                {participant.name}
-              </span>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {participant.type === "THREAT" && onOpenThreatSheet ? (
+                <button
+                  type="button"
+                  onClick={() => onOpenThreatSheet(participant)}
+                  className={`text-sm font-bold text-left hover:underline flex items-center gap-1 cursor-pointer ${
+                    isDead ? "line-through text-red-400" : "text-red-300 hover:text-white"
+                  }`}
+                  title="Abrir ficha e ataques da ameaça"
+                >
+                  <Skull className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                  <span>{participant.name}</span>
+                </button>
+              ) : (
+                <span className={`text-sm font-bold ${isDead ? "line-through text-red-400" : "text-white"}`}>
+                  {participant.name}
+                </span>
+              )}
+
               <span
                 className={`text-[9px] uppercase font-bold px-1.5 py-0.2 rounded border ${
                   participant.type === "PC"
@@ -92,6 +111,33 @@ export function ParticipantRow({
               >
                 {participant.type === "PC" ? "Jogador" : "Ameaça"}
               </span>
+
+              {/* Botão Ameaça: Ficha / Ataques */}
+              {participant.type === "THREAT" && onOpenThreatSheet && (
+                <button
+                  type="button"
+                  onClick={() => onOpenThreatSheet(participant)}
+                  className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-950/80 text-red-300 border border-red-800/60 hover:bg-red-900/60 transition-colors cursor-pointer"
+                  title="Abrir ficha e rolar ataques"
+                >
+                  <Swords className="w-3 h-3 text-red-400" />
+                  <span>Ficha / Ataques</span>
+                </button>
+              )}
+
+              {/* Botão Jogador: Abrir ficha em nova aba */}
+              {participant.type === "PC" && participant.characterId && campaignId && (
+                <a
+                  href={`/mestre/${campaignId}/fichas/${participant.characterId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-zinc-400 hover:text-blue-300 hover:bg-blue-950/50 border border-white/10 transition-colors"
+                  title="Abrir ficha completa em nova aba"
+                >
+                  <ExternalLink className="w-3 h-3 text-blue-400" />
+                  <span>Ficha</span>
+                </a>
+              )}
             </div>
 
             <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] mt-0.5">
@@ -103,96 +149,42 @@ export function ParticipantRow({
         </div>
 
         {/* Centro: Controle de HP e PE */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {/* Pontos de Vida (HP) */}
-          <div className="flex items-center gap-1.5 bg-[var(--bg-secondary)] px-2.5 py-1 rounded-lg border border-[var(--border-default)]">
+          <div className="flex items-center gap-1 bg-[var(--bg-secondary)] px-2 py-1 rounded-lg border border-[var(--border-default)]">
             <Heart className="w-3.5 h-3.5 text-red-400 shrink-0" />
-            <button
-              type="button"
-              onClick={() => adjustHp(-5)}
-              className="px-1 text-[11px] font-bold text-red-400 hover:text-red-300"
-              title="-5 PV"
-            >
-              -5
-            </button>
-            <button
-              type="button"
-              onClick={() => adjustHp(-1)}
-              className="px-1 text-xs font-bold text-red-400 hover:text-red-300"
-              title="-1 PV"
-            >
-              -1
-            </button>
+            <button type="button" onClick={() => adjustHp(-5)} className="px-1 text-[11px] font-bold text-red-400 hover:text-red-300">-5</button>
+            <button type="button" onClick={() => adjustHp(-1)} className="px-1 text-xs font-bold text-red-400 hover:text-red-300">-1</button>
             <input
               type="number"
               value={participant.currentHp}
-              onChange={(e) =>
-                onUpdate({ ...participant, currentHp: Number(e.target.value) || 0 })
-              }
-              className="w-12 text-center bg-transparent text-xs font-bold text-white focus:outline-none"
+              onChange={(e) => onUpdate({ ...participant, currentHp: Number(e.target.value) || 0 })}
+              className="w-11 text-center bg-transparent text-xs font-bold text-white focus:outline-none"
             />
             <span className="text-[10px] text-[var(--text-muted)]">/{participant.maxHp}</span>
-            <button
-              type="button"
-              onClick={() => adjustHp(1)}
-              className="px-1 text-xs font-bold text-emerald-400 hover:text-emerald-300"
-              title="+1 PV"
-            >
-              +1
-            </button>
-            <button
-              type="button"
-              onClick={() => adjustHp(5)}
-              className="px-1 text-[11px] font-bold text-emerald-400 hover:text-emerald-300"
-              title="+5 PV"
-            >
-              +5
-            </button>
+            <button type="button" onClick={() => adjustHp(1)} className="px-1 text-xs font-bold text-emerald-400 hover:text-emerald-300">+1</button>
+            <button type="button" onClick={() => adjustHp(5)} className="px-1 text-[11px] font-bold text-emerald-400 hover:text-emerald-300">+5</button>
           </div>
 
-          {/* PE (se existir) */}
+          {/* PE */}
           {participant.maxEnergy !== undefined && participant.currentEnergy !== undefined && (
-            <div className="flex items-center gap-1.5 bg-[var(--bg-secondary)] px-2.5 py-1 rounded-lg border border-[var(--border-default)]">
+            <div className="flex items-center gap-1 bg-[var(--bg-secondary)] px-2 py-1 rounded-lg border border-[var(--border-default)]">
               <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <button
-                type="button"
-                onClick={() => adjustEnergy(-1)}
-                className="px-1 text-xs font-bold text-amber-400 hover:text-amber-300"
-              >
-                -1
-              </button>
-              <span className="text-xs font-bold text-white min-w-[20px] text-center">
-                {participant.currentEnergy}
-              </span>
+              <button type="button" onClick={() => adjustEnergy(-1)} className="px-1 text-xs font-bold text-amber-400 hover:text-amber-300">-1</button>
+              <span className="text-xs font-bold text-white min-w-[18px] text-center">{participant.currentEnergy}</span>
               <span className="text-[10px] text-[var(--text-muted)]">/{participant.maxEnergy}</span>
-              <button
-                type="button"
-                onClick={() => adjustEnergy(1)}
-                className="px-1 text-xs font-bold text-amber-400 hover:text-amber-300"
-              >
-                +1
-              </button>
+              <button type="button" onClick={() => adjustEnergy(1)} className="px-1 text-xs font-bold text-amber-400 hover:text-amber-300">+1</button>
             </div>
           )}
         </div>
 
         {/* Direita: Condições e Remover */}
         <div className="flex items-center gap-2">
-          {/* Condições ativas */}
-          <div className="flex items-center gap-1 flex-wrap max-w-[200px]">
+          <div className="flex items-center gap-1 flex-wrap max-w-[180px]">
             {participant.conditions.map((c) => (
-              <span
-                key={c}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-950/60 text-amber-300 border border-amber-800/60"
-              >
+              <span key={c} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-950/60 text-amber-300 border border-amber-800/60">
                 {c}
-                <button
-                  type="button"
-                  onClick={() => removeCondition(c)}
-                  className="hover:text-white"
-                >
-                  <X className="w-2.5 h-2.5" />
-                </button>
+                <button type="button" onClick={() => removeCondition(c)} className="hover:text-white"><X className="w-2.5 h-2.5" /></button>
               </span>
             ))}
 
@@ -223,7 +215,6 @@ export function ParticipantRow({
             </div>
           </div>
 
-          {/* Remover do Combate */}
           <button
             type="button"
             onClick={() => onRemove(participant.id)}

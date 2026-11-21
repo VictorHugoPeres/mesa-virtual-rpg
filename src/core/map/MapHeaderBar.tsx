@@ -8,6 +8,8 @@ import {
   X,
   ExternalLink,
   Users,
+  Swords,
+  Dices,
 } from "lucide-react";
 import { TacticalMapData, MapDisplayMode } from "./mapTypes";
 
@@ -25,6 +27,9 @@ interface MapHeaderBarProps {
   onSecondaryMapIdChange: (id: string) => void;
   campaignId: string;
   onClose: () => void;
+  isCombatOpen?: boolean;
+  onToggleCombatDrawer?: () => void;
+  onOpenDiceModal?: () => void;
 }
 
 export function MapHeaderBar({
@@ -41,13 +46,16 @@ export function MapHeaderBar({
   onSecondaryMapIdChange,
   campaignId,
   onClose,
+  isCombatOpen = false,
+  onToggleCombatDrawer,
+  onOpenDiceModal,
 }: MapHeaderBarProps) {
   const hasSelectedMap = maps.some((m) => m.id === selectedMapId);
   const secondaryMaps = maps.filter((m) => m.id !== selectedMapId);
 
   return (
     <header className="min-h-14 py-2 px-3 sm:px-4 bg-zinc-950/95 border-b border-white/10 flex flex-wrap items-center justify-between gap-2.5 z-30 shrink-0 backdrop-blur-md">
-      {/* Lado Esquerdo: Identificação e Seleção de Mapa */}
+      {/* Lado Esquerdo: Identificação, Seleção de Mapa e Elementos */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="p-1.5 rounded-lg bg-emerald-950/80 border border-emerald-700/60 text-emerald-400">
           <MapIcon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -57,7 +65,7 @@ export function MapHeaderBar({
           <select
             value={selectedMapId || ""}
             onChange={(e) => onSelectMapId(e.target.value)}
-            className="bg-zinc-900 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-emerald-500 cursor-pointer max-w-[150px] sm:max-w-[200px] truncate"
+            className="bg-zinc-900 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-emerald-500 cursor-pointer max-w-[150px] sm:max-w-[190px] truncate"
             title="Mapa Principal (Slot 1 na TV)"
           >
             {maps.map((m) => (
@@ -82,11 +90,41 @@ export function MapHeaderBar({
           <button
             type="button"
             onClick={onOpenElementsDrawer}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-zinc-800 text-emerald-300 border border-emerald-500/30 hover:bg-zinc-700 hover:text-emerald-200 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-zinc-800 text-emerald-300 border border-emerald-500/30 hover:bg-zinc-700 hover:text-emerald-200 transition-colors cursor-pointer"
             title="Adicionar Tokens de Combatentes e Objetos de Cenário"
           >
             <Users className="w-3.5 h-3.5 text-emerald-400" />
             <span>+ Elementos</span>
+          </button>
+        )}
+
+        {/* Botão de Acesso Rápido ao Combate */}
+        {onToggleCombatDrawer && (
+          <button
+            type="button"
+            onClick={onToggleCombatDrawer}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              isCombatOpen
+                ? "bg-purple-600 text-white shadow-md shadow-purple-950 border border-purple-400"
+                : "bg-zinc-800 text-purple-300 hover:text-white border border-purple-500/30 hover:bg-zinc-700"
+            }`}
+            title="Abrir Painel Rápido de Combate & Iniciativa"
+          >
+            <Swords className="w-3.5 h-3.5 text-purple-400" />
+            <span>Combate</span>
+          </button>
+        )}
+
+        {/* Botão de Acesso Rápido aos Dados */}
+        {onOpenDiceModal && (
+          <button
+            type="button"
+            onClick={onOpenDiceModal}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-zinc-800 text-blue-300 hover:text-white border border-blue-500/30 hover:bg-zinc-700 transition-all cursor-pointer"
+            title="Abrir Rolador de Dados"
+          >
+            <Dices className="w-3.5 h-3.5 text-blue-400" />
+            <span>Dados</span>
           </button>
         )}
       </div>

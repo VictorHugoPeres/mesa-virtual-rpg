@@ -4,7 +4,6 @@ import { useState, useRef, useEffect, MouseEvent } from "react";
 import { MapElement } from "./elementTypes";
 import { TokenElement } from "./TokenElement";
 import { PropElement } from "./PropElement";
-import { ElementControlsOverlay } from "./ElementControlsOverlay";
 
 interface ElementsLayerProps {
   elements: MapElement[];
@@ -172,24 +171,6 @@ export function ElementsLayer({
           </div>
         );
       })}
-
-      {/* Barra de Ações do Elemento Selecionado */}
-      {interactive && selectedElement && !draggingId && (
-        <div className="pointer-events-auto" onClick={(e) => e.stopPropagation()}>
-          <ElementControlsOverlay
-            element={selectedElement}
-            gridSize={gridSize}
-            campaignId={campaignId}
-            onUpdate={onUpdateElement}
-            onDelete={onDeleteElement}
-            onDeselect={() => onSelectElement(null)}
-            availableMaps={availableMaps}
-            onTransfer={(targetMapId) => {
-              if (onTransferElement) onTransferElement(selectedElement.id, targetMapId);
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { MapCanvas } from "./MapCanvas";
 import { ElementsLayer } from "./elements/ElementsLayer";
+import { ElementControlsOverlay } from "./elements/ElementControlsOverlay";
 import { FogLayer } from "./fog/FogLayer";
 import { RulerLayer } from "./ruler/RulerLayer";
 import { GridControlsOverlay } from "./GridControlsOverlay";
@@ -72,6 +73,7 @@ export function MapEditorCanvas({
   onRulerCommit,
 }: MapEditorCanvasProps) {
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+  const selectedElement = elements.find((el) => el.id === selectedElementId);
 
   return (
     <div
@@ -142,6 +144,22 @@ export function MapEditorCanvas({
           onRulerCommit={onRulerCommit}
         />
       </MapCanvas>
+
+      {/* Inspetor Fixo do Elemento Selecionado (Fora do overflow-hidden do mapa) */}
+      {isActive && selectedElement && toolMode === "select" && (
+        <ElementControlsOverlay
+          element={selectedElement}
+          gridSize={map.gridSize}
+          campaignId={campaignId}
+          onUpdate={onUpdateElement}
+          onDelete={onDeleteElement}
+          onDeselect={() => onSelectElement(null)}
+          availableMaps={availableMaps}
+          onTransfer={(targetMapId) => {
+            if (onTransferElement) onTransferElement(selectedElement.id, targetMapId);
+          }}
+        />
+      )}
 
       <GridControlsOverlay
         gridEnabled={map.gridEnabled}

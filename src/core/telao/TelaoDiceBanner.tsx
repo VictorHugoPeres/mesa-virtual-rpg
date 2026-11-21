@@ -20,18 +20,20 @@ export function TelaoDiceBanner({ roll, onDismiss }: TelaoDiceBannerProps) {
     const intervalTime = 50;
     const step = (intervalTime / duration) * 100;
 
-    const timer = setInterval(() => {
-      setProgress((prev) => {
-        if (prev <= step) {
-          clearInterval(timer);
-          onDismiss();
-          return 0;
-        }
-        return prev - step;
-      });
+    // Atualiza apenas a barra visual de progresso
+    const progressTimer = setInterval(() => {
+      setProgress((prev) => Math.max(0, prev - step));
     }, intervalTime);
 
-    return () => clearInterval(timer);
+    // Disparo seguro de encerramento fora de qualquer updater do React
+    const dismissTimer = setTimeout(() => {
+      onDismiss();
+    }, duration);
+
+    return () => {
+      clearInterval(progressTimer);
+      clearTimeout(dismissTimer);
+    };
   }, [roll, onDismiss]);
 
   if (!roll) return null;
@@ -63,54 +65,67 @@ export function TelaoDiceBanner({ roll, onDismiss }: TelaoDiceBannerProps) {
             }`}
           >
             {roll.mode === "DIGITAL" ? (
-              <>
-                <Dices className="w-3 h-3" /> Dado Digital
-              </>
+              <Dices className="w-3 h-3" />
             ) : (
-              <>
-                <Dice5 className="w-3 h-3" /> Dado Físico Real
-              </>
+              <Dice5 className="w-3 h-3" />
             )}
+            {roll.mode === "DIGITAL" ? "Rolagem Digital" : "Dado Físico"}
           </span>
         </div>
 
-        {/* Nome da Ação / Perícia */}
-        <p className="text-sm md:text-base font-bold text-white/90 mb-1">
-          {roll.label || "Rolagem de Dado"}
-        </p>
-
-        {/* Alerta de Crítico / Falha */}
-        {roll.isCritical && (
-          <div className="text-amber-300 font-extrabold text-sm uppercase tracking-wider flex items-center justify-center gap-1.5 my-1 animate-pulse">
-            <Sparkles className="w-4 h-4" /> Sucesso Crítico! (20 Natural)
-          </div>
+        {/* Rótulo da Rolagem (se houver) */}
+        {roll.label && (
+          <p className="text-sm font-bold text-white/90 mb-1 flex items-center justify-center gap-1.5">
+            {roll.label}
+          </p>
         )}
 
-        {roll.isFumble && (
-          <div className="text-red-400 font-extrabold text-sm uppercase tracking-wider flex items-center justify-center gap-1.5 my-1 animate-pulse">
-            <AlertTriangle className="w-4 h-4" /> Falha Crítica! (1 Natural)
-          </div>
-        )}
-
-        {/* Grande Resultado Numérico */}
-        <div className="text-6xl md:text-7xl font-black tracking-tight text-white my-2 drop-shadow-md">
-          {roll.total}
+        {/* Número Total / Destaque Gigante */}
+        <div className="my-2 flex items-baseline justify-center gap-2">
+          <span
+            className={`text-6xl font-black font-mono tracking-tight drop-shadow-md ${
+              roll.isCritical
+                ? "text-amber-400 animate-bounce"
+                : roll.isFumble
+                ? "text-red-500"
+                : "text-white"
+            }`}
+          >
+            {roll.total}
+          </span>
         </div>
 
-        {/* Detalhes da Fórmula */}
-        <p className="text-xs text-zinc-400 font-mono">
-          {roll.formula} &rarr; {roll.rawRoll}{" "}
-          {roll.modifier !== 0 && (
-            <span>
-              {roll.modifier >= 0 ? `+ ${roll.modifier}` : `- ${Math.abs(roll.modifier)}`}
-            </span>
-          )}
-        </p>
+        {/* Indicador de Crítico ou Desastre */}
+        {roll.isCritical && (
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400 text-xs font-bold mb-2 animate-pulse">
+            <Sparkles className="w-3.5 h-3.5" />
+            SUCESSO CRÍTICO / VANTAGEM!
+          </div>
+        )}
+        {roll.isFumble && (
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/20 text-red-300 border border-red-500 text-xs font-bold mb-2">
+            <AlertTriangle className="w-3.5 h-3.5" />
+            FALHA CRÍTICA / DESASTRE!
+          </div>
+        )}
 
-        {/* Barra de Progresso no Rodapé */}
+        {/* Breakdown da Rolagem: Dados brutos + Modificador */}
+        <div className="text-xs text-zinc-400 font-mono mt-1 flex items-center justify-center gap-2">
+          <span>Fórmula: {roll.formula}</span>
+          <span>•</span>
+          <span>Dados: {roll.rawRoll}</span>
+          {roll.modifier !== 0 && (
+            <>
+              <span>•</span>
+              <span>Mod: {roll.modifier > 0 ? `+${roll.modifier}` : roll.modifier}</span>
+            </>
+          )}
+        </div>
+
+        {/* Barra de Progresso do Tempo Restante */}
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
           <div
-            className={`h-full transition-all duration-75 ${
+            className={`h-full transition-all ease-linear ${
               roll.isCritical
                 ? "bg-amber-400"
                 : roll.isFumble

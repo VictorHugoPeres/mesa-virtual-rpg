@@ -6,6 +6,7 @@ import { useCampaignSync } from "@/core/sync/useCampaignSync";
 import { CombatState, CombatParticipant, EMPTY_COMBAT, combatToTvData } from "./initiativeTypes";
 import { ParticipantRow } from "./ParticipantRow";
 import { InitiativeControls } from "./InitiativeControls";
+import { ThreatCombatDrawer } from "./ThreatCombatDrawer";
 import { FMCharacterData } from "@/systems/feiticeiros-e-maldicoes/schemas";
 
 interface CampaignCharItem {
@@ -22,6 +23,7 @@ interface InitiativePanelProps {
 
 export function InitiativePanel({ campaignId, characters }: InitiativePanelProps) {
   const [combatState, setCombatState] = useState<CombatState>(EMPTY_COMBAT);
+  const [selectedThreat, setSelectedThreat] = useState<CombatParticipant | null>(null);
 
   const handleSyncEvent = useCallback((event: any) => {
     if (event.type === "INITIATIVE_UPDATE" && event.payload) {
@@ -160,15 +162,26 @@ export function InitiativePanel({ campaignId, characters }: InitiativePanelProps
             <ParticipantRow
               key={p.id}
               participant={p}
-              isCurrentTurn={
-                combatState.isActive &&
-                idx === combatState.currentTurnIndex
-              }
+              isCurrentTurn={combatState.isActive && idx === combatState.currentTurnIndex}
               onUpdate={updateParticipant}
               onRemove={removeParticipant}
+              campaignId={campaignId}
+              onOpenThreatSheet={setSelectedThreat}
             />
           ))}
         </div>
+      )}
+
+      {/* Drawer de Detalhes da Ameaça com Ataques e Ficha */}
+      {selectedThreat && (
+        <ThreatCombatDrawer
+          campaignId={campaignId}
+          isOpen={Boolean(selectedThreat)}
+          onClose={() => setSelectedThreat(null)}
+          participantName={selectedThreat.name}
+          characterId={selectedThreat.characterId}
+          character={characters.find((c) => c.id === selectedThreat.characterId)}
+        />
       )}
     </section>
   );

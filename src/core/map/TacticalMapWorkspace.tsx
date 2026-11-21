@@ -9,12 +9,20 @@ import { MapEditorCanvas } from "./MapEditorCanvas";
 import { EmptyMapState } from "./EmptyMapState";
 import { AddMapModal } from "./AddMapModal";
 import { AddElementDrawer } from "./elements/AddElementDrawer";
+import { CombatQuickDrawer } from "./CombatQuickDrawer";
 import { useTacticalElements } from "./elements/useTacticalElements";
 import { useTacticalFog } from "./fog/useTacticalFog";
 import { useTacticalRuler } from "./ruler/useTacticalRuler";
-import { serializeFogState } from "./fog/fogTypes";
+import { useMapBroadcast } from "./useMapBroadcast";
 import { useCampaignSync } from "../sync/useCampaignSync";
-import { TacticalMapSyncData } from "../sync/syncTypes";
+import { useDice } from "../dice/DiceContext";
+
+interface CampaignCharItem {
+  id: string;
+  name: string;
+  type: string;
+  data: string;
+}
 
 interface TacticalMapWorkspaceProps {
   campaignId: string;
@@ -24,6 +32,7 @@ interface TacticalMapWorkspaceProps {
 
 export function TacticalMapWorkspace({ campaignId, isOpen, onClose }: TacticalMapWorkspaceProps) {
   const [maps, setMaps] = useState<TacticalMapData[]>([]);
+  const [characters, setCharacters] = useState<CampaignCharItem[]>([]);
   const [selectedMapId, setSelectedMapId] = useState<string>("");
   const [secondaryMapId, setSecondaryMapId] = useState<string>("");
   const [activeEditSlot, setActiveEditSlot] = useState<1 | 2>(1);
@@ -33,12 +42,14 @@ export function TacticalMapWorkspace({ campaignId, isOpen, onClose }: TacticalMa
   const [isProjected, setIsProjected] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showElementsDrawer, setShowElementsDrawer] = useState(false);
+  const [showCombatDrawer, setShowCombatDrawer] = useState(false);
 
   // Ferramentas Etapa 3C
   const [toolMode, setToolMode] = useState<MapToolMode>("select");
   const [brushSize, setBrushSize] = useState<number>(1);
 
   const { emit } = useCampaignSync({ campaignId });
+  const { openRoller } = useDice();
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const cameraSyncTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -73,18 +84,35 @@ export function TacticalMapWorkspace({ campaignId, isOpen, onClose }: TacticalMa
     clearRuler,
   } = useTacticalRuler({ campaignId });
 
+  const { broadcastMapState } = useMapBroadcast({
+    campaignId,
+    emit,
+    displayMode,
+    secondaryMapId,
+    secondaryMap,
+    cameras,
+    getElementsByMap,
+    getFogByMap,
+  });
+
   const loadMaps = useCallback(async () => {
     try {
-      const res = await fetch(`/api/campaigns/${campaignId}/maps`);
-      if (!res.ok) return;
-      const data = await res.json();
-      const list = data.maps || [];
-      setMaps(list);
-      if (list.length > 0 && !selectedMapId) {
-        setSelectedMapId(list[0].id);
+      const [mapsRes, charsRes] = await Promise.all([
+        fetch(`/api/campaigns/${campaignId}/maps`),
+        fetch(`/api/campaigns/${campaignId}/characters`),
+      ]);
+      if (mapsRes.ok) {
+        const data = await mapsRes.json();
+        const list = data.maps || [];
+        setMaps(list);
+        if (list.length > 0 && !selectedMapId) setSelectedMapId(list[0].id);
+      }
+      if (charsRes.ok) {
+        const data = await charsRes.json();
+        setCharacters(data.characters || []);
       }
     } catch (err) {
-      console.warn("Erro ao carregar mapas:", err);
+      console.warn("Erro ao carregar mapas ou personagens:", err);
     }
   }, [campaignId, selectedMapId]);
 
@@ -109,72 +137,6 @@ export function TacticalMapWorkspace({ campaignId, isOpen, onClose }: TacticalMa
     }
     checkActiveMap();
   }, [isOpen, campaignId, loadMaps]);
-
-  const broadcastMapState = useCallback(
-    async (
-      map: TacticalMapData,
-      projected: boolean,
-      overrideMode?: MapDisplayMode,
-      overrideSecId?: string,
-      overrideSecMap?: TacticalMapData | null
-    ) => {
-      const mode = overrideMode ?? displayMode;
-      const secId = overrideSecId ?? secondaryMapId;
-      const effectiveSec = overrideSecMap !== undefined ? overrideSecMap : secondaryMap;
-      const secCam = effectiveSec ? cameras[effectiveSec.id] || DEFAULT_CAMERA : DEFAULT_CAMERA;
-
-      const secData: TacticalMapSyncData | null =
-        mode === "split" && effectiveSec
-          ? {
-              id: effectiveSec.id,
-              title: effectiveSec.title,
-              imageUrl: effectiveSec.imageUrl,
-              gridEnabled: effectiveSec.gridEnabled,
-              gridSize: effectiveSec.gridSize,
-              gridColor: effectiveSec.gridColor,
-              gridOpacity: effectiveSec.gridOpacity,
-              metersPerGrid: effectiveSec.metersPerGrid,
-              cameraState: secCam,
-              elementsData: JSON.stringify(getElementsByMap(effectiveSec.id)),
-              fogData: serializeFogState(getFogByMap(effectiveSec.id)),
-              isProjected: true,
-              displayMode: "fit",
-            }
-          : null;
-
-      const primaryCam = cameras[map.id] || DEFAULT_CAMERA;
-      const payload: TacticalMapSyncData = {
-        id: map.id,
-        title: map.title,
-        imageUrl: map.imageUrl,
-        gridEnabled: map.gridEnabled,
-        gridSize: map.gridSize,
-        gridColor: map.gridColor,
-        gridOpacity: map.gridOpacity,
-        metersPerGrid: map.metersPerGrid,
-        cameraState: primaryCam,
-        elementsData: JSON.stringify(getElementsByMap(map.id)),
-        fogData: serializeFogState(getFogByMap(map.id)),
-        isProjected: projected,
-        displayMode: mode,
-        secondaryMapId: mode === "split" ? secId : null,
-        secondaryMapData: projected ? secData : null,
-      };
-
-      emit("MAP_UPDATE", payload);
-
-      try {
-        await fetch(`/api/campaigns/${campaignId}/maps/active`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mapData: projected ? payload : null }),
-        });
-      } catch (err) {
-        console.warn("Erro ao salvar mapa ativo no banco:", err);
-      }
-    },
-    [campaignId, emit, displayMode, secondaryMapId, secondaryMap, cameras, getElementsByMap, getFogByMap]
-  );
 
   function handleGridChange(updates: Partial<TacticalMapData>) {
     if (!currentEditingMap) return;
@@ -288,6 +250,11 @@ export function TacticalMapWorkspace({ campaignId, isOpen, onClose }: TacticalMa
         }}
         campaignId={campaignId}
         onClose={onClose}
+        isCombatOpen={showCombatDrawer}
+        onToggleCombatDrawer={() => setShowCombatDrawer(!showCombatDrawer)}
+        onOpenDiceModal={() =>
+          openRoller({ label: "Rolagem do Mestre", modifier: 0, roller: "Mestre", campaignId })
+        }
       />
 
       {displayMode === "split" && secondaryMap && (
@@ -351,6 +318,14 @@ export function TacticalMapWorkspace({ campaignId, isOpen, onClose }: TacticalMa
           x: Math.round(-currentCam.panX / currentCam.zoom + 250),
           y: Math.round(-currentCam.panY / currentCam.zoom + 200),
         }}
+      />
+
+      {/* Gaveta Rápida de Combate sobre o Mapa Tático */}
+      <CombatQuickDrawer
+        campaignId={campaignId}
+        isOpen={showCombatDrawer}
+        onClose={() => setShowCombatDrawer(false)}
+        characters={characters}
       />
     </div>
   );

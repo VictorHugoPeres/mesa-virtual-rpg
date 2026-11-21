@@ -13,7 +13,7 @@ export function DiceModal() {
   if (!isModalOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="w-full max-w-md rounded-2xl bg-[var(--bg-card)] border border-[var(--border-default)] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
         {/* Header do modal */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-default)]">
