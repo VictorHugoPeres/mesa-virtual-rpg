@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { User, Skull, Plus } from "lucide-react";
 import { MapElement } from "./elementTypes";
+import { generateId } from "@/lib/id";
 
 interface CampaignCharItem {
   id: string;
@@ -48,9 +49,7 @@ export function TokenPickerTab({
   }, [campaignId]);
 
   function genId() {
-    return typeof crypto !== "undefined" && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    return generateId("token");
   }
 
   function handleAddCharacterToken(char: CampaignCharItem) {

@@ -5,6 +5,7 @@ import { X, User, Skull, Plus, Sparkles } from "lucide-react";
 import { CombatParticipant } from "./initiativeTypes";
 import { parseCharacterData } from "@/systems/feiticeiros-e-maldicoes/schemas";
 import { CustomCombatantTab } from "./CustomCombatantTab";
+import { generateId } from "@/lib/id";
 
 interface CampaignCharItem {
   id: string;
@@ -36,9 +37,7 @@ export function AddCombatantModal({
   const threats = characters.filter((c) => c.type === "THREAT");
 
   function getGenId() {
-    return typeof crypto !== "undefined" && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    return generateId("combatant");
   }
 
   function handleAddPC(char: CampaignCharItem) {

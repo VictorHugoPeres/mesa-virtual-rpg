@@ -21,21 +21,44 @@ export interface RollResult {
 
 /**
  * Faz o parse de expressões de dados como "1d20+5", "2d8-2", "d20", "1d10".
+ * Também extrai com segurança dados seguidos de tipos de dano (ex: "1d8 cortante", "2d6+4 fogo", "1d10 perfurante").
  */
 export function parseDiceExpression(expr: string): ParsedDice | null {
-  const clean = expr.replace(/\s+/g, "").toLowerCase();
-  const regex = /^(\d*)d(\d+)([+-]\d+)?$/;
-  const match = clean.match(regex);
+  if (!expr || typeof expr !== "string") return null;
 
-  if (!match) return null;
+  // 1. Procura padrão NdX (+/- M) ignorando texto extra após a expressão
+  const diceRegex = /(\d*)d(\d+)(?:\s*([+-]\s*\d+))?/i;
+  const match = expr.match(diceRegex);
 
-  const count = match[1] === "" ? 1 : parseInt(match[1], 10);
-  const sides = parseInt(match[2], 10);
-  const modifier = match[3] ? parseInt(match[3], 10) : 0;
+  if (match) {
+    const count = match[1] === "" ? 1 : parseInt(match[1], 10);
+    const sides = parseInt(match[2], 10);
+    const modifier = match[3] ? parseInt(match[3].replace(/\s+/g, ""), 10) : 0;
 
-  if (count <= 0 || sides <= 0) return null;
+    if (count > 0 && sides > 0) {
+      return { count, sides, modifier };
+    }
+  }
 
-  return { count, sides, modifier };
+  // 2. Tenta extrair número fixo (ex: "+5", "3")
+  const staticMatch = expr.trim().match(/^([+-]?\d+)$/);
+  if (staticMatch) {
+    return { count: 0, sides: 0, modifier: parseInt(staticMatch[1], 10) };
+  }
+
+  return null;
+}
+
+/**
+ * Extrai apenas a fórmula limpa de dados de um texto (ex: "1d8 cortante" -> "1d8", "2d6+4 fogo" -> "2d6+4").
+ */
+export function extractDiceFormula(raw: string): string {
+  if (!raw) return "1d20";
+  const parsed = parseDiceExpression(raw);
+  if (!parsed) return raw;
+  if (parsed.count === 0 && parsed.sides === 0) return `${parsed.modifier >= 0 ? `+${parsed.modifier}` : parsed.modifier}`;
+  const modStr = parsed.modifier > 0 ? `+${parsed.modifier}` : parsed.modifier < 0 ? `${parsed.modifier}` : "";
+  return `${parsed.count}d${parsed.sides}${modStr}`;
 }
 
 /**
@@ -65,6 +88,19 @@ export function rollDigitalDice(
       isCritical: fallbackRoll === 20,
       isFumble: fallbackRoll === 1,
       mode,
+    };
+  }
+
+  // Valor fixo sem dados
+  if (parsed.count === 0 && parsed.sides === 0) {
+    return {
+      formula,
+      rolls: [parsed.modifier],
+      modifier: parsed.modifier,
+      total: parsed.modifier,
+      isCritical: false,
+      isFumble: false,
+      mode: "normal",
     };
   }
 
@@ -103,7 +139,7 @@ export function rollDigitalDice(
   const sumRolls = rolls.reduce((acc, r) => acc + r, 0);
   const total = sumRolls + parsed.modifier;
 
-  // Crítico / Falha para d20 simples
+  // Crítico / Falha apenas para d20 simples
   const isCritical = parsed.sides === 20 && parsed.count === 1 && rolls[0] === 20;
   const isFumble = parsed.sides === 20 && parsed.count === 1 && rolls[0] === 1;
 

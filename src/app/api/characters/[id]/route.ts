@@ -1,9 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { syncBus } from "@/core/sync/eventEmitter";
 import {
   parseCharacterData,
   FMCharacterDataSchema,
 } from "@/systems/feiticeiros-e-maldicoes";
+import { CombatState, combatToTvData } from "@/core/initiative/initiativeTypes";
+import { generateId } from "@/lib/id";
 
 export async function GET(
   req: Request,
@@ -66,6 +69,68 @@ export async function PUT(
         data: JSON.stringify(validatedData),
       },
     });
+
+    if (existing.campaignId) {
+      // 1. Emite CHARACTER_UPDATE para celular e PC
+      syncBus.emit(`campaign:${existing.campaignId}`, {
+        id: generateId("char"),
+        type: "CHARACTER_UPDATE",
+        campaignId: existing.campaignId,
+        payload: {
+          characterId: id,
+          name: updatedName,
+          data: validatedData,
+        },
+        timestamp: Date.now(),
+      });
+
+      // 2. Sincroniza combatState se o personagem estiver no combate ativo
+      try {
+        const campaign = await prisma.campaign.findUnique({
+          where: { id: existing.campaignId },
+          select: { activeCombat: true },
+        });
+
+        if (campaign?.activeCombat) {
+          const combatState: CombatState = JSON.parse(campaign.activeCombat);
+          let combatChanged = false;
+
+          combatState.participants = combatState.participants.map((p) => {
+            if (p.characterId === id || p.name.toLowerCase() === updatedName.toLowerCase()) {
+              combatChanged = true;
+              return {
+                ...p,
+                name: updatedName,
+                currentHp: validatedData.hp.current,
+                maxHp: validatedData.hp.max,
+                currentEnergy: validatedData.energy.current,
+                maxEnergy: validatedData.energy.max,
+                defense: validatedData.defense?.total ?? p.defense,
+              };
+            }
+            return p;
+          });
+
+          if (combatChanged) {
+            await prisma.campaign.update({
+              where: { id: existing.campaignId },
+              data: { activeCombat: JSON.stringify(combatState) },
+            });
+
+            const tvData = combatToTvData(combatState);
+            syncBus.emit(`campaign:${existing.campaignId}`, {
+              id: generateId("init"),
+              type: "INITIATIVE_UPDATE",
+              campaignId: existing.campaignId,
+              payload: tvData,
+              timestamp: Date.now(),
+            });
+          }
+        }
+      } catch (combatSyncErr) {
+        console.warn("Erro ao sincronizar participante com combate ativo:", combatSyncErr);
+      }
+    }
 
     return NextResponse.json({ success: true, character });
   } catch (error) {

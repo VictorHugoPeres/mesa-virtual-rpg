@@ -31,7 +31,7 @@ const DeathSavesSchema = z.object({
   failures: z.number().min(0).max(3).default(0),
 });
 
-const SpellSchema = z.object({
+export const SpellSchema = z.object({
   id: z.string(),
   name: z.string(),
   level: z.number().default(0),
@@ -41,6 +41,8 @@ const SpellSchema = z.object({
   duration: z.string().default("Instantânea"),
   effect: z.string().default(""),
 });
+
+export type SpellDef = z.infer<typeof SpellSchema>;
 
 const AptitudesSchema = z.object({
   aura: z.number().min(0).max(5).default(0),

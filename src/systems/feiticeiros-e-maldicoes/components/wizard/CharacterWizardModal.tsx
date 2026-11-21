@@ -18,12 +18,14 @@ interface CharacterWizardModalProps {
   isOpen: boolean;
   onClose: () => void;
   campaignId: string;
+  redirectPrefix?: string;
 }
 
 export function CharacterWizardModal({
   isOpen,
   onClose,
   campaignId,
+  redirectPrefix,
 }: CharacterWizardModalProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
@@ -67,7 +69,10 @@ export function CharacterWizardModal({
       const { character } = await res.json();
       onClose();
       router.refresh();
-      router.push(`/mestre/${campaignId}/fichas/${character.id}`);
+      const targetUrl = redirectPrefix
+        ? `${redirectPrefix}/${character.id}`
+        : `/mestre/${campaignId}/fichas/${character.id}`;
+      router.push(targetUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro inesperado ao criar personagem.");
     } finally {

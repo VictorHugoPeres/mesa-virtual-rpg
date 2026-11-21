@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Box, Plus, Image as ImageIcon } from "lucide-react";
 import { MapElement, PRESET_PROPS, PresetProp } from "./elementTypes";
 import { GalleryMediaPicker } from "../GalleryMediaPicker";
+import { generateId } from "@/lib/id";
 
 interface PropPickerTabProps {
   campaignId: string;
@@ -26,9 +27,7 @@ export function PropPickerTab({
   const [showGallery, setShowGallery] = useState(false);
 
   function genId() {
-    return typeof crypto !== "undefined" && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    return generateId("prop");
   }
 
   function handleAddPresetProp(preset: PresetProp) {

@@ -11,6 +11,7 @@ export interface CombatParticipant {
   characterId?: string;     // ID do Character no banco (para PCs/NPCs com ficha)
   initiative: number;
   initiativeBonus: number;
+  initiativeRolled?: boolean; // Se a iniciativa já foi rolada ou definida
   maxHp: number;
   currentHp: number;
   maxEnergy?: number;

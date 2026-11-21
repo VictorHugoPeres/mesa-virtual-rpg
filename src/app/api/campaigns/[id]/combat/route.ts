@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { syncBus } from "@/core/sync/eventEmitter";
 import { SyncEvent, InitiativeDisplayData } from "@/core/sync/syncTypes";
 import { CombatState, EMPTY_COMBAT, combatToTvData } from "@/core/initiative/initiativeTypes";
+import { parseCharacterData } from "@/systems/feiticeiros-e-maldicoes";
+import { generateId } from "@/lib/id";
 
 export async function GET(
   _req: NextRequest,
@@ -55,7 +57,7 @@ export async function POST(
     const tvData: InitiativeDisplayData = combatToTvData(combatState);
 
     const event: SyncEvent<InitiativeDisplayData> = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      id: generateId("init"),
       type: "INITIATIVE_UPDATE",
       campaignId: id,
       payload: tvData,
@@ -63,6 +65,52 @@ export async function POST(
     };
 
     syncBus.emit(`campaign:${id}`, event);
+
+    // Sincroniza participantes que possuem characterId de volta para a ficha do personagem
+    for (const p of combatState.participants) {
+      if (p.characterId) {
+        try {
+          const char = await prisma.character.findUnique({
+            where: { id: p.characterId },
+          });
+
+          if (char) {
+            const sheet = parseCharacterData(char.data);
+            let sheetChanged = false;
+
+            if (sheet.hp.current !== p.currentHp) {
+              sheet.hp.current = p.currentHp;
+              sheetChanged = true;
+            }
+            if (p.currentEnergy !== undefined && sheet.energy.current !== p.currentEnergy) {
+              sheet.energy.current = p.currentEnergy;
+              sheetChanged = true;
+            }
+
+            if (sheetChanged) {
+              await prisma.character.update({
+                where: { id: p.characterId },
+                data: { data: JSON.stringify(sheet) },
+              });
+
+              syncBus.emit(`campaign:${id}`, {
+                id: generateId("char"),
+                type: "CHARACTER_UPDATE",
+                campaignId: id,
+                payload: {
+                  characterId: p.characterId,
+                  name: char.name,
+                  data: sheet,
+                },
+                timestamp: Date.now(),
+              });
+            }
+          }
+        } catch (charSyncErr) {
+          console.warn("Erro ao sincronizar participante com ficha:", charSyncErr);
+        }
+      }
+    }
 
     return NextResponse.json({ success: true, combatState, tvData });
   } catch (err) {

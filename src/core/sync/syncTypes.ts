@@ -7,7 +7,8 @@ export type SyncEventType =
   | "MAP_UPDATE"
   | "MAP_ELEMENTS_UPDATE"
   | "MAP_FOG_UPDATE"
-  | "MAP_RULER_UPDATE";
+  | "MAP_RULER_UPDATE"
+  | "CHARACTER_UPDATE";
 
 export interface ProjectionData {
   mediaUrl: string | null;

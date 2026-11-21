@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { rollDigitalDice, RollResult } from "./diceParser";
+import { rollDigitalDice, RollResult, extractDiceFormula } from "./diceParser";
 import { RollRequest, useDice } from "./DiceContext";
 import { postBroadcastEvent } from "@/core/sync/broadcast";
 import { SyncEvent, DiceRollEventData } from "@/core/sync/syncTypes";
@@ -17,10 +17,11 @@ export function DigitalRollerTab({ request }: DigitalRollerTabProps) {
   const defaultDiceType = request?.defaultDice || "1d20";
   const defaultMod = request?.modifier ?? 0;
 
+  const cleanDice = extractDiceFormula(defaultDiceType);
   const [formula, setFormula] = useState(
     defaultMod !== 0
-      ? `${defaultDiceType}${defaultMod >= 0 ? `+${defaultMod}` : defaultMod}`
-      : defaultDiceType
+      ? `${cleanDice}${defaultMod >= 0 ? `+${defaultMod}` : defaultMod}`
+      : cleanDice
   );
   const [rollMode, setRollMode] = useState<"normal" | "advantage" | "disadvantage">(
     "normal"

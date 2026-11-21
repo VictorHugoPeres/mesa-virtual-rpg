@@ -11,6 +11,7 @@ import {
   EyeOff,
   ArrowUpDown,
   Dices,
+  RotateCcw,
 } from "lucide-react";
 import { CombatState, CombatParticipant, EMPTY_COMBAT } from "./initiativeTypes";
 import { AddCombatantModal } from "./AddCombatantModal";
@@ -54,21 +55,51 @@ export function InitiativeControls({
     setCombatState({ ...combatState, currentTurnIndex: nextIdx, round: newRound, isActive: true });
   }
 
-  function rollAllInitiatives() {
+  const pendingCount = combatState.participants.filter(
+    (p) => !p.initiativeRolled && p.initiative === 0
+  ).length;
+
+  function rollPendingInitiatives() {
     if (!combatState.participants.length) return;
     const updated = combatState.participants.map((p) => {
+      // Preserva quem já teve iniciativa rolada ou definida manualmente
+      if (p.initiativeRolled || p.initiative !== 0) {
+        return { ...p, initiativeRolled: true };
+      }
       const d20 = Math.floor(Math.random() * 20) + 1;
       return {
         ...p,
         initiative: d20 + (p.initiativeBonus || 0),
+        initiativeRolled: true,
       };
     });
     // Ordena do maior para o menor
-    updated.sort((a, b) => b.initiative - a.initiative);
+    updated.sort((a, b) => {
+      if (b.initiative !== a.initiative) {
+        return b.initiative - a.initiative;
+      }
+      return (b.initiativeBonus || 0) - (a.initiativeBonus || 0);
+    });
     setCombatState({
       ...combatState,
       participants: updated,
       currentTurnIndex: 0,
+    });
+  }
+
+  function resetInitiatives() {
+    if (!combatState.participants.length) return;
+    if (!window.confirm("Deseja zerar a iniciativa de todos os participantes para uma nova cena?")) return;
+    const updated = combatState.participants.map((p) => ({
+      ...p,
+      initiative: 0,
+      initiativeRolled: false,
+    }));
+    setCombatState({
+      ...combatState,
+      participants: updated,
+      currentTurnIndex: 0,
+      round: 1,
     });
   }
 
@@ -112,15 +143,27 @@ export function InitiativeControls({
           <Plus className="w-3.5 h-3.5" /> Combatente
         </button>
 
-        {/* Rolar Iniciativas */}
+        {/* Rolar Iniciativas Pendentes */}
         <button
           type="button"
-          onClick={rollAllInitiatives}
+          onClick={rollPendingInitiatives}
           disabled={!combatState.participants.length}
           className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30 disabled:opacity-40 transition-colors cursor-pointer"
-          title="Rolar d20 + bônus para todos e ordenar"
+          title="Rolar iniciativa apenas para quem está pendente (preserva iniciativas já roladas)"
         >
-          <Dices className="w-3.5 h-3.5 text-indigo-400" /> Rolar Inic.
+          <Dices className="w-3.5 h-3.5 text-indigo-400" />
+          {pendingCount > 0 ? `Rolar Inic. (${pendingCount})` : "Rolar Inic."}
+        </button>
+
+        {/* Zerar Iniciativas */}
+        <button
+          type="button"
+          onClick={resetInitiatives}
+          disabled={!combatState.participants.length}
+          className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium text-[var(--text-muted)] hover:text-amber-300 hover:bg-amber-950/20 border border-[var(--border-default)] disabled:opacity-40 transition-colors cursor-pointer"
+          title="Zerar iniciativas de todos os participantes para nova cena"
+        >
+          <RotateCcw className="w-3.5 h-3.5" /> Zerar Inic.
         </button>
 
         {/* Ordenar */}

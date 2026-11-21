@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CombatParticipant, CONDITION_LIST } from "./initiativeTypes";
-import { Shield, Heart, Zap, Trash2, Plus, X, ChevronRight, Skull, Swords, ExternalLink } from "lucide-react";
+import { Shield, Heart, Zap, Trash2, Plus, X, ChevronRight, Skull, Swords, ExternalLink, Dices } from "lucide-react";
 
 interface ParticipantRowProps {
   participant: CombatParticipant;
@@ -22,6 +22,16 @@ export function ParticipantRow({
   onOpenThreatSheet,
 }: ParticipantRowProps) {
   const [showConditionPicker, setShowConditionPicker] = useState(false);
+
+  function handleRollIndividualInitiative() {
+    const d20 = Math.floor(Math.random() * 20) + 1;
+    const total = d20 + (participant.initiativeBonus || 0);
+    onUpdate({
+      ...participant,
+      initiative: total,
+      initiativeRolled: true,
+    });
+  }
 
   function adjustHp(amount: number) {
     const newHp = Math.max(0, Math.min(participant.maxHp * 2, participant.currentHp + amount));
@@ -76,10 +86,25 @@ export function ParticipantRow({
               type="number"
               value={participant.initiative}
               onChange={(e) =>
-                onUpdate({ ...participant, initiative: Number(e.target.value) || 0 })
+                onUpdate({
+                  ...participant,
+                  initiative: Number(e.target.value) || 0,
+                  initiativeRolled: true,
+                })
               }
-              className="w-12 text-center bg-[var(--bg-input,#121218)] border border-[var(--border-default)] rounded px-1.5 py-1 text-xs font-bold text-white focus:outline-none focus:border-blue-500"
+              className={`w-12 text-center bg-[var(--bg-input,#121218)] border rounded px-1.5 py-1 text-xs font-bold text-white focus:outline-none focus:border-blue-500 ${
+                participant.initiativeRolled ? "border-emerald-500/60" : "border-[var(--border-default)]"
+              }`}
+              title={participant.initiativeRolled ? "Iniciativa rolada/definida" : "Iniciativa pendente"}
             />
+            <button
+              type="button"
+              onClick={handleRollIndividualInitiative}
+              className="p-1 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)] hover:border-indigo-400 text-indigo-400 hover:text-white transition-colors cursor-pointer"
+              title={`Rolar iniciativa individual (1d20+${participant.initiativeBonus || 0})`}
+            >
+              <Dices className="w-3.5 h-3.5" />
+            </button>
           </div>
 
           <div>

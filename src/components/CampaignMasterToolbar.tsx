@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useDice } from "@/core/dice/DiceContext";
 import { useCompendium } from "@/core/compendium/CompendiumContext";
 import { ProjectionToolbar } from "@/core/projection/ProjectionToolbar";
-import { Dices, History, BookOpen, Skull, Music, Map as MapIcon } from "lucide-react";
+import { LanQrCodeModal } from "@/core/player/LanQrCodeModal";
+import { Dices, History, BookOpen, Skull, Music, Map as MapIcon, Smartphone } from "lucide-react";
 
 interface CampaignMasterToolbarProps {
   campaignId: string;
@@ -12,6 +14,7 @@ interface CampaignMasterToolbarProps {
 export function CampaignMasterToolbar({ campaignId }: CampaignMasterToolbarProps) {
   const { openRoller, openHistory } = useDice();
   const { openCompendium } = useCompendium();
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -108,6 +111,25 @@ export function CampaignMasterToolbar({ campaignId }: CampaignMasterToolbarProps
         <BookOpen className="w-3.5 h-3.5 text-amber-400" />
         Compêndio
       </button>
+
+      {/* Botão Acesso Mobile / Celulares */}
+      <button
+        type="button"
+        onClick={() => setIsQrModalOpen(true)}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
+                   bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30
+                   transition-all cursor-pointer shadow-xs"
+        title="Abrir QR Code e link para celulares na rede Wi-Fi"
+      >
+        <Smartphone className="w-3.5 h-3.5 text-indigo-400" />
+        📱 Celulares
+      </button>
+
+      <LanQrCodeModal
+        isOpen={isQrModalOpen}
+        onClose={() => setIsQrModalOpen(false)}
+        campaignId={campaignId}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CombatParticipant } from "./initiativeTypes";
+import { generateId } from "@/lib/id";
 
 interface CustomCombatantTabProps {
   onAddParticipant: (participant: CombatParticipant) => void;
@@ -19,7 +20,7 @@ export function CustomCombatantTab({ onAddParticipant, onClose }: CustomCombatan
     if (!customName.trim()) return;
 
     const participant: CombatParticipant = {
-      id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id: generateId("custom"),
       name: customName.trim(),
       type: customType,
       initiative: 0,

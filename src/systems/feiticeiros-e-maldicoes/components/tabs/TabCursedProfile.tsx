@@ -36,7 +36,13 @@ export function TabCursedProfile({
       <AptitudesTracker data={data} onChange={onChange} />
 
       {/* 3. Feitiços & Liberações */}
-      <SpellsList data={data} onChange={onChange} />
+      <SpellsList
+        data={data}
+        onChange={onChange}
+        characterName={characterName}
+        characterId={characterId}
+        campaignId={campaignId}
+      />
 
       {/* 4. Expansão de Domínio */}
       <DomainExpansionCard data={data} onChange={onChange} />

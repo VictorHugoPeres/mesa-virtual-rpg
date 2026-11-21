@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Shield, Swords } from "lucide-react";
 import { useCampaignSync } from "@/core/sync/useCampaignSync";
 import { CombatState, CombatParticipant, EMPTY_COMBAT, combatToTvData } from "./initiativeTypes";
+import { generateId } from "@/lib/id";
 import { ParticipantRow } from "./ParticipantRow";
 import { InitiativeControls } from "./InitiativeControls";
 import { ThreatCombatDrawer } from "./ThreatCombatDrawer";
@@ -85,7 +86,7 @@ export function InitiativePanel({ campaignId, characters }: InitiativePanelProps
           existingCount === 0 ? `${threatName} #1` : `${threatName} #${existingCount + 1}`;
 
         const newParticipant: CombatParticipant = {
-          id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          id: generateId(threatId),
           name: cloneName,
           type: "THREAT",
           characterId: threatId,

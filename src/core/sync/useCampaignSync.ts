@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { SyncEvent, SyncEventType } from "./syncTypes";
 import { createBroadcastChannel, postBroadcastEvent } from "./broadcast";
+import { generateId } from "@/lib/id";
 
 interface UseCampaignSyncOptions {
   campaignId: string;
@@ -94,7 +95,7 @@ export function useCampaignSync({ campaignId, onEvent }: UseCampaignSyncOptions)
       if (!campaignId) return;
 
       const event: SyncEvent<T> = {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+        id: generateId("evt"),
         type,
         campaignId,
         payload,

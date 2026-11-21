@@ -5,6 +5,7 @@ import {
   FMCharacterData,
   parseCharacterData,
 } from "@/systems/feiticeiros-e-maldicoes";
+import { useCampaignSync } from "@/core/sync/useCampaignSync";
 import { TabPersonal } from "./tabs/TabPersonal";
 import { TabCursedProfile } from "./tabs/TabCursedProfile";
 import { TabInventory } from "./tabs/TabInventory";
@@ -50,6 +51,22 @@ export function SheetView({
   // Debounced auto-save
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const isFirstRender = useRef(true);
+  const isIncomingSyncRef = useRef(false);
+
+  // Sincronização em tempo real (atualizações vindas do combate ou celular)
+  useCampaignSync({
+    campaignId,
+    onEvent: (event) => {
+      if (event.type === "CHARACTER_UPDATE") {
+        const payload = event.payload as { characterId: string; name?: string; data: FMCharacterData };
+        if (payload?.characterId === characterId && payload.data) {
+          isIncomingSyncRef.current = true;
+          if (payload.name) setName(payload.name);
+          setData(payload.data);
+        }
+      }
+    },
+  });
 
   const saveToDatabase = useCallback(
     async (charName: string, charType: string, charData: FMCharacterData) => {
@@ -78,6 +95,11 @@ export function SheetView({
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
+      return;
+    }
+
+    if (isIncomingSyncRef.current) {
+      isIncomingSyncRef.current = false;
       return;
     }
 
