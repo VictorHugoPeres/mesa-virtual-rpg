@@ -73,6 +73,8 @@ export interface CameraState {
   panY: number;
 }
 
+export type MapDisplayMode = "fit" | "follow" | "split";
+
 export interface TacticalMapSyncData {
   id: string;
   title: string;
@@ -85,6 +87,9 @@ export interface TacticalMapSyncData {
   cameraState: CameraState;
   elementsData?: string;
   isProjected: boolean;
+  displayMode?: MapDisplayMode;
+  secondaryMapId?: string | null;
+  secondaryMapData?: TacticalMapSyncData | null;
 }
 
 export interface SyncEvent<T = unknown> {

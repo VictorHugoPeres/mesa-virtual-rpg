@@ -17,6 +17,8 @@ interface ElementsLayerProps {
   onLocalMove?: (updated: MapElement) => void;
   onCommitMove?: (updated: MapElement) => void;
   onDeleteElement: (id: string) => void;
+  availableMaps?: { id: string; title: string }[];
+  onTransferElement?: (elementId: string, targetMapId: string) => void;
   interactive?: boolean;
 }
 
@@ -31,6 +33,8 @@ export function ElementsLayer({
   onLocalMove,
   onCommitMove,
   onDeleteElement,
+  availableMaps,
+  onTransferElement,
   interactive = true,
 }: ElementsLayerProps) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -109,7 +113,6 @@ export function ElementsLayer({
       if (target && (target.x !== finalX || target.y !== finalY)) {
         const updated = { ...target, x: finalX, y: finalY };
         dragRef.current.lastUpdated = updated;
-        // Atualiza apenas o estado visual local — ZERO rede/fetch
         if (onLocalMove) {
           onLocalMove(updated);
         } else {
@@ -122,7 +125,6 @@ export function ElementsLayer({
       const { hasMoved, lastUpdated } = dragRef.current;
       setDraggingId(null);
 
-      // Apenas dispara salvamento e sincronização ao soltar o mouse
       if (hasMoved && lastUpdated && onCommitMove) {
         onCommitMove(lastUpdated);
       }
@@ -181,6 +183,10 @@ export function ElementsLayer({
             onUpdate={onUpdateElement}
             onDelete={onDeleteElement}
             onDeselect={() => onSelectElement(null)}
+            availableMaps={availableMaps}
+            onTransfer={(targetMapId) => {
+              if (onTransferElement) onTransferElement(selectedElement.id, targetMapId);
+            }}
           />
         </div>
       )}

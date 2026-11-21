@@ -35,16 +35,20 @@ export function GridControlsOverlay({
       <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 shadow-xl text-xs">
         <button
           type="button"
-          onClick={() => onChange({ gridEnabled: !gridEnabled })}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+          onClick={() => onChange({ gridEnabled: !Boolean(gridEnabled) })}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
             gridEnabled
-              ? "bg-emerald-600/30 text-emerald-300 border border-emerald-500/40"
-              : "bg-zinc-800 text-zinc-400 border border-zinc-700/60"
+              ? "bg-emerald-600 text-white shadow-md shadow-emerald-950 border border-emerald-400"
+              : "bg-zinc-800 text-zinc-400 border border-white/10 hover:text-zinc-200"
           }`}
-          title={gridEnabled ? "Grade Ativada" : "Grade Oculta"}
+          title={gridEnabled ? "Clique para desligar a grade" : "Clique para ligar a grade"}
         >
-          {gridEnabled ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-          <span>Grade {gridEnabled ? "ON" : "OFF"}</span>
+          {gridEnabled ? (
+            <Eye className="w-3.5 h-3.5 text-white" />
+          ) : (
+            <EyeOff className="w-3.5 h-3.5 text-zinc-400" />
+          )}
+          <span>{gridEnabled ? "Grade: Ligada" : "Grade: Desligada"}</span>
         </button>
 
         <button

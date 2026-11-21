@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { RotateCw, RotateCcw, Trash2, Edit3, X } from "lucide-react";
+import { RotateCw, RotateCcw, Trash2, Edit3, ArrowRightLeft, X } from "lucide-react";
 import { MapElement } from "./elementTypes";
 import { ElementEditModal } from "./ElementEditModal";
 
@@ -12,6 +12,8 @@ interface ElementControlsOverlayProps {
   onUpdate: (updated: MapElement) => void;
   onDelete: (id: string) => void;
   onDeselect: () => void;
+  availableMaps?: { id: string; title: string }[];
+  onTransfer?: (targetMapId: string) => void;
 }
 
 export function ElementControlsOverlay({
@@ -21,6 +23,8 @@ export function ElementControlsOverlay({
   onUpdate,
   onDelete,
   onDeselect,
+  availableMaps,
+  onTransfer,
 }: ElementControlsOverlayProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const isToken = element.type === "TOKEN";
@@ -137,7 +141,19 @@ export function ElementControlsOverlay({
 
         <div className="w-[1px] h-4 bg-white/20" />
 
-        {/* Botão de Edição Completa (Nome / Imagem / Tamanho) */}
+        {/* Botão de Transferência Rápida se houver outros mapas */}
+        {availableMaps && availableMaps.length > 0 && onTransfer && (
+          <button
+            type="button"
+            onClick={() => setIsEditOpen(true)}
+            className="p-1.5 rounded-lg hover:bg-indigo-600/30 text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer"
+            title="Mover para outro mapa..."
+          >
+            <ArrowRightLeft className="w-3.5 h-3.5" />
+          </button>
+        )}
+
+        {/* Botão de Edição Completa */}
         <button
           type="button"
           onClick={() => setIsEditOpen(true)}
@@ -175,6 +191,8 @@ export function ElementControlsOverlay({
           isOpen={isEditOpen}
           onClose={() => setIsEditOpen(false)}
           onSave={onUpdate}
+          availableMaps={availableMaps}
+          onTransfer={onTransfer}
         />
       )}
     </>

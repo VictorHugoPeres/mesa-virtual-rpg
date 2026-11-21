@@ -58,8 +58,20 @@ export function TelaoView({
     } else if (event.type === "MAP_ELEMENTS_UPDATE") {
       const payload = event.payload as { mapId: string; elementsData: string };
       setMapData((prev) => {
-        if (!prev || prev.id !== payload.mapId) return prev;
-        return { ...prev, elementsData: payload.elementsData };
+        if (!prev) return prev;
+        if (prev.id === payload.mapId) {
+          return { ...prev, elementsData: payload.elementsData };
+        }
+        if (prev.secondaryMapData && prev.secondaryMapData.id === payload.mapId) {
+          return {
+            ...prev,
+            secondaryMapData: {
+              ...prev.secondaryMapData,
+              elementsData: payload.elementsData,
+            },
+          };
+        }
+        return prev;
       });
     }
   }, []);

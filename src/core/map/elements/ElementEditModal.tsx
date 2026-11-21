@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Save, Image as ImageIcon } from "lucide-react";
+import { X, Save, Image as ImageIcon, ArrowRightLeft } from "lucide-react";
 import { MapElement } from "./elementTypes";
 import { GalleryMediaPicker } from "../GalleryMediaPicker";
 
@@ -11,6 +11,8 @@ interface ElementEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (updated: MapElement) => void;
+  availableMaps?: { id: string; title: string }[];
+  onTransfer?: (targetMapId: string) => void;
 }
 
 export function ElementEditModal({
@@ -19,6 +21,8 @@ export function ElementEditModal({
   isOpen,
   onClose,
   onSave,
+  availableMaps,
+  onTransfer,
 }: ElementEditModalProps) {
   const [name, setName] = useState(element.name || "");
   const [imageUrl, setImageUrl] = useState(element.imageUrl || "");
@@ -26,6 +30,7 @@ export function ElementEditModal({
   const [heightCells, setHeightCells] = useState(element.heightCells || 1);
   const [healthStatus, setHealthStatus] = useState(element.healthStatus || "Saudável");
   const [showGallery, setShowGallery] = useState(false);
+  const [targetMapId, setTargetMapId] = useState("");
 
   if (!isOpen) return null;
 
@@ -41,6 +46,13 @@ export function ElementEditModal({
     };
     onSave(updated);
     onClose();
+  }
+
+  function handleTransferClick() {
+    if (targetMapId && onTransfer) {
+      onTransfer(targetMapId);
+      onClose();
+    }
   }
 
   return (
@@ -150,6 +162,38 @@ export function ElementEditModal({
                 <option value="Gravemente Ferido">Gravemente Ferido (Vermelho)</option>
                 <option value="Derrotado">Derrotado (Cinza)</option>
               </select>
+            </div>
+          )}
+
+          {/* Mover para outro Mapa da Campanha */}
+          {availableMaps && availableMaps.length > 0 && onTransfer && (
+            <div className="pt-3 border-t border-white/10">
+              <label className="block text-zinc-400 font-semibold mb-1.5 flex items-center gap-1.5">
+                <ArrowRightLeft className="w-3.5 h-3.5 text-indigo-400" />
+                Mover para outro Mapa da Campanha
+              </label>
+              <div className="flex items-center gap-2">
+                <select
+                  value={targetMapId}
+                  onChange={(e) => setTargetMapId(e.target.value)}
+                  className="flex-1 bg-zinc-900 border border-white/15 rounded-lg px-3 py-2 text-white text-xs cursor-pointer focus:outline-none focus:border-indigo-500"
+                >
+                  <option value="">Selecione o mapa destino...</option>
+                  {availableMaps.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.title}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  disabled={!targetMapId}
+                  onClick={handleTransferClick}
+                  className="px-3 py-2 rounded-lg font-bold bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-xs transition-colors cursor-pointer"
+                >
+                  Transferir
+                </button>
+              </div>
             </div>
           )}
 

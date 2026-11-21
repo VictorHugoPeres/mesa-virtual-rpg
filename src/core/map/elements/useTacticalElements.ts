@@ -7,127 +7,186 @@ import { useCampaignSync } from "../../sync/useCampaignSync";
 
 interface UseTacticalElementsProps {
   campaignId: string;
-  selectedMap: TacticalMapData | undefined;
-  isProjected: boolean;
+  maps: TacticalMapData[];
 }
 
-export function useTacticalElements({
-  campaignId,
-  selectedMap,
-  isProjected,
-}: UseTacticalElementsProps) {
-  const [elements, setElements] = useState<MapElement[]>([]);
+export function useTacticalElements({ campaignId, maps }: UseTacticalElementsProps) {
+  const [elementsByMap, setElementsByMap] = useState<Record<string, MapElement[]>>({});
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
-  const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const saveTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
   const { emit } = useCampaignSync({ campaignId });
 
-  // Carrega elementos quando o mapa selecionado muda
+  // Inicializa ou sincroniza os elementos de cada mapa a partir de maps
   useEffect(() => {
-    if (!selectedMap) {
-      setElements([]);
-      setSelectedElementId(null);
-      return;
-    }
-    try {
-      if (selectedMap.elementsData) {
-        const parsed = JSON.parse(selectedMap.elementsData);
-        if (Array.isArray(parsed)) {
-          setElements(parsed);
-          return;
+    setElementsByMap((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const m of maps) {
+        if (!next[m.id]) {
+          try {
+            const parsed = m.elementsData ? JSON.parse(m.elementsData) : [];
+            next[m.id] = Array.isArray(parsed) ? parsed : [];
+            changed = true;
+          } catch {
+            next[m.id] = [];
+            changed = true;
+          }
         }
       }
-    } catch (err) {
-      console.warn("Erro ao fazer parse dos elementos do mapa:", err);
-    }
-    setElements([]);
-    setSelectedElementId(null);
-  }, [selectedMap?.id, selectedMap?.elementsData]);
+      return changed ? next : prev;
+    });
+  }, [maps]);
 
-  // Salva no banco com debounce e emite via sync
+  const getElementsByMap = useCallback(
+    (mapId: string): MapElement[] => {
+      return elementsByMap[mapId] || [];
+    },
+    [elementsByMap]
+  );
+
   const persistAndBroadcast = useCallback(
-    (newElements: MapElement[]) => {
-      if (!selectedMap) return;
-
+    (mapId: string, newElements: MapElement[]) => {
       const jsonStr = JSON.stringify(newElements);
 
-      // Emite sincronização em tempo real para o Telão
-      emit("MAP_ELEMENTS_UPDATE", {
-        mapId: selectedMap.id,
-        elementsData: jsonStr,
-      });
+      // Emite sincronização isolada para o Telão com mapId específico
+      emit("MAP_ELEMENTS_UPDATE", { mapId, elementsData: jsonStr });
 
-      // Salva no SQLite via PUT
-      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-      saveTimerRef.current = setTimeout(async () => {
+      // Salva no SQLite via PUT com debounce por mapa
+      if (saveTimersRef.current[mapId]) {
+        clearTimeout(saveTimersRef.current[mapId]);
+      }
+
+      saveTimersRef.current[mapId] = setTimeout(async () => {
         try {
-          await fetch(`/api/campaigns/${campaignId}/maps/${selectedMap.id}`, {
+          await fetch(`/api/campaigns/${campaignId}/maps/${mapId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ elementsData: jsonStr }),
           });
         } catch (err) {
-          console.warn("Erro ao salvar elementos do mapa:", err);
+          console.warn(`Erro ao salvar elementos do mapa ${mapId}:`, err);
         }
       }, 500);
     },
-    [campaignId, selectedMap, emit]
+    [campaignId, emit]
   );
 
   const addElement = useCallback(
-    (elem: MapElement) => {
-      setElements((prev) => {
-        const next = [...prev, elem];
-        persistAndBroadcast(next);
-        return next;
+    (mapId: string, elem: MapElement) => {
+      setElementsByMap((prev) => {
+        const current = prev[mapId] || [];
+        const next = [...current, elem];
+        persistAndBroadcast(mapId, next);
+        return { ...prev, [mapId]: next };
       });
       setSelectedElementId(elem.id);
     },
     [persistAndBroadcast]
   );
 
-  // Atualização direta por botões da toolbar/modal (salva e transmite)
   const updateElement = useCallback(
-    (updated: MapElement) => {
-      setElements((prev) => {
-        const next = prev.map((el) => (el.id === updated.id ? updated : el));
-        persistAndBroadcast(next);
-        return next;
+    (mapId: string, updated: MapElement) => {
+      setElementsByMap((prev) => {
+        const current = prev[mapId] || [];
+        const next = current.map((el) => (el.id === updated.id ? updated : el));
+        persistAndBroadcast(mapId, next);
+        return { ...prev, [mapId]: next };
       });
     },
     [persistAndBroadcast]
   );
 
-  // Atualização puramente visual durante o arraste (ZERO rede, 60fps)
-  const updateElementVisual = useCallback((updated: MapElement) => {
-    setElements((prev) => prev.map((el) => (el.id === updated.id ? updated : el)));
+  // Arraste visual puro (ZERO rede, 60fps)
+  const updateElementVisual = useCallback((mapId: string, updated: MapElement) => {
+    setElementsByMap((prev) => {
+      const current = prev[mapId] || [];
+      const next = current.map((el) => (el.id === updated.id ? updated : el));
+      return { ...prev, [mapId]: next };
+    });
   }, []);
 
-  // Confirmação final ao soltar o mouse (salva e transmite apenas uma vez)
+  // Confirmação ao soltar o clique
   const commitElementMove = useCallback(
-    (finalElem: MapElement) => {
-      setElements((prev) => {
-        const next = prev.map((el) => (el.id === finalElem.id ? finalElem : el));
-        persistAndBroadcast(next);
-        return next;
+    (mapId: string, finalElem: MapElement) => {
+      setElementsByMap((prev) => {
+        const current = prev[mapId] || [];
+        const next = current.map((el) => (el.id === finalElem.id ? finalElem : el));
+        persistAndBroadcast(mapId, next);
+        return { ...prev, [mapId]: next };
       });
     },
     [persistAndBroadcast]
   );
 
   const deleteElement = useCallback(
-    (id: string) => {
-      setElements((prev) => {
-        const next = prev.filter((el) => el.id !== id);
-        persistAndBroadcast(next);
-        return next;
+    (mapId: string, id: string) => {
+      setElementsByMap((prev) => {
+        const current = prev[mapId] || [];
+        const next = current.filter((el) => el.id !== id);
+        persistAndBroadcast(mapId, next);
+        return { ...prev, [mapId]: next };
       });
       setSelectedElementId(null);
     },
     [persistAndBroadcast]
   );
 
+  const transferElement = useCallback(
+    async (sourceMapId: string, targetMapId: string, elementId: string) => {
+      if (!sourceMapId || !targetMapId || sourceMapId === targetMapId) return;
+
+      let movedElem: MapElement | undefined;
+      let newSource: MapElement[] = [];
+      let newTarget: MapElement[] = [];
+
+      setElementsByMap((prev) => {
+        const srcList = prev[sourceMapId] || [];
+        const dstList = prev[targetMapId] || [];
+        movedElem = srcList.find((el) => el.id === elementId);
+        if (!movedElem) return prev;
+
+        newSource = srcList.filter((el) => el.id !== elementId);
+        newTarget = [...dstList, { ...movedElem }];
+
+        return {
+          ...prev,
+          [sourceMapId]: newSource,
+          [targetMapId]: newTarget,
+        };
+      });
+
+      if (!movedElem) return;
+
+      setSelectedElementId(null);
+
+      // Transmite atualizações imediatas para ambos os mapas na TV
+      emit("MAP_ELEMENTS_UPDATE", { mapId: sourceMapId, elementsData: JSON.stringify(newSource) });
+      emit("MAP_ELEMENTS_UPDATE", { mapId: targetMapId, elementsData: JSON.stringify(newTarget) });
+
+      // Salva imediatamente no banco para ambos os mapas
+      try {
+        await Promise.all([
+          fetch(`/api/campaigns/${campaignId}/maps/${sourceMapId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ elementsData: JSON.stringify(newSource) }),
+          }),
+          fetch(`/api/campaigns/${campaignId}/maps/${targetMapId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ elementsData: JSON.stringify(newTarget) }),
+          }),
+        ]);
+      } catch (err) {
+        console.warn("Erro ao salvar transferência de elemento:", err);
+      }
+    },
+    [campaignId, emit]
+  );
+
   return {
-    elements,
+    elementsByMap,
+    getElementsByMap,
     selectedElementId,
     setSelectedElementId,
     addElement,
@@ -135,5 +194,6 @@ export function useTacticalElements({
     updateElementVisual,
     commitElementMove,
     deleteElement,
+    transferElement,
   };
 }

@@ -14,6 +14,7 @@ interface MapCanvasProps {
   interactive?: boolean;
   children?: React.ReactNode;
   onClick?: () => void;
+  onImageLoaded?: (size: { width: number; height: number }) => void;
 }
 
 export function MapCanvas({
@@ -27,8 +28,10 @@ export function MapCanvas({
   interactive = true,
   children,
   onClick,
+  onImageLoaded,
 }: MapCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   const dragDistanceRef = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -38,6 +41,15 @@ export function MapCanvas({
   useEffect(() => {
     setImageError(false);
   }, [imageUrl]);
+
+  // Checa se a imagem já foi carregada do cache
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete && imgRef.current.naturalWidth) {
+      const size = { width: imgRef.current.naturalWidth, height: imgRef.current.naturalHeight };
+      setImageSize(size);
+      if (onImageLoaded) onImageLoaded(size);
+    }
+  }, [imageUrl, onImageLoaded]);
 
   // Previne zoom da página ao usar scroll no canvas
   useEffect(() => {
@@ -60,7 +72,7 @@ export function MapCanvas({
       if (!interactive) return;
 
       const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
-      const newZoom = Math.min(4, Math.max(0.2, camera.zoom * zoomFactor));
+      const newZoom = Math.min(4, Math.max(0.1, camera.zoom * zoomFactor));
 
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
@@ -100,7 +112,6 @@ export function MapCanvas({
   };
 
   const handleClick = (e: MouseEvent<HTMLDivElement>) => {
-    // Se arrastou (pan), não desmarca
     if (dragDistanceRef.current > 6) return;
     if (onClick) onClick();
   };
@@ -125,19 +136,64 @@ export function MapCanvas({
           transform: `translate3d(${camera.panX}px, ${camera.panY}px, 0) scale(${camera.zoom})`,
         }}
       >
-        {/* Imagem Base do Mapa */}
         {imageUrl && !imageError ? (
-          <img
-            src={imageUrl}
-            alt="Mapa Tático"
-            draggable={false}
-            onLoad={(e) => {
-              const img = e.currentTarget;
-              setImageSize({ width: img.naturalWidth, height: img.naturalHeight });
+          <div
+            className="relative select-none shadow-2xl overflow-hidden"
+            style={{
+              width: imageSize.width ? `${imageSize.width}px` : "auto",
+              height: imageSize.height ? `${imageSize.height}px` : "auto",
             }}
-            onError={() => setImageError(true)}
-            className="block max-w-none pointer-events-none shadow-2xl"
-          />
+          >
+            {/* Imagem Base do Mapa */}
+            <img
+              ref={imgRef}
+              src={imageUrl}
+              alt="Mapa Tático"
+              draggable={false}
+              onLoad={(e) => {
+                const img = e.currentTarget;
+                const size = { width: img.naturalWidth, height: img.naturalHeight };
+                setImageSize(size);
+                if (onImageLoaded) onImageLoaded(size);
+              }}
+              onError={() => setImageError(true)}
+              className="block max-w-none pointer-events-none shadow-2xl"
+            />
+
+            {/* Camada da Grade Vetorial (SVG Grid) - 100% presa dentro dos limites da imagem */}
+            {gridEnabled && gridSize > 5 && (
+              <svg
+                className="absolute inset-0 pointer-events-none w-full h-full"
+                width="100%"
+                height="100%"
+              >
+                <defs>
+                  <pattern
+                    id={`tactical-grid-${gridSize}`}
+                    width={gridSize}
+                    height={gridSize}
+                    patternUnits="userSpaceOnUse"
+                  >
+                    <path
+                      d={`M ${gridSize} 0 L 0 0 0 ${gridSize}`}
+                      fill="none"
+                      stroke={gridColor}
+                      strokeWidth="1"
+                      strokeOpacity={gridOpacity}
+                    />
+                  </pattern>
+                </defs>
+                <rect
+                  width="100%"
+                  height="100%"
+                  fill={`url(#tactical-grid-${gridSize})`}
+                />
+              </svg>
+            )}
+
+            {/* Camada de Elementos (Tokens e Objetos) */}
+            {children}
+          </div>
         ) : (
           <div className="w-[1200px] h-[800px] bg-zinc-900 border border-red-950 flex flex-col items-center justify-center text-zinc-500 font-medium p-6 text-center">
             <span className="text-sm font-bold text-red-400 mb-1">
@@ -150,41 +206,6 @@ export function MapCanvas({
             </span>
           </div>
         )}
-
-        {/* Camada da Grade Vetorial (SVG Grid) */}
-        {gridEnabled && gridSize > 5 && (
-          <svg
-            className="absolute inset-0 pointer-events-none"
-            width={imageSize.width || "100%"}
-            height={imageSize.height || "100%"}
-            style={{ width: imageSize.width || 2000, height: imageSize.height || 2000 }}
-          >
-            <defs>
-              <pattern
-                id={`tactical-grid-${gridSize}`}
-                width={gridSize}
-                height={gridSize}
-                patternUnits="userSpaceOnUse"
-              >
-                <path
-                  d={`M ${gridSize} 0 L 0 0 0 ${gridSize}`}
-                  fill="none"
-                  stroke={gridColor}
-                  strokeWidth="1"
-                  strokeOpacity={gridOpacity}
-                />
-              </pattern>
-            </defs>
-            <rect
-              width="100%"
-              height="100%"
-              fill={`url(#tactical-grid-${gridSize})`}
-            />
-          </svg>
-        )}
-
-        {/* Camada de Elementos (Tokens e Objetos) */}
-        {children}
       </div>
     </div>
   );

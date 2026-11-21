@@ -1,6 +1,6 @@
-import { CameraState, TacticalMapSyncData } from "../sync/syncTypes";
+import { CameraState, TacticalMapSyncData, MapDisplayMode } from "../sync/syncTypes";
 
-export type { CameraState, TacticalMapSyncData };
+export type { CameraState, TacticalMapSyncData, MapDisplayMode };
 
 export interface TacticalMapData {
   id: string;
