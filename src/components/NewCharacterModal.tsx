@@ -1,66 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { UserPlus, X, Loader2 } from "lucide-react";
-import {
-  SPECIALIZATIONS,
-  ORIGINS,
-  Specialization,
-  Origin,
-} from "@/systems/feiticeiros-e-maldicoes";
+import { UserPlus, X, Wand2, FileText, Sparkles, ChevronRight } from "lucide-react";
+import { QuickCharacterForm } from "./QuickCharacterForm";
+import { CharacterWizardModal } from "@/systems/feiticeiros-e-maldicoes/components/wizard/CharacterWizardModal";
 
 export function NewCharacterModal({ campaignId }: { campaignId: string }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [type, setType] = useState<"PC" | "NPC">("PC");
-  const [specialization, setSpecialization] = useState<Specialization>("Lutador");
-  const [origin, setOrigin] = useState<Origin>("Inato");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const router = useRouter();
+  const [mode, setMode] = useState<"choice" | "quick">("choice");
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!name.trim()) return;
+  function handleOpen() {
+    setMode("choice");
+    setIsOpen(true);
+  }
 
-    setLoading(true);
-    setError("");
-
-    try {
-      const res = await fetch(`/api/campaigns/${campaignId}/characters`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(),
-          type,
-          specialization,
-          origin,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Erro ao criar personagem");
-      }
-
-      const { character } = await res.json();
-      setName("");
-      setIsOpen(false);
-      router.refresh();
-      // Leva direto para a ficha recém-criada
-      router.push(`/mestre/${campaignId}/fichas/${character.id}`);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Erro desconhecido");
-    } finally {
-      setLoading(false);
-    }
+  function handleClose() {
+    setIsOpen(false);
+    setMode("choice");
   }
 
   return (
     <>
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={handleOpen}
         className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium
                    bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer"
       >
@@ -68,118 +31,94 @@ export function NewCharacterModal({ campaignId }: { campaignId: string }) {
         Novo Personagem
       </button>
 
+      {/* Modal de Escolha Inicial ou Ficha Rápida */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="w-full max-w-lg bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-default)]">
-              <h3 className="text-lg font-semibold">Criar Personagem</h3>
+              <h3 className="text-base font-bold">Novo Personagem</h3>
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={handleClose}
                 className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              {error && (
-                <div className="p-3 text-sm rounded bg-red-950/60 border border-red-800 text-red-200">
-                  {error}
-                </div>
-              )}
+            {mode === "choice" ? (
+              <div className="p-6 space-y-4">
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Como você deseja criar o novo personagem para a campanha?
+                </p>
 
-              <div>
-                <label className="block text-xs font-semibold uppercase text-[var(--text-secondary)] mb-1">
-                  Nome do Personagem
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ex: Megumi Fushiguro, Aoi Todo..."
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)]
-                             text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-blue-500"
-                  autoFocus
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-[var(--text-secondary)] mb-1">
-                    Tipo
-                  </label>
-                  <select
-                    value={type}
-                    onChange={(e) => setType(e.target.value as "PC" | "NPC")}
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)]
-                               text-[var(--text-primary)] focus:outline-none focus:border-blue-500"
-                  >
-                    <option value="PC">Jogador (PC)</option>
-                    <option value="NPC">NPC / Ameaça</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase text-[var(--text-secondary)] mb-1">
-                    Origem
-                  </label>
-                  <select
-                    value={origin}
-                    onChange={(e) => setOrigin(e.target.value as Origin)}
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)]
-                               text-[var(--text-primary)] focus:outline-none focus:border-blue-500"
-                  >
-                    {ORIGINS.map((o) => (
-                      <option key={o} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase text-[var(--text-secondary)] mb-1">
-                  Especialização Inicial
-                </label>
-                <select
-                  value={specialization}
-                  onChange={(e) =>
-                    setSpecialization(e.target.value as Specialization)
-                  }
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)]
-                             text-[var(--text-primary)] focus:outline-none focus:border-blue-500"
-                >
-                  {SPECIALIZATIONS.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-default)]">
+                {/* Opção 1: Criador Guiado */}
                 <button
                   type="button"
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 text-sm rounded-lg border border-[var(--border-default)] hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] transition-colors cursor-pointer"
+                  onClick={() => {
+                    handleClose();
+                    setIsWizardOpen(true);
+                  }}
+                  className="w-full p-4 rounded-xl border border-blue-500/50 bg-blue-950/20 hover:bg-blue-950/40 text-left transition-all flex items-start gap-3.5 group cursor-pointer"
                 >
-                  Cancelar
+                  <div className="p-2.5 rounded-xl bg-blue-600/20 border border-blue-500/40 text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-all shrink-0">
+                    <Wand2 className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-bold text-sm text-[var(--text-primary)]">
+                        Criador Guiado (Passo a Passo)
+                      </span>
+                      <span className="text-[10px] font-bold text-blue-400 bg-blue-900/60 px-2 py-0.5 rounded-full border border-blue-700/60 flex items-center gap-1">
+                        <Sparkles className="w-3 h-3" /> Recomendado
+                      </span>
+                    </div>
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                      Ideal para iniciantes. Questionário em 7 etapas com cards para Origem, Classe, Atributos, Perícias, Feitiços e Equipamentos com cálculos automáticos.
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-blue-400 shrink-0 self-center transition-colors" />
                 </button>
+
+                {/* Opção 2: Ficha Rápida em Branco */}
                 <button
-                  type="submit"
-                  disabled={loading || !name.trim()}
-                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white transition-colors cursor-pointer"
+                  type="button"
+                  onClick={() => setMode("quick")}
+                  className="w-full p-4 rounded-xl border border-[var(--border-default)] bg-[var(--bg-secondary)] hover:border-gray-500 text-left transition-all flex items-start gap-3.5 group cursor-pointer"
                 >
-                  {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {loading ? "Criando..." : "Criar Personagem"}
+                  <div className="p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-all shrink-0">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-bold text-sm text-[var(--text-primary)]">
+                        Ficha Rápida em Branco
+                      </span>
+                    </div>
+                    <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                      Para mestres ou veteranos que preferem preencher diretamente todos os campos na ficha aberta.
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--text-primary)] shrink-0 self-center transition-colors" />
                 </button>
               </div>
-            </form>
+            ) : (
+              <QuickCharacterForm
+                campaignId={campaignId}
+                onClose={handleClose}
+                onBackToOptions={() => setMode("choice")}
+              />
+            )}
           </div>
         </div>
       )}
+
+      {/* Modal do Criador Guiado */}
+      <CharacterWizardModal
+        isOpen={isWizardOpen}
+        onClose={() => setIsWizardOpen(false)}
+        campaignId={campaignId}
+      />
     </>
   );
 }

@@ -6,7 +6,7 @@ import {
   COMPENDIUM_ENTRIES,
   CompendiumEntry,
 } from "./compendiumData";
-import { BookOpen, X, Search, Shield, Flame, Skull, Activity, Swords } from "lucide-react";
+import { BookOpen, X, Search, Shield, Flame, Skull, Activity, Swords, GraduationCap } from "lucide-react";
 
 interface QuickCompendiumDrawerProps {
   isOpen: boolean;
@@ -32,6 +32,7 @@ export function QuickCompendiumDrawer({ isOpen, onClose }: QuickCompendiumDrawer
   });
 
   const categoryIcons: Record<string, React.ReactNode> = {
+    iniciantes: <GraduationCap className="w-3.5 h-3.5 text-emerald-400" />,
     combate: <Swords className="w-3.5 h-3.5 text-red-400" />,
     testes: <Shield className="w-3.5 h-3.5 text-blue-400" />,
     condicoes: <Activity className="w-3.5 h-3.5 text-amber-400" />,

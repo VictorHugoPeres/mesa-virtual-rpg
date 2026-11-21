@@ -1,12 +1,15 @@
+import { INICIANTES_ENTRIES } from "./entriesIniciantes";
+
 export interface CompendiumEntry {
   id: string;
-  category: "combate" | "testes" | "morte" | "condicoes" | "dominios";
+  category: "iniciantes" | "combate" | "testes" | "morte" | "condicoes" | "dominios";
   title: string;
   summary: string;
   details: string[];
 }
 
 export const COMPENDIUM_CATEGORIES = [
+  { id: "iniciantes", label: "Guia Básico (Iniciantes)" },
   { id: "combate", label: "Combate & Ações" },
   { id: "testes", label: "Testes & Resistências" },
   { id: "condicoes", label: "Condições Jujutsu" },
@@ -15,6 +18,7 @@ export const COMPENDIUM_CATEGORIES = [
 ] as const;
 
 export const COMPENDIUM_ENTRIES: CompendiumEntry[] = [
+  ...INICIANTES_ENTRIES,
   // COMBATE & AÇÕES
   {
     id: "acao-padrao",
