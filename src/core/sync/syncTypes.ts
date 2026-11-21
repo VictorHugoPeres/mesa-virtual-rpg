@@ -5,7 +5,9 @@ export type SyncEventType =
   | "AUDIO_UPDATE"
   | "AUDIO_SFX_PLAY"
   | "MAP_UPDATE"
-  | "MAP_ELEMENTS_UPDATE";
+  | "MAP_ELEMENTS_UPDATE"
+  | "MAP_FOG_UPDATE"
+  | "MAP_RULER_UPDATE";
 
 export interface ProjectionData {
   mediaUrl: string | null;
@@ -75,6 +77,19 @@ export interface CameraState {
 
 export type MapDisplayMode = "fit" | "follow" | "split";
 
+export type RulerShape = "line" | "circle";
+
+export interface TacticalRulerData {
+  startX: number;
+  startY: number;
+  currentX: number;
+  currentY: number;
+  shape: RulerShape;
+  distanceMeters: number;
+  gridCells: number;
+  showOnTv: boolean;
+}
+
 export interface TacticalMapSyncData {
   id: string;
   title: string;
@@ -86,6 +101,7 @@ export interface TacticalMapSyncData {
   metersPerGrid: number;
   cameraState: CameraState;
   elementsData?: string;
+  fogData?: string;
   isProjected: boolean;
   displayMode?: MapDisplayMode;
   secondaryMapId?: string | null;

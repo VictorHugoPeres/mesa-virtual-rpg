@@ -97,6 +97,7 @@ model TacticalMap {
   metersPerGrid Float    @default(1.5)
   cameraState   String   @default("{\"zoom\":1,\"panX\":0,\"panY\":0}")
   elementsData  String   @default("[]")
+  fogData       String   @default("[]")
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

@@ -1,29 +1,32 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { TacticalMapSyncData } from "../sync/syncTypes";
+import { TacticalMapSyncData, TacticalRulerData } from "../sync/syncTypes";
 import { MapCanvas } from "../map/MapCanvas";
 import { ElementsLayer } from "../map/elements/ElementsLayer";
+import { FogLayer } from "../map/fog/FogLayer";
+import { RulerLayer } from "../map/ruler/RulerLayer";
 import { MapElement } from "../map/elements/elementTypes";
+import { parseFogState } from "../map/fog/fogTypes";
 
 interface SingleTelaoMapPanelProps {
   mapData: TacticalMapSyncData;
   displayMode?: "fit" | "follow";
   labelPrefix?: string;
+  ruler?: TacticalRulerData | null;
 }
 
 export function SingleTelaoMapPanel({
   mapData,
   displayMode = "fit",
   labelPrefix,
+  ruler = null,
 }: SingleTelaoMapPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
-  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
     const el = containerRef.current;
     if (!el) return;
 
@@ -52,7 +55,11 @@ export function SingleTelaoMapPanel({
     }
   }, [mapData.elementsData]);
 
-  // Centralização geométrica exata (Horizontal e Vertical)
+  const fog = useMemo(() => {
+    return parseFogState(mapData.fogData);
+  }, [mapData.fogData]);
+
+  // Centralização geométrica exata
   const activeCamera = useMemo(() => {
     if (displayMode === "follow") {
       return mapData.cameraState;
@@ -87,6 +94,7 @@ export function SingleTelaoMapPanel({
         onImageLoaded={setImageSize}
         interactive={false}
       >
+        {/* Tokens e Objetos */}
         <ElementsLayer
           elements={elements}
           gridSize={mapData.gridSize}
@@ -97,10 +105,32 @@ export function SingleTelaoMapPanel({
           onDeleteElement={() => {}}
           interactive={false}
         />
+
+        {/* Névoa de Guerra 100% Opaca (z-30: cobre o mapa E todos os tokens/props na TV) */}
+        <FogLayer
+          mapId={mapData.id}
+          fog={fog}
+          gridSize={mapData.gridSize}
+          width={imageSize.width}
+          height={imageSize.height}
+          isMaster={false}
+          interactive={false}
+        />
+
+        {/* Projeção da Régua / Área se ativada pelo Mestre */}
+        {ruler && (
+          <RulerLayer
+            ruler={ruler}
+            gridSize={mapData.gridSize}
+            metersPerGrid={mapData.metersPerGrid}
+            isMaster={false}
+            interactive={false}
+          />
+        )}
       </MapCanvas>
 
       {/* Rótulo de título do mapa na TV */}
-      <div className="absolute top-4 left-4 z-20 pointer-events-none opacity-70 hover:opacity-100 transition-opacity">
+      <div className="absolute top-4 left-4 z-40 pointer-events-none opacity-70 hover:opacity-100 transition-opacity">
         <span className="px-3 py-1.5 rounded-lg bg-black/85 border border-white/15 text-white font-mono text-xs backdrop-blur-md shadow-lg flex items-center gap-2">
           {labelPrefix && (
             <span className="text-emerald-400 font-bold uppercase tracking-wider text-[10px]">

@@ -49,6 +49,11 @@ export async function PUT(
         ? body.elementsData
         : JSON.stringify(body.elementsData);
     }
+    if (body.fogData !== undefined) {
+      updateData.fogData = typeof body.fogData === "string"
+        ? body.fogData
+        : JSON.stringify(body.fogData);
+    }
 
     const updated = await prisma.tacticalMap.update({
       where: { id: mapId },

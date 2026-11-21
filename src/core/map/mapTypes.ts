@@ -1,6 +1,14 @@
-import { CameraState, TacticalMapSyncData, MapDisplayMode } from "../sync/syncTypes";
+import {
+  CameraState,
+  TacticalMapSyncData,
+  MapDisplayMode,
+  TacticalRulerData,
+  RulerShape,
+} from "../sync/syncTypes";
 
-export type { CameraState, TacticalMapSyncData, MapDisplayMode };
+export type { CameraState, TacticalMapSyncData, MapDisplayMode, TacticalRulerData, RulerShape };
+
+export type MapToolMode = "select" | "fog_reveal" | "fog_hide" | "ruler";
 
 export interface TacticalMapData {
   id: string;
@@ -14,6 +22,7 @@ export interface TacticalMapData {
   metersPerGrid: number;
   cameraState: CameraState;
   elementsData?: string;
+  fogData?: string;
   createdAt?: string;
   updatedAt?: string;
 }

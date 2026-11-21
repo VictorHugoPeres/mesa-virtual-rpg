@@ -1,13 +1,14 @@
 "use client";
 
-import { TacticalMapSyncData } from "../sync/syncTypes";
+import { TacticalMapSyncData, TacticalRulerData } from "../sync/syncTypes";
 import { SingleTelaoMapPanel } from "./SingleTelaoMapPanel";
 
 interface TelaoMapViewerProps {
   mapData: TacticalMapSyncData | null;
+  rulersByMap?: Record<string, TacticalRulerData | null>;
 }
 
-export function TelaoMapViewer({ mapData }: TelaoMapViewerProps) {
+export function TelaoMapViewer({ mapData, rulersByMap }: TelaoMapViewerProps) {
   if (!mapData || !mapData.isProjected || !mapData.imageUrl) {
     return null;
   }
@@ -24,11 +25,13 @@ export function TelaoMapViewer({ mapData }: TelaoMapViewerProps) {
           mapData={mapData}
           displayMode="fit"
           labelPrefix="Mapa 1"
+          ruler={rulersByMap?.[mapData.id] || null}
         />
         <SingleTelaoMapPanel
           mapData={mapData.secondaryMapData}
           displayMode="fit"
           labelPrefix="Mapa 2"
+          ruler={rulersByMap?.[mapData.secondaryMapData.id] || null}
         />
       </div>
     );
@@ -39,6 +42,7 @@ export function TelaoMapViewer({ mapData }: TelaoMapViewerProps) {
       <SingleTelaoMapPanel
         mapData={mapData}
         displayMode={mapData.displayMode === "follow" ? "follow" : "fit"}
+        ruler={rulersByMap?.[mapData.id] || null}
       />
     </div>
   );

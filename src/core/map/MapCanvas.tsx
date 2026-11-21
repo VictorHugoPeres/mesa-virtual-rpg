@@ -12,6 +12,7 @@ interface MapCanvasProps {
   camera: CameraState;
   onCameraChange: (newCam: CameraState) => void;
   interactive?: boolean;
+  canPan?: boolean;
   children?: React.ReactNode;
   onClick?: () => void;
   onImageLoaded?: (size: { width: number; height: number }) => void;
@@ -26,6 +27,7 @@ export function MapCanvas({
   camera,
   onCameraChange,
   interactive = true,
+  canPan = true,
   children,
   onClick,
   onImageLoaded,
@@ -91,7 +93,7 @@ export function MapCanvas({
   );
 
   const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
-    if (!interactive) return;
+    if (!interactive || !canPan) return;
     if (e.button === 0 || e.button === 1) {
       setIsDragging(true);
       setDragStart({ x: e.clientX - camera.panX, y: e.clientY - camera.panY });
@@ -126,7 +128,7 @@ export function MapCanvas({
       onMouseLeave={handleMouseUp}
       onClick={handleClick}
       className={`relative w-full h-full overflow-hidden bg-[#07070a] select-none ${
-        interactive ? (isDragging ? "cursor-grabbing" : "cursor-grab") : ""
+        interactive && canPan ? (isDragging ? "cursor-grabbing" : "cursor-grab") : ""
       }`}
     >
       {/* Camada Transformada por Zoom e Pan */}

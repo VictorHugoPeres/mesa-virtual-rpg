@@ -1,14 +1,18 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Map as MapIcon, Plus } from "lucide-react";
-import { TacticalMapData, CameraState, DEFAULT_CAMERA, MapDisplayMode } from "./mapTypes";
+import { TacticalMapData, CameraState, DEFAULT_CAMERA, MapDisplayMode, MapToolMode } from "./mapTypes";
 import { MapHeaderBar } from "./MapHeaderBar";
+import { MapToolsToolbar } from "./MapToolsToolbar";
 import { SplitEditingToolbar } from "./SplitEditingToolbar";
 import { MapEditorCanvas } from "./MapEditorCanvas";
+import { EmptyMapState } from "./EmptyMapState";
 import { AddMapModal } from "./AddMapModal";
 import { AddElementDrawer } from "./elements/AddElementDrawer";
 import { useTacticalElements } from "./elements/useTacticalElements";
+import { useTacticalFog } from "./fog/useTacticalFog";
+import { useTacticalRuler } from "./ruler/useTacticalRuler";
+import { serializeFogState } from "./fog/fogTypes";
 import { useCampaignSync } from "../sync/useCampaignSync";
 import { TacticalMapSyncData } from "../sync/syncTypes";
 
@@ -18,11 +22,7 @@ interface TacticalMapWorkspaceProps {
   onClose: () => void;
 }
 
-export function TacticalMapWorkspace({
-  campaignId,
-  isOpen,
-  onClose,
-}: TacticalMapWorkspaceProps) {
+export function TacticalMapWorkspace({ campaignId, isOpen, onClose }: TacticalMapWorkspaceProps) {
   const [maps, setMaps] = useState<TacticalMapData[]>([]);
   const [selectedMapId, setSelectedMapId] = useState<string>("");
   const [secondaryMapId, setSecondaryMapId] = useState<string>("");
@@ -33,6 +33,10 @@ export function TacticalMapWorkspace({
   const [isProjected, setIsProjected] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showElementsDrawer, setShowElementsDrawer] = useState(false);
+
+  // Ferramentas Etapa 3C
+  const [toolMode, setToolMode] = useState<MapToolMode>("select");
+  const [brushSize, setBrushSize] = useState<number>(1);
 
   const { emit } = useCampaignSync({ campaignId });
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -53,6 +57,21 @@ export function TacticalMapWorkspace({
     deleteElement,
     transferElement,
   } = useTacticalElements({ campaignId, maps });
+
+  const { getFogByMap, coverAll, revealAll, paintCells, commitFog } = useTacticalFog({
+    campaignId,
+    maps,
+  });
+
+  const {
+    getRulerByMap,
+    shape: rulerShape,
+    setShape: setRulerShape,
+    showOnTv: showRulerOnTv,
+    toggleShowOnTv: toggleShowRulerOnTv,
+    updateRuler,
+    clearRuler,
+  } = useTacticalRuler({ campaignId });
 
   const loadMaps = useCallback(async () => {
     try {
@@ -117,6 +136,7 @@ export function TacticalMapWorkspace({
               metersPerGrid: effectiveSec.metersPerGrid,
               cameraState: secCam,
               elementsData: JSON.stringify(getElementsByMap(effectiveSec.id)),
+              fogData: serializeFogState(getFogByMap(effectiveSec.id)),
               isProjected: true,
               displayMode: "fit",
             }
@@ -134,6 +154,7 @@ export function TacticalMapWorkspace({
         metersPerGrid: map.metersPerGrid,
         cameraState: primaryCam,
         elementsData: JSON.stringify(getElementsByMap(map.id)),
+        fogData: serializeFogState(getFogByMap(map.id)),
         isProjected: projected,
         displayMode: mode,
         secondaryMapId: mode === "split" ? secId : null,
@@ -152,7 +173,7 @@ export function TacticalMapWorkspace({
         console.warn("Erro ao salvar mapa ativo no banco:", err);
       }
     },
-    [campaignId, emit, displayMode, secondaryMapId, secondaryMap, cameras, getElementsByMap]
+    [campaignId, emit, displayMode, secondaryMapId, secondaryMap, cameras, getElementsByMap, getFogByMap]
   );
 
   function handleGridChange(updates: Partial<TacticalMapData>) {
@@ -219,6 +240,16 @@ export function TacticalMapWorkspace({
       badge={isSplit || (displayMode === "split" && secondaryMap) ? `Slot ${slot}: ${map.title}` : undefined}
       isActive={activeEditSlot === slot}
       onActivate={() => setActiveEditSlot(slot)}
+      toolMode={toolMode}
+      fog={getFogByMap(map.id)}
+      brushSize={brushSize}
+      onPaintFog={(cells, mode) => paintCells(map.id, cells, mode)}
+      onCommitFog={() => commitFog(map.id)}
+      ruler={getRulerByMap(map.id)}
+      rulerShape={rulerShape}
+      showRulerOnTv={showRulerOnTv}
+      onRulerChange={(r) => updateRuler(map.id, r)}
+      onRulerCommit={(r) => updateRuler(map.id, r)}
     />
   );
 
@@ -281,20 +312,24 @@ export function TacticalMapWorkspace({
             renderEditor(currentEditingMap, activeEditSlot, false)
           )
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center text-center p-6 text-zinc-500">
-            <MapIcon className="w-16 h-16 mb-3 opacity-20 text-emerald-400" />
-            <h3 className="text-base font-bold text-white mb-1">Nenhum mapa cadastrado</h3>
-            <p className="text-xs max-w-sm mb-4">
-              Crie o seu primeiro mapa de batalha fazendo upload de uma imagem ou colando um link.
-            </p>
-            <button
-              type="button"
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-500 transition-colors shadow-lg cursor-pointer"
-            >
-              <Plus className="w-4 h-4" /> Criar Primeiro Mapa
-            </button>
-          </div>
+          <EmptyMapState onOpenAddModal={() => setShowAddModal(true)} />
+        )}
+
+        {/* Barra de Ferramentas Flutuante: Selecionar, Névoa e Régua */}
+        {currentEditingMap && (
+          <MapToolsToolbar
+            activeTool={toolMode}
+            onSelectTool={setToolMode}
+            onCoverAll={() => coverAll(currentEditingMap.id)}
+            onRevealAll={() => revealAll(currentEditingMap.id)}
+            brushSize={brushSize}
+            onBrushSizeChange={setBrushSize}
+            rulerShape={rulerShape}
+            onRulerShapeChange={setRulerShape}
+            showRulerOnTv={showRulerOnTv}
+            onToggleShowRulerOnTv={toggleShowRulerOnTv}
+            onClearRuler={() => clearRuler(currentEditingMap.id)}
+          />
         )}
       </div>
 

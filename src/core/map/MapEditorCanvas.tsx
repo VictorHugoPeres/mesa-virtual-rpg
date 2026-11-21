@@ -1,11 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { MapCanvas } from "./MapCanvas";
 import { ElementsLayer } from "./elements/ElementsLayer";
+import { FogLayer } from "./fog/FogLayer";
+import { RulerLayer } from "./ruler/RulerLayer";
 import { GridControlsOverlay } from "./GridControlsOverlay";
 import { CameraControlsOverlay } from "./CameraControlsOverlay";
-import { TacticalMapData, CameraState } from "./mapTypes";
+import { TacticalMapData, CameraState, MapToolMode, RulerShape, TacticalRulerData } from "./mapTypes";
 import { MapElement } from "./elements/elementTypes";
+import { FogMapState } from "./fog/fogTypes";
 
 interface MapEditorCanvasProps {
   map: TacticalMapData;
@@ -25,6 +29,17 @@ interface MapEditorCanvasProps {
   badge?: string;
   isActive?: boolean;
   onActivate?: () => void;
+  // Ferramentas da Etapa 3C
+  toolMode?: MapToolMode;
+  fog: FogMapState;
+  brushSize?: number;
+  onPaintFog?: (cellKeys: string[], mode: "reveal" | "hide") => void;
+  onCommitFog?: () => void;
+  ruler: TacticalRulerData | null;
+  rulerShape?: RulerShape;
+  showRulerOnTv?: boolean;
+  onRulerChange?: (ruler: TacticalRulerData | null) => void;
+  onRulerCommit?: (ruler: TacticalRulerData | null) => void;
 }
 
 export function MapEditorCanvas({
@@ -45,7 +60,19 @@ export function MapEditorCanvas({
   badge,
   isActive = true,
   onActivate,
+  toolMode = "select",
+  fog,
+  brushSize = 1,
+  onPaintFog,
+  onCommitFog,
+  ruler,
+  rulerShape = "line",
+  showRulerOnTv = false,
+  onRulerChange,
+  onRulerCommit,
 }: MapEditorCanvasProps) {
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+
   return (
     <div
       onClick={onActivate}
@@ -61,8 +88,13 @@ export function MapEditorCanvas({
         gridOpacity={map.gridOpacity}
         camera={camera}
         onCameraChange={onCameraChange}
-        onClick={() => onSelectElement(null)}
+        canPan={isActive && toolMode === "select"}
+        onImageLoaded={setImageSize}
+        onClick={() => {
+          if (toolMode === "select") onSelectElement(null);
+        }}
       >
+        {/* Camada de Tokens e Objetos */}
         <ElementsLayer
           campaignId={campaignId}
           elements={elements}
@@ -76,7 +108,38 @@ export function MapEditorCanvas({
           onDeleteElement={onDeleteElement}
           availableMaps={availableMaps}
           onTransferElement={onTransferElement}
+          interactive={isActive && toolMode === "select"}
+        />
+
+        {/* Camada de Névoa de Guerra (Semitransparente para o Mestre) */}
+        <FogLayer
+          mapId={map.id}
+          fog={fog}
+          gridSize={map.gridSize}
+          width={imageSize.width}
+          height={imageSize.height}
+          isMaster={true}
           interactive={isActive}
+          toolMode={toolMode}
+          brushSize={brushSize}
+          cameraZoom={camera.zoom}
+          onPaintCells={onPaintFog}
+          onCommitPaint={onCommitFog}
+        />
+
+        {/* Camada da Régua de Medição */}
+        <RulerLayer
+          ruler={ruler}
+          gridSize={map.gridSize}
+          metersPerGrid={map.metersPerGrid}
+          isMaster={true}
+          interactive={isActive}
+          toolMode={toolMode}
+          shape={rulerShape}
+          showOnTv={showRulerOnTv}
+          cameraZoom={camera.zoom}
+          onRulerChange={onRulerChange}
+          onRulerCommit={onRulerCommit}
         />
       </MapCanvas>
 

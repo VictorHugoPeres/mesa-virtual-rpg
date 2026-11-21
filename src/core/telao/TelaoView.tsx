@@ -9,6 +9,7 @@ import {
   InitiativeDisplayData,
   AudioBGMEventData,
   TacticalMapSyncData,
+  TacticalRulerData,
 } from "../sync/syncTypes";
 import { TelaoStandby } from "./TelaoStandby";
 import { TelaoProjection } from "./TelaoProjection";
@@ -42,6 +43,7 @@ export function TelaoView({
     initialCombat
   );
   const [mapData, setMapData] = useState<TacticalMapSyncData | null>(initialMap);
+  const [rulersByMap, setRulersByMap] = useState<Record<string, TacticalRulerData | null>>({});
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(false);
 
@@ -73,6 +75,27 @@ export function TelaoView({
         }
         return prev;
       });
+    } else if (event.type === "MAP_FOG_UPDATE") {
+      const payload = event.payload as { mapId: string; fogData: string };
+      setMapData((prev) => {
+        if (!prev) return prev;
+        if (prev.id === payload.mapId) {
+          return { ...prev, fogData: payload.fogData };
+        }
+        if (prev.secondaryMapData && prev.secondaryMapData.id === payload.mapId) {
+          return {
+            ...prev,
+            secondaryMapData: {
+              ...prev.secondaryMapData,
+              fogData: payload.fogData,
+            },
+          };
+        }
+        return prev;
+      });
+    } else if (event.type === "MAP_RULER_UPDATE") {
+      const payload = event.payload as { mapId: string; ruler: TacticalRulerData | null };
+      setRulersByMap((prev) => ({ ...prev, [payload.mapId]: payload.ruler }));
     }
   }, []);
 
@@ -153,7 +176,9 @@ export function TelaoView({
       />
 
       {/* Mapa Tático Projetado (Renderizado se o mestre estiver projetando) */}
-      {mapData?.isProjected && <TelaoMapViewer mapData={mapData} />}
+      {mapData?.isProjected && (
+        <TelaoMapViewer mapData={mapData} rulersByMap={rulersByMap} />
+      )}
 
       {/* Conteúdo Central: Mídia Projetada OU Standby (quando nenhum mapa estiver projetado) */}
       {!mapData?.isProjected && (
