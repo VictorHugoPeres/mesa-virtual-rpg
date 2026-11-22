@@ -155,6 +155,7 @@ export function SheetView({
         data={data}
         saveStatus={saveStatus}
         onManualSave={() => saveToDatabase(name, type, data)}
+        onUpdateSheet={setData}
       />
 
       {/* Navegação entre as 5 Abas */}

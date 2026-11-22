@@ -26,6 +26,10 @@ export interface DiceRollEventData {
   isCritical: boolean;
   isFumble: boolean;
   mode: string; // "DIGITAL" | "PHYSICAL_INPUT"
+  targetName?: string;
+  targetDefense?: number;
+  isHit?: boolean;
+  appliedDamage?: number;
 }
 
 export type HealthStatus = "Saudável" | "Ferido" | "Crítico" | "Gravemente Ferido" | "Derrotado";

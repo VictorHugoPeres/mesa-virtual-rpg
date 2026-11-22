@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -10,11 +11,13 @@ import {
   CheckCircle2,
   Loader2,
   AlertCircle,
+  Moon,
 } from "lucide-react";
 import { useDice } from "@/core/dice/DiceContext";
 import { useCompendium } from "@/core/compendium/CompendiumContext";
 import { ProjectionToolbar } from "@/core/projection/ProjectionToolbar";
-import { FMCharacterData } from "../types";
+import { FMCharacterData, SPEC_TABLE, Specialization } from "@/systems/feiticeiros-e-maldicoes";
+import { RestModal } from "./RestModal";
 
 interface SheetHeaderProps {
   name: string;
@@ -25,6 +28,7 @@ interface SheetHeaderProps {
   data: FMCharacterData;
   saveStatus: "saved" | "saving" | "error";
   onManualSave: () => void;
+  onUpdateSheet?: (updater: (prev: FMCharacterData) => FMCharacterData) => void;
 }
 
 export function SheetHeader({
@@ -36,9 +40,16 @@ export function SheetHeader({
   data,
   saveStatus,
   onManualSave,
+  onUpdateSheet,
 }: SheetHeaderProps) {
   const { openRoller, openHistory } = useDice();
   const { openCompendium } = useCompendium();
+  const [isRestModalOpen, setIsRestModalOpen] = useState(false);
+
+  const totalDV = Math.max(data.hitDice?.total ?? 1, data.level ?? 1);
+  const spentDV = data.hitDice?.spent ?? 0;
+  const availDV = Math.max(0, totalDV - spentDV);
+  const die = data.hitDice?.die || SPEC_TABLE[data.specialization as Specialization]?.hitDie || "d10";
 
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[var(--border-default)]">
@@ -127,6 +138,23 @@ export function SheetHeader({
           Compêndio
         </button>
 
+        {onUpdateSheet && (
+          <button
+            type="button"
+            onClick={() => setIsRestModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
+                       bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30
+                       transition-all cursor-pointer shadow-xs"
+            title="Realizar Descanso Curto ou Longo"
+          >
+            <Moon className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Descanso</span>
+            <span className="text-[10px] px-1 py-0.2 rounded bg-indigo-950/80 border border-indigo-700/50 text-indigo-300 font-mono">
+              {availDV}/{totalDV} {die}
+            </span>
+          </button>
+        )}
+
         {/* Status de salvamento e botão manual */}
         <div className="flex items-center gap-2 pl-2 border-l border-[var(--border-default)]">
           <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
@@ -161,6 +189,18 @@ export function SheetHeader({
           </button>
         </div>
       </div>
+
+      {onUpdateSheet && (
+        <RestModal
+          isOpen={isRestModalOpen}
+          onClose={() => setIsRestModalOpen(false)}
+          data={data}
+          onChange={onUpdateSheet}
+          characterName={name}
+          characterId={characterId}
+          campaignId={campaignId}
+        />
+      )}
     </div>
   );
 }

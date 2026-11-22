@@ -9,6 +9,7 @@ export interface RollRequest {
   roller: string; // Nome do personagem ou Mestre
   characterId?: string;
   campaignId?: string;
+  linkedDamage?: string; // Ex: "1d8 cortante" para rolar dano após acertar
 }
 
 interface DiceContextValue {

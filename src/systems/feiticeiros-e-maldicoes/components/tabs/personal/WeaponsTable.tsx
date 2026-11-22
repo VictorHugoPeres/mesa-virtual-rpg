@@ -21,7 +21,7 @@ export function WeaponsTable({
 }: WeaponsTableProps) {
   const { openRoller } = useDice();
 
-  function handleRollAttack(name: string, bonus: number) {
+  function handleRollAttack(name: string, bonus: number, damage?: string) {
     openRoller({
       label: `Ataque: ${name}`,
       modifier: bonus,
@@ -29,6 +29,7 @@ export function WeaponsTable({
       roller: characterName || "Personagem",
       characterId,
       campaignId,
+      linkedDamage: damage?.trim() || undefined,
     });
   }
 
@@ -191,7 +192,7 @@ export function WeaponsTable({
                     <div className="flex items-center justify-center gap-1.5">
                       <button
                         type="button"
-                        onClick={() => handleRollAttack(w.name, w.attackBonus)}
+                        onClick={() => handleRollAttack(w.name, w.attackBonus, w.damage)}
                         className="px-2 py-1 text-[11px] font-bold rounded bg-blue-900/40 border border-blue-700/60 text-blue-300 hover:bg-blue-800/60 transition-all cursor-pointer flex items-center gap-1"
                         title="Rolar Ataque (1d20 + bônus)"
                       >

@@ -5,7 +5,9 @@ import { rollDigitalDice, RollResult, extractDiceFormula } from "./diceParser";
 import { RollRequest, useDice } from "./DiceContext";
 import { postBroadcastEvent } from "@/core/sync/broadcast";
 import { SyncEvent, DiceRollEventData } from "@/core/sync/syncTypes";
-import { Dices, Sparkles, AlertTriangle, Tv } from "lucide-react";
+import { useCombatTargets } from "./useCombatTargets";
+import { CombatTargetSelector } from "./CombatTargetSelector";
+import { Dices, Sparkles, AlertTriangle, Tv, Swords, Crosshair } from "lucide-react";
 
 interface DigitalRollerTabProps {
   request: RollRequest | null;
@@ -13,7 +15,7 @@ interface DigitalRollerTabProps {
 }
 
 export function DigitalRollerTab({ request }: DigitalRollerTabProps) {
-  const { notifyRollSaved } = useDice();
+  const { notifyRollSaved, openRoller } = useDice();
   const defaultDiceType = request?.defaultDice || "1d20";
   const defaultMod = request?.modifier ?? 0;
 
@@ -23,19 +25,46 @@ export function DigitalRollerTab({ request }: DigitalRollerTabProps) {
       ? `${cleanDice}${defaultMod >= 0 ? `+${defaultMod}` : defaultMod}`
       : cleanDice
   );
-  const [rollMode, setRollMode] = useState<"normal" | "advantage" | "disadvantage">(
-    "normal"
-  );
+  const [rollMode, setRollMode] = useState<"normal" | "advantage" | "disadvantage">("normal");
   const [showOnTv, setShowOnTv] = useState(true);
+  const [applyAutoDamage, setApplyAutoDamage] = useState(true);
   const [result, setResult] = useState<RollResult | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [appliedDamageDone, setAppliedDamageDone] = useState<number | null>(null);
+
+  // Alvos do combate ativo
+  const { targets, selectedTargetId, setSelectedTargetId, selectedTarget } = useCombatTargets(
+    request?.campaignId,
+    request?.roller
+  );
+
+  const isAttack = Boolean(
+    request?.label?.toLowerCase().includes("ataque") ||
+    request?.label?.toLowerCase().includes("acerto") ||
+    formula.toLowerCase().includes("d20")
+  );
+  const isDamage = Boolean(
+    request?.label?.toLowerCase().includes("dano") ||
+    (!isAttack && !formula.toLowerCase().includes("d20"))
+  );
+
+  // Calcula acerto vs defesa
+  const hitEvaluation = result && selectedTarget && isAttack ? {
+    isCritical: result.isCritical,
+    isFumble: result.isFumble,
+    isHit: result.isCritical || (!result.isFumble && result.total >= selectedTarget.defense),
+  } : null;
 
   async function handleRoll() {
     const res = rollDigitalDice(formula, rollMode);
     setResult(res);
     setIsSaving(true);
+    setAppliedDamageDone(null);
 
-    // Se houver campanha e a opção de TV estiver marcada, dispara instantaneamente no BroadcastChannel
+    const hitStatus = selectedTarget && isAttack ? (res.isCritical || (!res.isFumble && res.total >= selectedTarget.defense)) : undefined;
+    const willApplyDamage = Boolean(selectedTarget && isDamage && applyAutoDamage);
+
+    // Disparo local no BroadcastChannel
     if (showOnTv && request?.campaignId) {
       const syncEvent: SyncEvent<DiceRollEventData> = {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
@@ -51,6 +80,10 @@ export function DigitalRollerTab({ request }: DigitalRollerTabProps) {
           isCritical: res.isCritical,
           isFumble: res.isFumble,
           mode: "DIGITAL",
+          targetName: selectedTarget?.name,
+          targetDefense: selectedTarget?.defense,
+          isHit: hitStatus,
+          appliedDamage: willApplyDamage ? res.total : undefined,
         },
         timestamp: Date.now(),
       };
@@ -74,25 +107,56 @@ export function DigitalRollerTab({ request }: DigitalRollerTabProps) {
           isCritical: res.isCritical,
           isFumble: res.isFumble,
           showOnTv,
+          targetName: selectedTarget?.name,
+          targetDefense: selectedTarget?.defense,
+          isHit: hitStatus,
+          applyDamageToTarget: willApplyDamage ? { targetId: selectedTarget!.id, damage: res.total } : undefined,
         }),
       });
+
+      if (willApplyDamage) setAppliedDamageDone(res.total);
       notifyRollSaved();
     } catch (err) {
-      console.error("Erro ao salvar log de rolagem:", err);
+      console.error("Erro ao salvar rolagem:", err);
     } finally {
       setIsSaving(false);
     }
   }
 
-  const dicePresets = ["1d20", "1d4", "1d6", "1d8", "1d10", "1d12", "1d100"];
+  function handleRollLinkedDamage() {
+    if (!request?.linkedDamage) return;
+    const cleanDmg = extractDiceFormula(request.linkedDamage);
+    setFormula(cleanDmg);
+    setResult(null);
+    setAppliedDamageDone(null);
+  }
 
   return (
-    <div className="space-y-4">
-      {/* Fórmula & Atalhos */}
-      <div>
-        <label className="block text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">
-          Fórmula do Dado
+    <div className="space-y-3.5">
+      {/* Seletor de Alvo do Combate */}
+      {targets.length > 0 && (
+        <CombatTargetSelector
+          targets={targets}
+          selectedTargetId={selectedTargetId}
+          onSelectTargetId={setSelectedTargetId}
+        />
+      )}
+
+      {/* Se for dano com alvo selecionado, exibe toggle para aplicar automático */}
+      {selectedTarget && isDamage && (
+        <label className="flex items-center gap-2 p-2 rounded-lg bg-rose-950/30 border border-rose-800/40 text-xs text-rose-300 font-medium cursor-pointer">
+          <input
+            type="checkbox"
+            checked={applyAutoDamage}
+            onChange={(e) => setApplyAutoDamage(e.target.checked)}
+            className="rounded accent-rose-600"
+          />
+          <span>Descontar PV automaticamente de <strong>{selectedTarget.name}</strong></span>
         </label>
+      )}
+
+      {/* Input de Fórmula e Botão Rolar */}
+      <div>
         <div className="flex gap-2">
           <input
             type="text"
@@ -112,23 +176,21 @@ export function DigitalRollerTab({ request }: DigitalRollerTabProps) {
         </div>
       </div>
 
-      {/* Botões de Vantagem / Desvantagem */}
-      <div className="flex gap-2">
-        {(
-          [
-            { id: "normal", label: "Normal" },
-            { id: "advantage", label: "Vantagem (2d20)" },
-            { id: "disadvantage", label: "Desvantagem (2d20)" },
-          ] as const
-        ).map((m) => (
+      {/* Modos Vantagem / Desvantagem */}
+      <div className="flex gap-1.5">
+        {[
+          { id: "normal", label: "Normal" },
+          { id: "advantage", label: "Vantagem" },
+          { id: "disadvantage", label: "Desvantagem" },
+        ].map((m) => (
           <button
             key={m.id}
             type="button"
-            onClick={() => setRollMode(m.id)}
-            className={`flex-1 py-1.5 px-2 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
+            onClick={() => setRollMode(m.id as any)}
+            className={`flex-1 py-1.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
               rollMode === m.id
                 ? "bg-blue-950/60 border-blue-500 text-blue-300"
-                : "bg-[var(--bg-secondary)] border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                : "bg-[var(--bg-secondary)] border-[var(--border-default)] text-[var(--text-muted)]"
             }`}
           >
             {m.label}
@@ -136,92 +198,43 @@ export function DigitalRollerTab({ request }: DigitalRollerTabProps) {
         ))}
       </div>
 
-      {/* Atalhos rápidos de dados e Opção de TV */}
-      <div className="flex items-center justify-between pt-1">
-        <div className="flex flex-wrap gap-1.5">
-          {dicePresets.map((d) => (
-            <button
-              key={d}
-              type="button"
-              onClick={() => {
-                const mod = request?.modifier ?? 0;
-                setFormula(mod !== 0 ? `${d}${mod >= 0 ? `+${mod}` : mod}` : d);
-              }}
-              className="px-2 py-1 text-xs rounded bg-[var(--bg-secondary)] hover:bg-[var(--bg-card-hover)] border border-[var(--border-default)] text-[var(--text-secondary)] font-mono cursor-pointer"
-            >
-              {d}
-            </button>
-          ))}
-        </div>
-
-        <label className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={showOnTv}
-            onChange={(e) => setShowOnTv(e.target.checked)}
-            className="rounded border-[var(--border-default)] accent-blue-600 cursor-pointer"
-          />
-          <Tv className="w-3.5 h-3.5 text-blue-400" />
-          <span className="hidden sm:inline">Telão</span>
-        </label>
-      </div>
-
-      {/* Destaque Visual do Resultado */}
+      {/* Destaque do Resultado */}
       {result && (
-        <div
-          className={`p-4 rounded-xl border text-center transition-all animate-in zoom-in-95 duration-150 ${
-            result.isCritical
-              ? "bg-amber-950/30 border-amber-500/80 shadow-lg shadow-amber-500/10"
-              : result.isFumble
-              ? "bg-red-950/30 border-red-500/80 shadow-lg shadow-red-500/10"
-              : "bg-[var(--bg-secondary)] border-[var(--border-default)]"
-          }`}
-        >
-          {result.isCritical && (
-            <p className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center justify-center gap-1 mb-1">
-              <Sparkles className="w-4 h-4" /> Sucesso Crítico! (20 Natural)
-            </p>
-          )}
-
-          {result.isFumble && (
-            <p className="text-xs font-bold uppercase tracking-wider text-red-400 flex items-center justify-center gap-1 mb-1">
-              <AlertTriangle className="w-4 h-4" /> Falha Crítica! (1 Natural)
-            </p>
-          )}
-
-          <div className="text-4xl font-extrabold tracking-tight my-1 text-[var(--text-primary)]">
-            {result.total}
+        <div className={`p-3.5 rounded-xl border text-center transition-all ${
+          result.isCritical ? "bg-amber-950/30 border-amber-500/80" : result.isFumble ? "bg-red-950/30 border-red-500/80" : "bg-[var(--bg-secondary)] border-[var(--border-default)]"
+        }`}>
+          <div className="text-3xl font-black font-mono text-[var(--text-primary)]">{result.total}</div>
+          <div className="text-xs text-[var(--text-muted)] font-mono">
+            [{result.rolls.join(", ")}] {result.modifier !== 0 ? (result.modifier > 0 ? `+${result.modifier}` : result.modifier) : ""}
           </div>
 
-          <div className="text-xs text-[var(--text-secondary)] flex items-center justify-center gap-2">
-            <span>
-              Dados: [
-              {result.rolls.map((r, i) => (
-                <span
-                  key={i}
-                  className={`mx-0.5 font-bold ${
-                    result.keptIndex !== undefined && result.keptIndex !== i
-                      ? "line-through opacity-40"
-                      : r === 20
-                      ? "text-amber-400"
-                      : r === 1
-                      ? "text-red-400"
-                      : "text-[var(--text-primary)]"
-                  }`}
-                >
-                  {r}
-                </span>
-              ))}
-              ]
-            </span>
-            {result.modifier !== 0 && (
-              <span>
-                {result.modifier >= 0
-                  ? `+ ${result.modifier}`
-                  : `- ${Math.abs(result.modifier)}`}
-              </span>
-            )}
-          </div>
+          {/* Feedback de Acerto vs Defesa */}
+          {hitEvaluation && (
+            <div className={`mt-2 py-1.5 px-3 rounded-lg text-xs font-bold ${
+              hitEvaluation.isCritical ? "bg-amber-950/80 text-amber-300 border border-amber-600" : hitEvaluation.isHit ? "bg-emerald-950/80 text-emerald-300 border border-emerald-600" : "bg-red-950/80 text-red-300 border border-red-600"
+            }`}>
+              {hitEvaluation.isCritical ? "💥 CRÍTICO! Acerto Garantido!" : hitEvaluation.isHit ? `🎯 ACERTOU ${selectedTarget!.name}!` : `❌ ERROU ${selectedTarget!.name}!`}
+              <span className="text-[11px] font-normal opacity-80 block">Total: {result.total} vs Defesa: {selectedTarget!.defense}</span>
+            </div>
+          )}
+
+          {/* Botão Rolar Dano no Alvo */}
+          {hitEvaluation?.isHit && request?.linkedDamage && (
+            <button
+              type="button"
+              onClick={handleRollLinkedDamage}
+              className="mt-2.5 w-full py-2 px-3 rounded-lg bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
+            >
+              <Swords className="w-3.5 h-3.5" /> Rolar Dano no Alvo ({request.linkedDamage})
+            </button>
+          )}
+
+          {/* Feedback de Dano Aplicado */}
+          {appliedDamageDone !== null && selectedTarget && (
+            <div className="mt-2 py-1.5 px-3 rounded-lg bg-rose-950/80 border border-rose-600 text-rose-300 text-xs font-bold">
+              💥 {appliedDamageDone} de dano aplicado em {selectedTarget.name}!
+            </div>
+          )}
         </div>
       )}
     </div>

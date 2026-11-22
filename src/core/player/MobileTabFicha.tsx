@@ -6,13 +6,16 @@ import {
   getSkillBonus,
   SKILLS_LIST,
   SkillDef,
+  SPEC_TABLE,
+  Specialization,
 } from "@/systems/feiticeiros-e-maldicoes";
 import { useDice } from "@/core/dice/DiceContext";
 import { useCampaignSync } from "@/core/sync/useCampaignSync";
 import { MobileResourceBar } from "./MobileResourceBar";
 import { MobileAttributesGrid } from "./MobileAttributesGrid";
 import { MobileSpellsSection } from "./MobileSpellsSection";
-import { Heart, Activity, Sparkles, Swords } from "lucide-react";
+import { RestModal } from "@/systems/feiticeiros-e-maldicoes/components/RestModal";
+import { Heart, Activity, Sparkles, Swords, Moon, Dices } from "lucide-react";
 
 interface MobileTabFichaProps {
   campaignId: string;
@@ -29,8 +32,14 @@ export function MobileTabFicha({
 }: MobileTabFichaProps) {
   const { openRoller } = useDice();
   const [sheet, setSheet] = useState<FMCharacterData>(initialSheet);
+  const [isRestOpen, setIsRestOpen] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isIncomingSyncRef = useRef(false);
+
+  const totalDV = Math.max(sheet.hitDice?.total ?? 1, sheet.level ?? 1);
+  const spentDV = sheet.hitDice?.spent ?? 0;
+  const availableDV = Math.max(0, totalDV - spentDV);
+  const die = sheet.hitDice?.die || SPEC_TABLE[sheet.specialization as Specialization]?.hitDie || "d10";
 
   // Sincronização em tempo real com o PC do Mestre e o Tracker de Combate
   useCampaignSync({
@@ -100,6 +109,30 @@ export function MobileTabFicha({
           icon={<Sparkles className="w-4 h-4 text-purple-400" />}
           onChange={(newVal) => updateSheet((prev) => ({ ...prev, integrity: { ...prev.integrity, current: newVal } }))}
         />
+
+        {/* Dados de Vida e Descanso */}
+        <div className="p-2.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-indigo-950/80 border border-indigo-800/60 text-indigo-400">
+              <Moon className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider block">
+                Dados de Vida (DV)
+              </span>
+              <span className="text-xs font-mono font-bold text-amber-300">
+                {availableDV} / {totalDV} {die}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsRestOpen(true)}
+            className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs cursor-pointer flex items-center gap-1.5 touch-manipulation"
+          >
+            <Moon className="w-3.5 h-3.5" /> Descanso
+          </button>
+        </div>
       </div>
 
       {/* 2. Estatísticas e Atributos */}
@@ -139,6 +172,7 @@ export function MobileTabFicha({
                         roller: characterName,
                         characterId,
                         campaignId,
+                        linkedDamage: wpn.damage?.trim() || undefined,
                       })
                     }
                     className="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-[11px] cursor-pointer touch-manipulation select-none"
@@ -221,6 +255,16 @@ export function MobileTabFicha({
           })}
         </div>
       </div>
+
+      <RestModal
+        isOpen={isRestOpen}
+        onClose={() => setIsRestOpen(false)}
+        data={sheet}
+        onChange={updateSheet}
+        characterName={characterName}
+        characterId={characterId}
+        campaignId={campaignId}
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { syncBus } from "@/core/sync/eventEmitter";
 import { SyncEvent, DiceRollEventData, InitiativeDisplayData } from "@/core/sync/syncTypes";
 import { CombatState, combatToTvData } from "@/core/initiative/initiativeTypes";
+import { parseCharacterData } from "@/systems/feiticeiros-e-maldicoes";
 import { generateId } from "@/lib/id";
 
 export async function GET(req: Request) {
@@ -49,6 +50,10 @@ export async function POST(req: Request) {
       isCritical,
       isFumble,
       showOnTv = true,
+      targetName,
+      targetDefense,
+      isHit,
+      applyDamageToTarget, // { targetId: string, damage: number }
     } = body;
 
     if (!mode || !roller || !formula || total === undefined) {
@@ -74,7 +79,86 @@ export async function POST(req: Request) {
       },
     });
 
-    // Se solicitado para exibir no telão e houver campanha associada, emite evento de sync
+    let appliedDamageAmount: number | undefined = undefined;
+
+    // 1. Aplicação de dano automático no alvo do combate ativo
+    if (campaignId && applyDamageToTarget && applyDamageToTarget.targetId && applyDamageToTarget.damage > 0) {
+      try {
+        const campaign = await prisma.campaign.findUnique({
+          where: { id: String(campaignId) },
+          select: { activeCombat: true },
+        });
+
+        if (campaign?.activeCombat) {
+          const combatState: CombatState = JSON.parse(campaign.activeCombat);
+          let targetParticipant: any = null;
+
+          combatState.participants = combatState.participants.map((p) => {
+            if (p.id === applyDamageToTarget.targetId) {
+              const newHp = Math.max(0, p.currentHp - applyDamageToTarget.damage);
+              targetParticipant = { ...p, currentHp: newHp };
+              return targetParticipant;
+            }
+            return p;
+          });
+
+          if (targetParticipant) {
+            appliedDamageAmount = applyDamageToTarget.damage;
+
+            // Salva combate atualizado
+            await prisma.campaign.update({
+              where: { id: String(campaignId) },
+              data: { activeCombat: JSON.stringify(combatState) },
+            });
+
+            // Sincroniza Telão e Mestre
+            const tvData: InitiativeDisplayData = combatToTvData(combatState);
+            syncBus.emit(`campaign:${campaignId}`, {
+              id: generateId("init"),
+              type: "INITIATIVE_UPDATE",
+              campaignId: String(campaignId),
+              payload: tvData,
+              timestamp: Date.now(),
+            });
+
+            // Se o alvo for um Personagem (PC ou com characterId), atualiza a ficha no banco
+            if (targetParticipant.characterId) {
+              try {
+                const char = await prisma.character.findUnique({
+                  where: { id: targetParticipant.characterId },
+                });
+                if (char) {
+                  const sheet = parseCharacterData(char.data);
+                  sheet.hp.current = targetParticipant.currentHp;
+                  await prisma.character.update({
+                    where: { id: targetParticipant.characterId },
+                    data: { data: JSON.stringify(sheet) },
+                  });
+
+                  syncBus.emit(`campaign:${campaignId}`, {
+                    id: generateId("char"),
+                    type: "CHARACTER_UPDATE",
+                    campaignId: String(campaignId),
+                    payload: {
+                      characterId: targetParticipant.characterId,
+                      name: char.name,
+                      data: sheet,
+                    },
+                    timestamp: Date.now(),
+                  });
+                }
+              } catch (cErr) {
+                console.warn("Erro ao atualizar ficha do alvo:", cErr);
+              }
+            }
+          }
+        }
+      } catch (dmgErr) {
+        console.warn("Erro ao aplicar dano automático no combate:", dmgErr);
+      }
+    }
+
+    // 2. Dispara notificação no Telão e SSE
     if (showOnTv && campaignId) {
       const syncEvent: SyncEvent<DiceRollEventData> = {
         id: generateId("roll"),
@@ -90,6 +174,10 @@ export async function POST(req: Request) {
           isCritical: log.isCritical,
           isFumble: log.isFumble,
           mode: log.mode,
+          targetName: targetName ? String(targetName) : undefined,
+          targetDefense: targetDefense !== undefined ? Number(targetDefense) : undefined,
+          isHit: isHit !== undefined ? Boolean(isHit) : undefined,
+          appliedDamage: appliedDamageAmount,
         },
         timestamp: Date.now(),
       };
@@ -97,7 +185,7 @@ export async function POST(req: Request) {
       syncBus.emit(`campaign:${campaignId}`, syncEvent);
     }
 
-    // Iniciativa Automática: se a rolagem for de iniciativa e houver combate ativo na campanha
+    // 3. Iniciativa Automática: se a rolagem for de iniciativa e houver combate ativo na campanha
     if (campaignId && label && label.toLowerCase().includes("iniciativa")) {
       try {
         const campaign = await prisma.campaign.findUnique({
@@ -121,7 +209,6 @@ export async function POST(req: Request) {
           });
 
           if (found) {
-            // Reordena por iniciativa decrescente
             combatState.participants.sort((a, b) => {
               if (b.initiative !== a.initiative) {
                 return b.initiative - a.initiative;

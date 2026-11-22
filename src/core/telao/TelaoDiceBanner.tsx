@@ -122,6 +122,33 @@ export function TelaoDiceBanner({ roll, onDismiss }: TelaoDiceBannerProps) {
           )}
         </div>
 
+        {/* Feedback de Acerto / Erro vs Defesa do Alvo */}
+        {roll.targetName && roll.isHit !== undefined && (
+          <div
+            className={`mt-2 py-1.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 ${
+              roll.isCritical
+                ? "bg-amber-950/80 border-amber-400 text-amber-300"
+                : roll.isHit
+                ? "bg-emerald-950/80 border-emerald-500 text-emerald-300"
+                : "bg-red-950/80 border-red-500 text-red-300"
+            }`}
+          >
+            {roll.isCritical
+              ? `🎯 CRÍTICO! Acertou ${roll.targetName}`
+              : roll.isHit
+              ? `🎯 ACERTOU! ${roll.targetName}`
+              : `❌ ERROU! ${roll.targetName}`}
+            {roll.targetDefense !== undefined ? ` (${roll.total} vs Def ${roll.targetDefense})` : ""}
+          </div>
+        )}
+
+        {/* Feedback de Dano Aplicado no Alvo */}
+        {roll.targetName && roll.appliedDamage !== undefined && (
+          <div className="mt-2 py-1.5 px-3 rounded-xl bg-rose-950/80 border border-rose-500/80 text-rose-300 font-bold text-xs flex items-center justify-center gap-1.5 animate-pulse">
+            💥 {roll.appliedDamage} de Dano Aplicado em {roll.targetName}!
+          </div>
+        )}
+
         {/* Barra de Progresso do Tempo Restante */}
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
           <div

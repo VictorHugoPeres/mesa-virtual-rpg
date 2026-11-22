@@ -66,7 +66,7 @@ export function ThreatCombatDrawer({
 
   const displayName = participantName || character?.name || "Ameaça";
 
-  function handleAttackRoll(weaponName: string, bonus: number) {
+  function handleAttackRoll(weaponName: string, bonus: number, damageFormula?: string) {
     openRoller({
       label: `${displayName} — ${weaponName} (Ataque)`,
       modifier: bonus,
@@ -74,6 +74,7 @@ export function ThreatCombatDrawer({
       roller: displayName,
       characterId,
       campaignId,
+      linkedDamage: damageFormula?.trim() || undefined,
     });
   }
 
@@ -201,7 +202,7 @@ export function ThreatCombatDrawer({
                         <div className="flex items-center gap-1.5 shrink-0">
                           <button
                             type="button"
-                            onClick={() => handleAttackRoll(w.name, w.attackBonus)}
+                            onClick={() => handleAttackRoll(w.name, w.attackBonus, w.damage)}
                             className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 font-bold text-[11px] border border-blue-500/40 cursor-pointer transition-colors"
                             title="Rolar Teste de Ataque (1d20 + bônus)"
                           >
