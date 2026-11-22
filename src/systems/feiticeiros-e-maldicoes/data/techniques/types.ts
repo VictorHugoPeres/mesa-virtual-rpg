@@ -3,6 +3,8 @@
  * F&M v2.0 / Enciclopédia Amaldiçoada
  */
 
+import { AttributeKey } from "../../constants";
+
 export interface ReadySpell {
   name: string;
   level: number;
@@ -20,7 +22,7 @@ export interface InnateTechnique {
   name: string;
   characterRef: string;
   category: "Clã Tradicional" | "Maldição do Desastre" | "Feiticeiro Notável" | "Grau Especial" | "Feiticeiro Reencarnado" | "Feiticeiro Desperto" | "Feto Amaldiçoado";
-  suggestedAttribute: "FOR" | "DES" | "CON" | "INT" | "SAB" | "CAR";
+  suggestedAttribute: AttributeKey;
   source: string;
   description: string;
   basicFunction: string;

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   FMCharacterData,
   ATTRIBUTE_KEYS,
@@ -7,9 +8,13 @@ import {
   AttributeKey,
   getModifier,
   getProficiencyBonus,
+  SpellDef,
 } from "@/systems/feiticeiros-e-maldicoes";
 import { useDice } from "@/core/dice/DiceContext";
-import { Sparkles, Dices } from "lucide-react";
+import { useDialog } from "@/core/ui";
+import { Sparkles, Dices, BookOpen } from "lucide-react";
+import { TechniqueCatalogModal } from "../../techniques";
+import { generateId } from "@/lib/id";
 
 interface TechniqueDetailsProps {
   data: FMCharacterData;
@@ -27,6 +32,8 @@ export function TechniqueDetails({
   campaignId,
 }: TechniqueDetailsProps) {
   const { openRoller } = useDice();
+  const { toast } = useDialog();
+  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
   const prof = getProficiencyBonus(data.level);
   const cp = data.cursedProfile;
 
@@ -34,6 +41,38 @@ export function TechniqueDetails({
   const techAttrMod = getModifier(data.attributes[techAttr] ?? 10);
   const calcDC = 8 + prof + techAttrMod;
   const calcAttack = prof + techAttrMod;
+
+  function handleApplyFromCatalog(techData: {
+    name: string;
+    attribute: any;
+    description: string;
+    selectedSpells: any[];
+  }) {
+    onChange((prev) => {
+      const newSpells: SpellDef[] = techData.selectedSpells.map((s) => ({
+        id: generateId("spell"),
+        name: s.name,
+        level: s.level,
+        peCost: parseInt(s.cost) || (s.level === 0 ? 0 : s.level === 1 ? 2 : 5),
+        action: s.action || "Ação Comum",
+        range: s.range || "12m",
+        duration: s.duration || "Instantânea",
+        effect: s.description || "",
+      }));
+
+      return {
+        ...prev,
+        cursedProfile: {
+          ...prev.cursedProfile,
+          techniqueName: techData.name,
+          techniqueDesc: techData.description,
+          techniqueAttribute: techData.attribute,
+          spells: [...prev.cursedProfile.spells, ...newSpells],
+        },
+      };
+    });
+    toast.success(`Técnica "${techData.name}" e feitiços aplicados na ficha!`);
+  }
 
   function handleRollSpellAttack() {
     openRoller({
@@ -48,9 +87,18 @@ export function TechniqueDetails({
 
   return (
     <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)]">
-      <div className="flex items-center gap-2 mb-4">
-        <Sparkles className="w-5 h-5 text-blue-400" />
-        <h3 className="text-base font-semibold">Técnica Amaldiçoada & Atributos Mágicos</h3>
+      <div className="flex items-center justify-between gap-2 mb-4">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-blue-400" />
+          <h3 className="text-base font-semibold">Técnica Amaldiçoada & Atributos Mágicos</h3>
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsCatalogOpen(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600/20 text-blue-300 border border-blue-500/30 hover:bg-blue-600/30 transition-colors cursor-pointer"
+        >
+          <BookOpen className="w-3.5 h-3.5" /> 📚 Catálogo de Técnicas
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
@@ -177,6 +225,14 @@ export function TechniqueDetails({
           className="w-full text-xs p-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)]"
         />
       </div>
+
+      <TechniqueCatalogModal
+        isOpen={isCatalogOpen}
+        onClose={() => setIsCatalogOpen(false)}
+        characterLevel={data.level}
+        maxSpells={4}
+        onApplyTechnique={handleApplyFromCatalog}
+      />
     </div>
   );
 }

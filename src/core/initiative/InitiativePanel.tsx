@@ -30,23 +30,27 @@ export function InitiativePanel({ campaignId, characters }: InitiativePanelProps
     if (event.type === "INITIATIVE_UPDATE" && event.payload) {
       loadCombat();
     }
-  }, []);
+  }, [campaignId]);
 
   const { emit } = useCampaignSync({ campaignId, onEvent: handleSyncEvent });
 
-  async function loadCombat() {
+  async function loadCombat(signal?: AbortSignal) {
+    if (!campaignId) return;
     try {
-      const res = await fetch(`/api/campaigns/${campaignId}/combat`);
+      const res = await fetch(`/api/campaigns/${campaignId}/combat`, { signal });
       if (res.ok) {
         const data = await res.json();
         setCombatState(data.combatState ?? EMPTY_COMBAT);
       }
-    } catch (e) {
-      console.error("Failed to load combat state", e);
+    } catch (e: any) {
+      if (e?.name === "AbortError") return;
+      // Aviso leve para falhas transitórias, sem disparar overlay de erro do Next.js
+      console.warn("Falha transitória ao carregar combate:", e?.message || e);
     }
   }
 
   async function saveCombat(updated: CombatState) {
+    if (!campaignId) return;
     setCombatState(updated);
     try {
       await fetch(`/api/campaigns/${campaignId}/combat`, {
@@ -56,13 +60,18 @@ export function InitiativePanel({ campaignId, characters }: InitiativePanelProps
       });
       // Notifica abas locais (BroadcastChannel)
       emit("INITIATIVE_UPDATE", combatToTvData(updated));
-    } catch (e) {
-      console.error("Failed to save combat", e);
+    } catch (e: any) {
+      console.warn("Falha ao salvar combate:", e?.message || e);
     }
   }
 
   useEffect(() => {
-    loadCombat();
+    if (!campaignId) return;
+    const controller = new AbortController();
+    loadCombat(controller.signal);
+    return () => {
+      controller.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaignId]);
 

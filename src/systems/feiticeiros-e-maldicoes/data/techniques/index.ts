@@ -4,31 +4,55 @@
  */
 
 import { InnateTechnique } from "./types";
-import { CLAN_TECHNIQUES } from "./clans";
-import { DISASTER_TECHNIQUES } from "./disasters";
-import { SORCERERS_TECHNIQUES_1 } from "./sorcerers1";
-import { SORCERERS_TECHNIQUES_2 } from "./sorcerers2";
-import { SORCERERS_TECHNIQUES_3 } from "./sorcerers3";
-import { SORCERERS_TECHNIQUES_4 } from "./sorcerers4";
+import { CLANS1_TECHNIQUES } from "./clans1";
+import { CLANS2_TECHNIQUES } from "./clans2";
+import { CLANS3_TECHNIQUES } from "./clans3";
+import { DISASTERS1_TECHNIQUES } from "./disasters1";
+import { DISASTERS2_TECHNIQUES } from "./disasters2";
+import { DISASTERS3_TECHNIQUES } from "./disasters3";
+import { SORCERERS1A_TECHNIQUES } from "./sorcerers1a";
+import { SORCERERS1B_TECHNIQUES } from "./sorcerers1b";
+import { SORCERERS1C_TECHNIQUES } from "./sorcerers1c";
+import { SORCERERS2A_TECHNIQUES } from "./sorcerers2a";
+import { SORCERERS2B_TECHNIQUES } from "./sorcerers2b";
+import { SORCERERS3A_TECHNIQUES } from "./sorcerers3a";
+import { SORCERERS3B_TECHNIQUES } from "./sorcerers3b";
+import { SORCERERS4A_TECHNIQUES } from "./sorcerers4a";
+import { SORCERERS4B_TECHNIQUES } from "./sorcerers4b";
 
 export * from "./types";
-export { CLAN_TECHNIQUES } from "./clans";
-export { DISASTER_TECHNIQUES } from "./disasters";
-export { SORCERERS_TECHNIQUES_1 } from "./sorcerers1";
-export { SORCERERS_TECHNIQUES_2 } from "./sorcerers2";
-export { SORCERERS_TECHNIQUES_3 } from "./sorcerers3";
-export { SORCERERS_TECHNIQUES_4 } from "./sorcerers4";
+
+export const CLAN_TECHNIQUES: InnateTechnique[] = [
+  ...CLANS1_TECHNIQUES,
+  ...CLANS2_TECHNIQUES,
+  ...CLANS3_TECHNIQUES,
+];
+
+export const DISASTER_TECHNIQUES: InnateTechnique[] = [
+  ...DISASTERS1_TECHNIQUES,
+  ...DISASTERS2_TECHNIQUES,
+  ...DISASTERS3_TECHNIQUES,
+];
+
+export const SORCERERS_TECHNIQUES: InnateTechnique[] = [
+  ...SORCERERS1A_TECHNIQUES,
+  ...SORCERERS1B_TECHNIQUES,
+  ...SORCERERS1C_TECHNIQUES,
+  ...SORCERERS2A_TECHNIQUES,
+  ...SORCERERS2B_TECHNIQUES,
+  ...SORCERERS3A_TECHNIQUES,
+  ...SORCERERS3B_TECHNIQUES,
+  ...SORCERERS4A_TECHNIQUES,
+  ...SORCERERS4B_TECHNIQUES,
+];
 
 /**
- * Catálogo completo com as 26 Técnicas Amaldiçoadas Oficiais da Obra
+ * Catálogo completo com as 26 Técnicas Amaldiçoadas Oficiais da Obra (F&M 2.5 / Enciclopédia)
  */
 export const READY_TECHNIQUES: InnateTechnique[] = [
   ...CLAN_TECHNIQUES,
   ...DISASTER_TECHNIQUES,
-  ...SORCERERS_TECHNIQUES_1,
-  ...SORCERERS_TECHNIQUES_2,
-  ...SORCERERS_TECHNIQUES_3,
-  ...SORCERERS_TECHNIQUES_4,
+  ...SORCERERS_TECHNIQUES,
 ];
 
 /**
@@ -56,7 +80,7 @@ export function getTechniquesByCategory(category: string): InnateTechnique[] {
 }
 
 /**
- * Filtra técnicas pelo atributo-chave sugerido (FOR, DES, CON, INT, SAB, CAR)
+ * Filtra técnicas pelo atributo-chave sugerido (FOR, DEX, CON, INT, SAB, CAR)
  */
 export function getTechniquesByAttribute(attr: string): InnateTechnique[] {
   return READY_TECHNIQUES.filter((t) => t.suggestedAttribute === attr);
