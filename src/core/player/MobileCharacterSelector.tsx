@@ -5,6 +5,7 @@ import Link from "next/link";
 import { User, Plus, Shield, Heart, Activity, Sparkles, ChevronRight } from "lucide-react";
 import { CharacterWizardModal } from "@/systems/feiticeiros-e-maldicoes/components/wizard/CharacterWizardModal";
 import { parseCharacterData } from "@/systems/feiticeiros-e-maldicoes";
+import { BrandLogo } from "@/components/BrandLogo";
 
 interface PCItem {
   id: string;
@@ -29,7 +30,8 @@ export function MobileCharacterSelector({
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] p-4 flex flex-col max-w-lg mx-auto">
       {/* Header */}
-      <div className="pt-4 pb-6 text-center space-y-1">
+      <div className="pt-4 pb-6 text-center flex flex-col items-center space-y-1">
+        <BrandLogo variant="full" size="md" className="mb-1" />
         <span className="text-[10px] uppercase font-bold tracking-wider text-blue-400 bg-blue-950/60 border border-blue-800/60 px-2.5 py-0.5 rounded-full inline-block">
           Portal do Jogador
         </span>

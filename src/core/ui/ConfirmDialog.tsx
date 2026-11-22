@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { AlertTriangle, AlertCircle, Info, CheckCircle2, X } from "lucide-react";
 import { DialogVariant } from "./DialogContext";
+import { Portal } from "./Portal";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -67,7 +68,8 @@ export function ConfirmDialog({
   }[variant];
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
+    <Portal>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
       <div
         className="w-full max-w-md bg-zinc-950 border border-white/15 rounded-2xl shadow-2xl p-5 text-white space-y-4 animate-in zoom-in-95 duration-150"
         role="dialog"
@@ -114,5 +116,6 @@ export function ConfirmDialog({
         </div>
       </div>
     </div>
+    </Portal>
   );
 }

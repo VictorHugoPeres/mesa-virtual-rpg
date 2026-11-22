@@ -12,6 +12,7 @@ import {
   Dices,
 } from "lucide-react";
 import { TacticalMapData, MapDisplayMode } from "./mapTypes";
+import { BrandLogo } from "@/components/BrandLogo";
 
 interface MapHeaderBarProps {
   maps: TacticalMapData[];
@@ -57,6 +58,7 @@ export function MapHeaderBar({
     <header className="min-h-14 py-2 px-3 sm:px-4 bg-zinc-950/95 border-b border-white/10 flex flex-wrap items-center justify-between gap-2.5 z-30 shrink-0 backdrop-blur-md">
       {/* Lado Esquerdo: Identificação, Seleção de Mapa e Elementos */}
       <div className="flex flex-wrap items-center gap-2">
+        <BrandLogo variant="compact" size="sm" className="hidden sm:inline-flex" />
         <div className="p-1.5 rounded-lg bg-emerald-950/80 border border-emerald-700/60 text-emerald-400">
           <MapIcon className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>

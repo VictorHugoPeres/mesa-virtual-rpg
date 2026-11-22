@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Skull, Swords, ExternalLink, Shield, Heart, Zap, X, Dices } from "lucide-react";
+import { Portal } from "@/core/ui";
 import { useDice } from "@/core/dice/DiceContext";
 import { FMCharacterData, parseCharacterData } from "@/systems/feiticeiros-e-maldicoes/schemas";
 import { ATTRIBUTE_KEYS } from "@/systems/feiticeiros-e-maldicoes/constants";
@@ -90,7 +91,8 @@ export function ThreatCombatDrawer({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <Portal>
+      <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
       <div className="w-full max-w-md bg-zinc-950 border-l border-white/15 h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 text-white">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10 bg-zinc-900/90">
@@ -253,5 +255,6 @@ export function ThreatCombatDrawer({
         </div>
       </div>
     </div>
+    </Portal>
   );
 }

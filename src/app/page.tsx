@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Swords, Users, Calendar } from "lucide-react";
+import { Users, Calendar } from "lucide-react";
 import { NewCampaignModal } from "@/components/NewCampaignModal";
+import { BrandLogo, D20Icon } from "@/components/BrandLogo";
 
 export const dynamic = "force-dynamic";
 
@@ -16,14 +17,11 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen p-6 max-w-4xl mx-auto">
-      {/* Header */}
-      <header className="mb-10 text-center">
-        <h1 className="text-3xl font-bold tracking-tight mb-2 flex items-center justify-center gap-3">
-          <Swords className="w-8 h-8 text-red-500" />
-          Mesa Virtual RPG
-        </h1>
-        <p className="text-[var(--text-secondary)] text-sm">
-          Plataforma modular para mesas presenciais híbridas
+      {/* Header com a Logo Oficial D20 */}
+      <header className="mb-10 text-center flex flex-col items-center">
+        <BrandLogo variant="hero" size="xl" className="mb-3" />
+        <p className="text-zinc-400 text-xs sm:text-sm max-w-md">
+          Plataforma modular e minimalista para mesas presenciais híbridas de RPG
         </p>
       </header>
 
@@ -36,7 +34,7 @@ export default async function HomePage() {
 
         {campaigns.length === 0 ? (
           <div className="text-center py-16 text-[var(--text-muted)]">
-            <Swords className="w-12 h-12 mx-auto mb-4 opacity-30" />
+            <D20Icon size={48} className="mx-auto mb-4 opacity-30 text-red-500" />
             <p>Nenhuma campanha encontrada.</p>
             <p className="text-xs mt-1">
               Execute <code className="bg-[var(--bg-card)] px-1.5 py-0.5 rounded">npm run db:seed</code> para criar dados de exemplo.

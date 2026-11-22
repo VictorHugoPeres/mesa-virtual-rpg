@@ -1,6 +1,7 @@
 "use client";
 
 import { X, Swords } from "lucide-react";
+import { Portal } from "@/core/ui";
 import { InitiativePanel } from "../initiative/InitiativePanel";
 
 interface CampaignCharItem {
@@ -26,7 +27,8 @@ export function CombatQuickDrawer({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <Portal>
+      <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
       <div className="w-full max-w-2xl bg-zinc-950 border-l border-white/20 h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 text-white">
         {/* Cabeçalho da Gaveta de Combate */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10 bg-zinc-900/90">
@@ -60,5 +62,6 @@ export function CombatQuickDrawer({
         </div>
       </div>
     </div>
+    </Portal>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Plus, X, Upload, Link2, Loader2, Map as MapIcon, Image as ImageIcon } from "lucide-react";
+import { Portal } from "@/core/ui";
 import { GalleryMediaPicker } from "./GalleryMediaPicker";
 
 interface AddMapModalProps {
@@ -101,7 +102,8 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
+    <Portal>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="w-full max-w-lg bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Cabeçalho */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border-default)]">
@@ -257,5 +259,6 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
         </form>
       </div>
     </div>
+    </Portal>
   );
 }

@@ -2,6 +2,7 @@
 
 import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from "lucide-react";
 import { ToastItem } from "./DialogContext";
+import { Portal } from "./Portal";
 
 interface ToastContainerProps {
   toasts: ToastItem[];
@@ -12,7 +13,8 @@ export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-[110] flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0">
+    <Portal>
+      <div className="fixed bottom-4 right-4 z-[110] flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0">
       {toasts.map((toast) => {
         const icon = {
           success: <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />,
@@ -48,5 +50,6 @@ export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
         );
       })}
     </div>
+  </Portal>
   );
 }

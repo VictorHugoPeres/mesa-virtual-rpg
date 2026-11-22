@@ -7,7 +7,7 @@ import { MediaUrlTab } from "./MediaUrlTab";
 import { MediaGalleryTab } from "./MediaGalleryTab";
 import { ProjectionData } from "../sync/syncTypes";
 import { postBroadcastEvent } from "../sync/broadcast";
-import { useDialog } from "@/core/ui";
+import { useDialog, Portal } from "@/core/ui";
 import {
   Tv,
   EyeOff,
@@ -127,7 +127,8 @@ export function ProjectionManagerModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
+    <Portal>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="w-full max-w-3xl max-h-[90vh] rounded-2xl bg-[var(--bg-card)] border border-[var(--border-default)] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
         {/* Header do Modal */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-default)]">
@@ -255,5 +256,6 @@ export function ProjectionManagerModal({
         </div>
       </div>
     </div>
+    </Portal>
   );
 }

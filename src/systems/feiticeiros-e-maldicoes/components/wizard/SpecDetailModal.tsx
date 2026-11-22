@@ -1,6 +1,7 @@
 "use client";
 
 import { X, Check, Shield, Flame, Heart, Activity } from "lucide-react";
+import { Portal } from "@/core/ui";
 import { SpecDetailInfo } from "./wizardTypes";
 
 interface SpecDetailModalProps {
@@ -19,7 +20,8 @@ export function SpecDetailModal({
   if (!spec) return null;
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
+    <Portal>
+      <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="w-full max-w-lg bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-default)] bg-[var(--bg-secondary)]">
@@ -131,5 +133,6 @@ export function SpecDetailModal({
         </div>
       </div>
     </div>
+    </Portal>
   );
 }

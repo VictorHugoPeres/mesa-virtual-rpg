@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Plus, X, Upload, Link as LinkIcon, Loader2, AlertCircle } from "lucide-react";
+import { Portal } from "@/core/ui";
 
 interface AddAudioModalProps {
   campaignId: string;
@@ -99,7 +100,8 @@ export function AddAudioModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
+    <Portal>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="w-full max-w-md bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl shadow-2xl overflow-hidden flex flex-col">
         {/* Cabeçalho */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border-default)]">
@@ -240,5 +242,6 @@ export function AddAudioModal({
         </form>
       </div>
     </div>
+    </Portal>
   );
 }

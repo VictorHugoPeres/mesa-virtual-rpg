@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, X, Loader2 } from "lucide-react";
+import { Portal } from "@/core/ui";
 
 export function NewCampaignModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -55,7 +56,8 @@ export function NewCampaignModal() {
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+        <Portal>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
           <div className="w-full max-w-md bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-default)]">
               <h3 className="text-lg font-semibold">Criar Nova Campanha</h3>
@@ -125,7 +127,8 @@ export function NewCampaignModal() {
               </div>
             </form>
           </div>
-        </div>
+          </div>
+        </Portal>
       )}
     </>
   );

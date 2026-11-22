@@ -1,45 +1,61 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #141414;
-  --bg-card: #1a1a1a;
-  --bg-card-hover: #222222;
-  --border-default: #2a2a2a;
-  --border-accent: #3b3b3b;
-  --text-primary: #ededed;
-  --text-secondary: #a0a0a0;
-  --text-muted: #666666;
-  --accent-red: #dc2626;
-  --accent-red-dim: #991b1b;
-  --accent-blue: #2563eb;
-  --accent-purple: #7c3aed;
-  --accent-green: #16a34a;
-  --accent-amber: #d97706;
+  --bg-primary: #09090b;
+  --bg-secondary: #121217;
+  --bg-card: #18181f;
+  --bg-card-hover: #21212b;
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-accent: rgba(255, 255, 255, 0.18);
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --accent-red: #ef4444;
+  --accent-red-dim: #b91c1c;
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+  --accent-green: #10b981;
+  --accent-amber: #f59e0b;
+  --brand-red: #ef4444;
 }
 
 html {
   color-scheme: dark;
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.01em;
 }
 
-/* Scrollbar sutil para dark mode */
+/* Seleção de texto temática */
+::selection {
+  background: rgba(239, 68, 68, 0.35);
+  color: #ffffff;
+}
+
+/* Foco acessível padronizado */
+:focus-visible {
+  outline: none;
+  ring: 2px;
+  ring-color: rgba(239, 68, 68, 0.5);
+}
+
+/* Scrollbar sutil e minimalista para dark mode */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-accent);
-  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: rgba(255, 255, 255, 0.28);
 }

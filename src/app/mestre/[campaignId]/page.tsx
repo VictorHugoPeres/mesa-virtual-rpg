@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Swords, User } from "lucide-react";
+import { ArrowLeft, User } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { NewCharacterModal } from "@/components/NewCharacterModal";
 import { CampaignMasterToolbar } from "@/components/CampaignMasterToolbar";
 import { CampaignCharacterCard } from "@/components/CampaignCharacterCard";
@@ -59,10 +60,11 @@ export default async function MasterPage({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors group"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Voltar às Campanhas
+          <ArrowLeft className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" />
+          <BrandLogo variant="compact" size="sm" />
+          <span className="font-semibold text-xs tracking-wide">Campanhas</span>
         </Link>
 
         <CampaignMasterToolbar campaignId={campaign.id} />
@@ -71,8 +73,9 @@ export default async function MasterPage({
       {/* Header da campanha */}
       <header className="pb-4 border-b border-[var(--border-default)]">
         <div className="flex items-center gap-3 mb-1">
-          <Swords className="w-7 h-7 text-red-500" />
-          <h1 className="text-2xl font-bold">{campaign.name}</h1>
+          <BrandLogo variant="full" size="lg" />
+          <div className="h-6 w-px bg-white/10" />
+          <h1 className="text-2xl font-bold tracking-tight text-white">{campaign.name}</h1>
         </div>
         <p className="text-sm text-[var(--text-secondary)]">
           Sistema:{" "}

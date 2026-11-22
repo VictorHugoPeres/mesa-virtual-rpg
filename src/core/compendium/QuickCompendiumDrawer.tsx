@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Portal } from "@/core/ui";
 import {
   COMPENDIUM_CATEGORIES,
   COMPENDIUM_ENTRIES,
@@ -41,7 +42,8 @@ export function QuickCompendiumDrawer({ isOpen, onClose }: QuickCompendiumDrawer
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <Portal>
+      <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="w-full max-w-lg h-full bg-[var(--bg-card)] border-l border-[var(--border-default)] shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
         {/* Header do Compêndio */}
         <div className="px-5 py-4 border-b border-[var(--border-default)] space-y-3">
@@ -142,5 +144,6 @@ export function QuickCompendiumDrawer({ isOpen, onClose }: QuickCompendiumDrawer
         </div>
       </div>
     </div>
+    </Portal>
   );
 }

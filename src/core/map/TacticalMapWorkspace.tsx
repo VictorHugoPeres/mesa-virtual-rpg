@@ -16,6 +16,7 @@ import { useTacticalRuler } from "./ruler/useTacticalRuler";
 import { useMapBroadcast } from "./useMapBroadcast";
 import { useCampaignSync } from "../sync/useCampaignSync";
 import { useDice } from "../dice/DiceContext";
+import { Portal } from "@/core/ui";
 
 interface CampaignCharItem {
   id: string;
@@ -216,7 +217,8 @@ export function TacticalMapWorkspace({ campaignId, isOpen, onClose }: TacticalMa
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#050508] text-white animate-in fade-in duration-200">
+    <Portal>
+      <div className="fixed inset-0 z-50 flex flex-col bg-[#050508] text-white animate-in fade-in duration-200">
       <MapHeaderBar
         maps={maps}
         selectedMapId={selectedMapId || ""}
@@ -328,5 +330,6 @@ export function TacticalMapWorkspace({ campaignId, isOpen, onClose }: TacticalMa
         characters={characters}
       />
     </div>
+  </Portal>
   );
 }

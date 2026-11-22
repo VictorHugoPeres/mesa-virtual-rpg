@@ -6,7 +6,16 @@ import { useCompendium } from "@/core/compendium/CompendiumContext";
 import { ProjectionToolbar } from "@/core/projection/ProjectionToolbar";
 import { LanQrCodeModal } from "@/core/player/LanQrCodeModal";
 import { SessionJournalDrawer } from "@/core/sessions/SessionJournalDrawer";
-import { Dices, History, BookOpen, Skull, Music, Map as MapIcon, Smartphone, BookMarked } from "lucide-react";
+import {
+  Dices,
+  History,
+  BookOpen,
+  Skull,
+  Music,
+  Map as MapIcon,
+  Smartphone,
+  BookMarked,
+} from "lucide-react";
 
 interface CampaignMasterToolbarProps {
   campaignId: string;
@@ -18,139 +27,133 @@ export function CampaignMasterToolbar({ campaignId }: CampaignMasterToolbarProps
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [isJournalOpen, setIsJournalOpen] = useState(false);
 
+  // Estilo padronizado e coeso para botões da toolbar
+  const btnStyle =
+    "inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-semibold bg-zinc-900/80 hover:bg-zinc-800 border border-white/10 hover:border-white/20 text-zinc-200 hover:text-white transition-all shadow-xs cursor-pointer select-none";
+
   return (
-    <div className="flex flex-wrap items-center gap-2">
-        {/* Botão Bestiário */}
+    <>
+      <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-zinc-950 border border-white/10 shadow-xs">
+        {/* Grupo 1: Ferramentas da Mesa (Mapa, Áudio, Ameaças) */}
+        <div className="flex items-center gap-1">
         <button
           type="button"
-          onClick={() => {
-            const ev = new CustomEvent('open-bestiary');
-            window.dispatchEvent(ev);
-          }}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                     bg-red-600/20 text-red-300 border border-red-500/30 hover:bg-red-600/30
-                     transition-all cursor-pointer shadow-xs"
-          title="Abrir Bestiário de Ameaças"
-        >
-          <Skull className="w-3.5 h-3.5 text-red-400" />
-          Bestiário
-        </button>
-
-        {/* Botão Mesa de Som */}
-        <button
-          type="button"
-          onClick={() => {
-            const ev = new CustomEvent('open-audio-desk');
-            window.dispatchEvent(ev);
-          }}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                     bg-pink-600/20 text-pink-300 border border-pink-500/30 hover:bg-pink-600/30
-                     transition-all cursor-pointer shadow-xs"
-          title="Abrir Mesa de Som (BGM & Soundboard SFX)"
-        >
-          <Music className="w-3.5 h-3.5 text-pink-400" />
-          Mesa de Som
-        </button>
-
-        {/* Botão Tabuleiro Tático */}
-        <button
-          type="button"
-          onClick={() => {
-            const ev = new CustomEvent('open-tactical-map');
-            window.dispatchEvent(ev);
-          }}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                     bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600/30
-                     transition-all cursor-pointer shadow-xs"
-          title="Abrir Tabuleiro Tático (Grid & Mapas)"
+          onClick={() => window.dispatchEvent(new CustomEvent("open-tactical-map"))}
+          className={btnStyle}
+          title="Abrir Tabuleiro Tático (Grid & Tokens)"
         >
           <MapIcon className="w-3.5 h-3.5 text-emerald-400" />
-          Mapa Tático
+          <span>Mapa</span>
         </button>
 
-      <ProjectionToolbar campaignId={campaignId} />
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent("open-audio-desk"))}
+          className={btnStyle}
+          title="Abrir Mesa de Som (Música Ambiente & Efeitos Sonoros)"
+        >
+          <Music className="w-3.5 h-3.5 text-pink-400" />
+          <span>Som</span>
+        </button>
 
-      <button
-        type="button"
-        onClick={() =>
-          openRoller({
-            label: "Rolagem do Mestre",
-            modifier: 0,
-            defaultDice: "1d20",
-            roller: "Mestre",
-            campaignId,
-          })
-        }
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                   bg-blue-600/20 text-blue-300 border border-blue-500/30 hover:bg-blue-600/30
-                   transition-all cursor-pointer shadow-xs"
-        title="Abrir rolador livre de dados (Digital / Físico)"
-      >
-        <Dices className="w-3.5 h-3.5 text-blue-400" />
-        Rolar Dado
-      </button>
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent("open-bestiary"))}
+          className={btnStyle}
+          title="Abrir Bestiário de Ameaças"
+        >
+          <Skull className="w-3.5 h-3.5 text-rose-400" />
+          <span>Bestiário</span>
+        </button>
+      </div>
 
-      <button
-        type="button"
-        onClick={openHistory}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                   bg-purple-600/20 text-purple-300 border border-purple-500/30 hover:bg-purple-600/30
-                   transition-all cursor-pointer shadow-xs"
-        title="Abrir histórico de rolagens"
-      >
-        <History className="w-3.5 h-3.5 text-purple-400" />
-        Histórico
-      </button>
+      <div className="h-4 w-px bg-white/10 mx-0.5 hidden sm:block" />
 
-      <button
-        type="button"
-        onClick={openCompendium}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                   bg-amber-600/20 text-amber-300 border border-amber-500/30 hover:bg-amber-600/30
-                   transition-all cursor-pointer shadow-xs"
-        title="Abrir compêndio de regras de Feiticeiros e Maldições"
-      >
-        <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-        Compêndio
-      </button>
+      {/* Grupo 2: Projeção no Telão */}
+      <div className="flex items-center">
+        <ProjectionToolbar campaignId={campaignId} />
+      </div>
 
-      {/* Botão Acesso Mobile / Celulares */}
-      <button
-        type="button"
-        onClick={() => setIsQrModalOpen(true)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                   bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30
-                   transition-all cursor-pointer shadow-xs"
-        title="Abrir QR Code e link para celulares na rede Wi-Fi"
-      >
-        <Smartphone className="w-3.5 h-3.5 text-indigo-400" />
-        📱 Celulares
-      </button>
+      <div className="h-4 w-px bg-white/10 mx-0.5 hidden sm:block" />
 
-      {/* Botão Diário / Sessões */}
-      <button
-        type="button"
-        onClick={() => setIsJournalOpen(true)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                   bg-amber-600/20 text-amber-300 border border-amber-500/30 hover:bg-amber-600/30
-                   transition-all cursor-pointer shadow-xs"
-        title="Abrir Diário de Sessões e histórico de mesas"
-      >
-        <BookMarked className="w-3.5 h-3.5 text-amber-400" />
-        📜 Diário / Sessões
-      </button>
+      {/* Grupo 3: Dados & Regras */}
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() =>
+            openRoller({
+              label: "Rolagem do Mestre",
+              modifier: 0,
+              defaultDice: "1d20",
+              roller: "Mestre",
+              campaignId,
+            })
+          }
+          className={btnStyle}
+          title="Abrir Rolador Livre de Dados"
+        >
+          <Dices className="w-3.5 h-3.5 text-blue-400" />
+          <span>Rolar</span>
+        </button>
 
-      <LanQrCodeModal
-        isOpen={isQrModalOpen}
-        onClose={() => setIsQrModalOpen(false)}
-        campaignId={campaignId}
-      />
+        <button
+          type="button"
+          onClick={openHistory}
+          className={btnStyle}
+          title="Abrir Histórico de Rolagens"
+        >
+          <History className="w-3.5 h-3.5 text-purple-400" />
+          <span>Histórico</span>
+        </button>
 
-      <SessionJournalDrawer
-        isOpen={isJournalOpen}
-        onClose={() => setIsJournalOpen(false)}
-        campaignId={campaignId}
-      />
+        <button
+          type="button"
+          onClick={openCompendium}
+          className={btnStyle}
+          title="Abrir Compêndio de Regras"
+        >
+          <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+          <span>Compêndio</span>
+        </button>
+      </div>
+
+      <div className="h-4 w-px bg-white/10 mx-0.5 hidden sm:block" />
+
+      {/* Grupo 4: Gestão da Sessão & Jogadores */}
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => setIsJournalOpen(true)}
+          className={`${btnStyle} border-amber-500/20 text-amber-200/90 hover:border-amber-500/40`}
+          title="Abrir Diário de Sessões e Histórico de Mesas"
+        >
+          <BookMarked className="w-3.5 h-3.5 text-amber-400" />
+          <span>Diário</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setIsQrModalOpen(true)}
+          className={`${btnStyle} border-indigo-500/20 text-indigo-200/90 hover:border-indigo-500/40`}
+          title="Abrir QR Code e Link de Acesso Mobile (Wi-Fi)"
+        >
+          <Smartphone className="w-3.5 h-3.5 text-indigo-400" />
+          <span>Celulares</span>
+        </button>
+      </div>
     </div>
+
+    <LanQrCodeModal
+      isOpen={isQrModalOpen}
+      onClose={() => setIsQrModalOpen(false)}
+      campaignId={campaignId}
+    />
+
+    <SessionJournalDrawer
+      isOpen={isJournalOpen}
+      onClose={() => setIsJournalOpen(false)}
+      campaignId={campaignId}
+    />
+  </>
   );
 }

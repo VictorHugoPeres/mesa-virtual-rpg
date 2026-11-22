@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Flag, X, Check, Calendar, AlertCircle, Loader2 } from "lucide-react";
-import { useDialog } from "@/core/ui";
+import { useDialog, Portal } from "@/core/ui";
 
 interface FinishSessionModalProps {
   isOpen: boolean;
@@ -72,7 +72,8 @@ export function FinishSessionModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
+    <Portal>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="w-full max-w-lg bg-zinc-950 border border-white/15 rounded-2xl shadow-2xl p-5 text-white space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 pb-3">
@@ -158,5 +159,6 @@ export function FinishSessionModal({
         </div>
       </div>
     </div>
+    </Portal>
   );
 }

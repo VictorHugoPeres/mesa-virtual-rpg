@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { BookMarked, X, RefreshCw, Calendar, Clock, Dices, ChevronDown, ChevronUp, CheckCircle2, Play } from "lucide-react";
 import { useDice } from "@/core/dice/DiceContext";
+import { Portal } from "@/core/ui";
 
 interface SessionItem {
   id: string;
@@ -67,7 +68,8 @@ export function SessionJournalDrawer({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <Portal>
+      <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="w-full max-w-lg h-full bg-zinc-950 border-l border-white/10 shadow-2xl flex flex-col text-white animate-in slide-in-from-right duration-200">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 bg-zinc-900/80">
@@ -197,5 +199,6 @@ export function SessionJournalDrawer({
         </div>
       </div>
     </div>
+    </Portal>
   );
 }

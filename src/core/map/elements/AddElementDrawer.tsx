@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X, User, Box, Sparkles } from "lucide-react";
+import { Portal } from "@/core/ui";
 import { MapElement } from "./elementTypes";
 import { TokenPickerTab } from "./TokenPickerTab";
 import { PropPickerTab } from "./PropPickerTab";
@@ -26,7 +27,8 @@ export function AddElementDrawer({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
+    <Portal>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="w-full max-w-lg bg-zinc-950 border border-white/15 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
         {/* Cabeçalho */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10">
@@ -89,5 +91,6 @@ export function AddElementDrawer({
         </div>
       </div>
     </div>
+    </Portal>
   );
 }

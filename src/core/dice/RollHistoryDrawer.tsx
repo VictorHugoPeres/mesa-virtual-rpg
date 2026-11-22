@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
+import { Portal } from "@/core/ui";
 import { useDice } from "./DiceContext";
 import { History, X, RefreshCw, Dices, Dice5, Sparkles, AlertTriangle, Filter } from "lucide-react";
 
@@ -74,7 +75,8 @@ export function RollHistoryDrawer({ campaignId: propCampaignId }: { campaignId?:
   if (!isHistoryOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <Portal>
+      <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="w-full max-w-md h-full bg-[var(--bg-card)] border-l border-[var(--border-default)] shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
         {/* Header da gaveta */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-default)]">
@@ -218,5 +220,6 @@ export function RollHistoryDrawer({ campaignId: propCampaignId }: { campaignId?:
         </div>
       </div>
     </div>
+    </Portal>
   );
 }

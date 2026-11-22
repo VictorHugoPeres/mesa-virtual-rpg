@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { X, Smartphone, Copy, Check, Wifi, ExternalLink } from "lucide-react";
+import { Portal } from "@/core/ui";
 
 interface LanQrCodeModalProps {
   isOpen: boolean;
@@ -66,7 +67,8 @@ export function LanQrCodeModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-150">
+    <Portal>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="w-full max-w-md bg-[var(--bg-card)] border border-[var(--border-default)] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-default)] bg-[var(--bg-secondary)]">
@@ -157,5 +159,6 @@ export function LanQrCodeModal({
         </div>
       </div>
     </div>
+    </Portal>
   );
 }

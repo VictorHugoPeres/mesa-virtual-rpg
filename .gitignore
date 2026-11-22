@@ -1,22 +1,29 @@
-# Pasta com seus PDFs e livros de RPG (não sobe pro GitHub)
+# Pastas locais e referências (não sobem para o GitHub)
 referencias/
 
-# Pastas pesadas do Next.js / Node (são baixadas automaticamente depois)
+# Dependências e caches de build
 node_modules/
 .next/
 out/
-
-# Arquivos de senhas e configurações secretas
-.env
-.env.local
-
-# Banco de dados local (para os dados de teste não irem para o código)
-*.db
-*.db-journal
-
-# Cache de build do TypeScript
+build/
 *.tsbuildinfo
 
-# Uploads locais de imagens do mestre (mantendo apenas .gitkeep)
+# Variáveis de ambiente e segredos locais
+.env
+.env.local
+.env.*.local
+
+# Banco de dados local SQLite
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Uploads locais de imagens do mestre (preservando pasta via .gitkeep)
 public/uploads/*
 !public/uploads/.gitkeep
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini

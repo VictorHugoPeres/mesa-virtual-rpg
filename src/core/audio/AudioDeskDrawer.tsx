@@ -6,6 +6,7 @@ import { useAudio } from "./AudioContext";
 import { BGMTab } from "./BGMTab";
 import { SoundboardTab } from "./SoundboardTab";
 import { AddAudioModal } from "./AddAudioModal";
+import { Portal } from "@/core/ui";
 
 interface AudioDeskDrawerProps {
   campaignId: string;
@@ -20,7 +21,8 @@ export function AudioDeskDrawer({ campaignId }: AudioDeskDrawerProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <Portal>
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
         <div className="w-full max-w-2xl bg-[var(--bg-primary)] border-l border-[var(--border-default)] h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
           {/* Cabeçalho */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-default)] bg-[var(--bg-card)]">
@@ -113,6 +115,7 @@ export function AudioDeskDrawer({ campaignId }: AudioDeskDrawerProps) {
           </div>
         </div>
       </div>
+      </Portal>
 
       <AddAudioModal
         campaignId={campaignId}

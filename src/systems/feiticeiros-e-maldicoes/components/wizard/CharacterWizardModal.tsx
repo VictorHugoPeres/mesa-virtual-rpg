@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { X, ArrowLeft, ArrowRight, Wand2, AlertCircle } from "lucide-react";
+import { Portal } from "@/core/ui";
 import { WizardProgressBar } from "./WizardProgressBar";
 import { StepOrigin } from "./StepOrigin";
 import { StepSpecialization } from "./StepSpecialization";
@@ -81,7 +82,8 @@ export function CharacterWizardModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-xs animate-in fade-in duration-150">
+    <Portal>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="w-full max-w-4xl h-[90vh] bg-[var(--bg-card)] border border-[var(--border-default)] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-default)] bg-[var(--bg-secondary)]">
           <div className="flex items-center gap-2.5">
@@ -216,5 +218,6 @@ export function CharacterWizardModal({
         </div>
       </div>
     </div>
+    </Portal>
   );
 }

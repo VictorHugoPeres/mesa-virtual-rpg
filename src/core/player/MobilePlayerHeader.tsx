@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, User } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { FMCharacterData } from "@/systems/feiticeiros-e-maldicoes";
+import { BrandLogo } from "@/components/BrandLogo";
 
 interface MobilePlayerHeaderProps {
   campaignId: string;
@@ -20,10 +21,11 @@ export function MobilePlayerHeader({
       <div className="flex items-center gap-2.5">
         <Link
           href={`/jogador/${campaignId}`}
-          className="p-1.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+          className="p-1.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1"
           title="Trocar Personagem"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <BrandLogo variant="compact" size="sm" />
         </Link>
         <div>
           <h2 className="text-sm font-black text-[var(--text-primary)] leading-tight truncate max-w-[190px]">

@@ -18,6 +18,7 @@ import { useCompendium } from "@/core/compendium/CompendiumContext";
 import { ProjectionToolbar } from "@/core/projection/ProjectionToolbar";
 import { FMCharacterData, SPEC_TABLE, Specialization } from "@/systems/feiticeiros-e-maldicoes";
 import { RestModal } from "./RestModal";
+import { BrandLogo } from "@/components/BrandLogo";
 
 interface SheetHeaderProps {
   name: string;
@@ -57,10 +58,11 @@ export function SheetHeader({
       <div className="flex items-center gap-3">
         <Link
           href={`/mestre/${campaignId}`}
-          className="p-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+          className="p-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer flex items-center gap-1.5"
           title="Voltar ao Painel da Campanha"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-4 h-4" />
+          <BrandLogo variant="compact" size="sm" />
         </Link>
 
         <div>

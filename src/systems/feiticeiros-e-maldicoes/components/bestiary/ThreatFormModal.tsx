@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Skull, X, Loader2 } from "lucide-react";
+import { Portal } from "@/core/ui";
 import { createDefaultCharacter } from "../../defaultCharacter";
 import { AttributeKey } from "../../constants";
 import { getModifier } from "../../formulas";
@@ -140,7 +141,8 @@ export function ThreatFormModal({ campaignId, onSuccess }: ThreatFormModalProps)
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+        <Portal>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
           <div className="w-full max-w-xl bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border-default)]">
               <h3 className="text-base font-semibold flex items-center gap-2 text-red-400">
@@ -282,6 +284,7 @@ export function ThreatFormModal({ campaignId, onSuccess }: ThreatFormModalProps)
             </form>
           </div>
         </div>
+        </Portal>
       )}
     </>
   );
