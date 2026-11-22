@@ -11,11 +11,27 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const campaignId = searchParams.get("campaignId");
     const characterId = searchParams.get("characterId");
-    const limit = Math.min(100, parseInt(searchParams.get("limit") || "30", 10));
+    const sessionId = searchParams.get("sessionId");
+    const limit = Math.min(100, parseInt(searchParams.get("limit") || "50", 10));
 
-    const where: { campaignId?: string; characterId?: string } = {};
+    const where: { campaignId?: string; characterId?: string; sessionId?: string } = {};
     if (campaignId) where.campaignId = campaignId;
     if (characterId) where.characterId = characterId;
+
+    let activeSessionId: string | null = null;
+    if (campaignId) {
+      const activeSession = await prisma.session.findFirst({
+        where: { campaignId, status: "ACTIVE" },
+        select: { id: true },
+      });
+      activeSessionId = activeSession?.id || null;
+    }
+
+    if (sessionId && sessionId !== "all") {
+      where.sessionId = sessionId;
+    } else if (!sessionId && activeSessionId) {
+      where.sessionId = activeSessionId;
+    }
 
     const rolls = await prisma.diceLog.findMany({
       where,
@@ -23,7 +39,7 @@ export async function GET(req: Request) {
       take: limit,
     });
 
-    return NextResponse.json({ rolls });
+    return NextResponse.json({ rolls, activeSessionId });
   } catch (error) {
     console.error("Erro ao buscar rolagens:", error);
     return NextResponse.json(
@@ -63,10 +79,20 @@ export async function POST(req: Request) {
       );
     }
 
+    let activeSessionId: string | null = null;
+    if (campaignId) {
+      const active = await prisma.session.findFirst({
+        where: { campaignId: String(campaignId), status: "ACTIVE" },
+        select: { id: true },
+      });
+      activeSessionId = active?.id || null;
+    }
+
     const log = await prisma.diceLog.create({
       data: {
         mode: String(mode),
         campaignId: campaignId ? String(campaignId) : null,
+        sessionId: activeSessionId,
         characterId: characterId ? String(characterId) : null,
         roller: String(roller),
         formula: String(formula),

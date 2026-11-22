@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
+import { DialogProvider } from "../ui";
 import { DiceProvider } from "../dice/DiceContext";
 import { DiceModal } from "../dice/DiceModal";
 import { RollHistoryDrawer } from "../dice/RollHistoryDrawer";
@@ -24,11 +25,13 @@ function GlobalDrawers() {
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
-    <DiceProvider>
-      <CompendiumProvider>
-        {children}
-        <GlobalDrawers />
-      </CompendiumProvider>
-    </DiceProvider>
+    <DialogProvider>
+      <DiceProvider>
+        <CompendiumProvider>
+          {children}
+          <GlobalDrawers />
+        </CompendiumProvider>
+      </DiceProvider>
+    </DialogProvider>
   );
 }

@@ -18,13 +18,17 @@ export async function POST(req: Request) {
       data: {
         name,
         systemId,
+        generalNotes: "",
       },
     });
 
     // Cria automaticamente a primeira sessão vazia
     await prisma.session.create({
       data: {
+        sessionNumber: 1,
         number: 1,
+        title: "Sessão 1 — Início da campanha",
+        status: "ACTIVE",
         campaignId: campaign.id,
         notes: "Sessão 1 — Início da campanha.",
       },

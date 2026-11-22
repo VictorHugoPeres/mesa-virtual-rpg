@@ -2,6 +2,7 @@
 
 import { FMCharacterData, SpellDef } from "@/systems/feiticeiros-e-maldicoes";
 import { useDice } from "@/core/dice/DiceContext";
+import { useDialog } from "@/core/ui";
 import { Wand2, Sparkles, Dices } from "lucide-react";
 
 interface MobileSpellsSectionProps {
@@ -20,6 +21,7 @@ export function MobileSpellsSection({
   onUpdateSheet,
 }: MobileSpellsSectionProps) {
   const { openRoller } = useDice();
+  const { toast } = useDialog();
   const isRestringido = sheet.origin === "Restringido";
   const spells = sheet.cursedProfile?.spells || [];
 
@@ -28,7 +30,7 @@ export function MobileSpellsSection({
   function handleCastSpell(sp: SpellDef) {
     const currentPE = sheet.energy?.current ?? 0;
     if (currentPE < sp.peCost) {
-      alert(`PE Insuficiente! Você possui ${currentPE} PE, mas "${sp.name}" requer ${sp.peCost} PE.`);
+      toast.warning(`PE Insuficiente! Você possui ${currentPE} PE, mas "${sp.name}" requer ${sp.peCost} PE.`);
       return;
     }
 

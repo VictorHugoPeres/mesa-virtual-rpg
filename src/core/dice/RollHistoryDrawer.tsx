@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useParams } from "next/navigation";
 import { useDice } from "./DiceContext";
-import { History, X, RefreshCw, Dices, Dice5, Sparkles, AlertTriangle } from "lucide-react";
+import { History, X, RefreshCw, Dices, Dice5, Sparkles, AlertTriangle, Filter } from "lucide-react";
 
 interface RollLogItem {
   id: string;
@@ -20,18 +21,38 @@ interface RollLogItem {
   createdAt: string;
 }
 
-export function RollHistoryDrawer({ campaignId }: { campaignId?: string }) {
+export function RollHistoryDrawer({ campaignId: propCampaignId }: { campaignId?: string }) {
+  const routeParams = useParams();
+  const routeCampaignId = typeof routeParams?.campaignId === "string" ? routeParams.campaignId : undefined;
+  const campaignId = propCampaignId || routeCampaignId;
+
   const { isHistoryOpen, closeHistory, historyVersion } = useDice();
   const [logs, setLogs] = useState<RollLogItem[]>([]);
+  const [sessions, setSessions] = useState<{ id: string; sessionNumber: number; title: string; status: string }[]>([]);
+  const [selectedSessionId, setSelectedSessionId] = useState<string>("");
   const [loading, setLoading] = useState(false);
+
+  const fetchSessions = useCallback(async () => {
+    if (!campaignId) return;
+    try {
+      const res = await fetch(`/api/campaigns/${campaignId}/sessions`);
+      if (res.ok) {
+        const data = await res.json();
+        setSessions(data.sessions || []);
+      }
+    } catch (err) {
+      console.warn("Erro ao buscar sessões para filtro:", err);
+    }
+  }, [campaignId]);
 
   const fetchLogs = useCallback(async () => {
     setLoading(true);
     try {
-      const url = campaignId
-        ? `/api/rolls?campaignId=${campaignId}&limit=50`
-        : "/api/rolls?limit=50";
-      const res = await fetch(url);
+      const params = new URLSearchParams({ limit: "50" });
+      if (campaignId) params.append("campaignId", campaignId);
+      if (selectedSessionId) params.append("sessionId", selectedSessionId);
+
+      const res = await fetch(`/api/rolls?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
         setLogs(data.rolls || []);
@@ -41,13 +62,14 @@ export function RollHistoryDrawer({ campaignId }: { campaignId?: string }) {
     } finally {
       setLoading(false);
     }
-  }, [campaignId]);
+  }, [campaignId, selectedSessionId]);
 
   useEffect(() => {
     if (isHistoryOpen) {
+      fetchSessions();
       fetchLogs();
     }
-  }, [isHistoryOpen, historyVersion, fetchLogs]);
+  }, [isHistoryOpen, historyVersion, fetchSessions, fetchLogs]);
 
   if (!isHistoryOpen) return null;
 
@@ -80,6 +102,28 @@ export function RollHistoryDrawer({ campaignId }: { campaignId?: string }) {
             </button>
           </div>
         </div>
+
+        {/* Filtro por Sessão */}
+        {campaignId && sessions.length > 0 && (
+          <div className="px-5 py-2.5 bg-[var(--bg-secondary)] border-b border-[var(--border-default)] flex items-center justify-between gap-2">
+            <span className="text-xs text-[var(--text-muted)] font-medium flex items-center gap-1.5 shrink-0">
+              <Filter className="w-3.5 h-3.5 text-purple-400" /> Sessão:
+            </span>
+            <select
+              value={selectedSessionId}
+              onChange={(e) => setSelectedSessionId(e.target.value)}
+              className="text-xs bg-[var(--bg-card)] border border-[var(--border-default)] rounded-lg px-2.5 py-1 text-[var(--text-primary)] font-medium cursor-pointer max-w-[240px] truncate focus:outline-none focus:border-purple-500"
+            >
+              <option value="">Sessão Ativa (Padrão)</option>
+              <option value="all">Todas as Sessões</option>
+              {sessions.map((s) => (
+                <option key={s.id} value={s.id}>
+                  Sessão #{s.sessionNumber || 1} {s.title ? `— ${s.title}` : ""} {s.status === "ACTIVE" ? "(Ativa)" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Lista de rolagens */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">

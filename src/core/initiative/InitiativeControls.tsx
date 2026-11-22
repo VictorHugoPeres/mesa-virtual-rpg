@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { CombatState, CombatParticipant, EMPTY_COMBAT } from "./initiativeTypes";
 import { AddCombatantModal } from "./AddCombatantModal";
+import { useDialog } from "@/core/ui";
 
 interface CampaignCharItem {
   id: string;
@@ -36,6 +37,7 @@ export function InitiativeControls({
   setCombatState,
   characters,
 }: InitiativeControlsProps) {
+  const { confirm } = useDialog();
   const [showAddModal, setShowAddModal] = useState(false);
 
   function startOrPauseCombat() {
@@ -87,9 +89,14 @@ export function InitiativeControls({
     });
   }
 
-  function resetInitiatives() {
+  async function resetInitiatives() {
     if (!combatState.participants.length) return;
-    if (!window.confirm("Deseja zerar a iniciativa de todos os participantes para uma nova cena?")) return;
+    const ok = await confirm({
+      title: "Zerar Iniciativa",
+      message: "Deseja zerar a iniciativa de todos os participantes para uma nova cena?",
+      variant: "warning",
+    });
+    if (!ok) return;
     const updated = combatState.participants.map((p) => ({
       ...p,
       initiative: 0,
@@ -117,8 +124,13 @@ export function InitiativeControls({
     setCombatState({ ...combatState, showOnTv: !combatState.showOnTv });
   }
 
-  function resetCombat() {
-    if (!window.confirm("Deseja realmente resetar o combate ativo?")) return;
+  async function resetCombat() {
+    const ok = await confirm({
+      title: "Resetar Combate",
+      message: "Deseja realmente resetar o combate ativo? Todos os participantes serão removidos.",
+      variant: "danger",
+    });
+    if (!ok) return;
     setCombatState({ ...EMPTY_COMBAT });
   }
 

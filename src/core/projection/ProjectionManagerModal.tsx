@@ -7,6 +7,7 @@ import { MediaUrlTab } from "./MediaUrlTab";
 import { MediaGalleryTab } from "./MediaGalleryTab";
 import { ProjectionData } from "../sync/syncTypes";
 import { postBroadcastEvent } from "../sync/broadcast";
+import { useDialog } from "@/core/ui";
 import {
   Tv,
   EyeOff,
@@ -32,6 +33,7 @@ export function ProjectionManagerModal({
   activeProjection,
   onProjectionChange,
 }: ProjectionManagerModalProps) {
+  const { confirm, toast } = useDialog();
   const [activeTab, setActiveTab] = useState<"gallery" | "upload" | "url">("gallery");
   const [mediaList, setMediaList] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -105,13 +107,22 @@ export function ProjectionManagerModal({
   }
 
   async function handleDelete(id: string) {
+    const ok = await confirm({
+      title: "Excluir Mídia",
+      message: "Deseja realmente remover esta mídia da campanha?",
+      variant: "danger",
+    });
+    if (!ok) return;
+
     try {
       const res = await fetch(`/api/media/${id}`, { method: "DELETE" });
       if (res.ok) {
         setMediaList((prev) => prev.filter((m) => m.id !== id));
+        toast.success("Mídia excluída com sucesso.");
       }
     } catch (err) {
       console.error("Erro ao deletar mídia:", err);
+      toast.error("Erro ao deletar mídia.");
     }
   }
 

@@ -15,6 +15,7 @@ model Campaign {
   id               String       @id @default(cuid())
   name             String
   systemId         String       // Ex: "feiticeiros-e-maldicoes"
+  generalNotes     String       @default("")
   activeProjection String?      // JSON com a mídia atualmente projetada no telão
   activeCombat     String?      // JSON com o estado atual do combate (iniciativa)
   activeAudio      String?      // JSON com o estado da música ambiente/mesa de som
@@ -44,14 +45,21 @@ model Character {
 }
 
 model Session {
-  id         String   @id @default(cuid())
-  number     Int      @default(1)
-  campaignId String
-  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  id            String    @id @default(cuid())
+  sessionNumber Int       @default(1)
+  number        Int?      @default(1)
+  title         String    @default("Nova Sessão")
+  status        String    @default("ACTIVE") // "ACTIVE" | "COMPLETED"
+  startedAt     DateTime  @default(now())
+  endedAt       DateTime?
+  notes         String    @default("") // Bloco de notas da sessão
 
-  notes      String   @default("") // Bloco de notas rápido do mestre
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  campaignId    String
+  campaign      Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  diceLogs      DiceLog[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model MediaAsset {
@@ -70,6 +78,8 @@ model MediaAsset {
 model DiceLog {
   id           String   @id @default(cuid())
   campaignId   String?
+  sessionId    String?
+  session      Session? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
   characterId  String?
   mode         String   // "DIGITAL" | "PHYSICAL_INPUT"
   roller       String   // Nome de quem rolou

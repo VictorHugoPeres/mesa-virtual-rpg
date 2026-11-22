@@ -8,11 +8,23 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await req.json();
-    const { notes } = body;
+    const { notes, title, status, endedAt } = body;
+
+    const data: {
+      notes?: string;
+      title?: string;
+      status?: string;
+      endedAt?: Date | null;
+    } = {};
+
+    if (typeof notes === "string") data.notes = notes;
+    if (typeof title === "string") data.title = title;
+    if (typeof status === "string") data.status = status;
+    if (endedAt !== undefined) data.endedAt = endedAt ? new Date(endedAt) : null;
 
     const session = await prisma.session.update({
       where: { id },
-      data: { notes: typeof notes === "string" ? notes : "" },
+      data,
     });
 
     return NextResponse.json({ success: true, session });

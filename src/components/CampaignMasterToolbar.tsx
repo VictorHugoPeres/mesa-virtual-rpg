@@ -5,7 +5,8 @@ import { useDice } from "@/core/dice/DiceContext";
 import { useCompendium } from "@/core/compendium/CompendiumContext";
 import { ProjectionToolbar } from "@/core/projection/ProjectionToolbar";
 import { LanQrCodeModal } from "@/core/player/LanQrCodeModal";
-import { Dices, History, BookOpen, Skull, Music, Map as MapIcon, Smartphone } from "lucide-react";
+import { SessionJournalDrawer } from "@/core/sessions/SessionJournalDrawer";
+import { Dices, History, BookOpen, Skull, Music, Map as MapIcon, Smartphone, BookMarked } from "lucide-react";
 
 interface CampaignMasterToolbarProps {
   campaignId: string;
@@ -15,6 +16,7 @@ export function CampaignMasterToolbar({ campaignId }: CampaignMasterToolbarProps
   const { openRoller, openHistory } = useDice();
   const { openCompendium } = useCompendium();
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const [isJournalOpen, setIsJournalOpen] = useState(false);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -125,9 +127,28 @@ export function CampaignMasterToolbar({ campaignId }: CampaignMasterToolbarProps
         📱 Celulares
       </button>
 
+      {/* Botão Diário / Sessões */}
+      <button
+        type="button"
+        onClick={() => setIsJournalOpen(true)}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
+                   bg-amber-600/20 text-amber-300 border border-amber-500/30 hover:bg-amber-600/30
+                   transition-all cursor-pointer shadow-xs"
+        title="Abrir Diário de Sessões e histórico de mesas"
+      >
+        <BookMarked className="w-3.5 h-3.5 text-amber-400" />
+        📜 Diário / Sessões
+      </button>
+
       <LanQrCodeModal
         isOpen={isQrModalOpen}
         onClose={() => setIsQrModalOpen(false)}
+        campaignId={campaignId}
+      />
+
+      <SessionJournalDrawer
+        isOpen={isJournalOpen}
+        onClose={() => setIsJournalOpen(false)}
         campaignId={campaignId}
       />
     </div>

@@ -4,12 +4,14 @@ import { useState } from "react";
 import { Music, Play, Pause, Trash2, Plus, Filter } from "lucide-react";
 import { AudioTrack, BGM_CATEGORIES, BGMCategoryType } from "./audioTypes";
 import { useAudio } from "./AudioContext";
+import { useDialog } from "@/core/ui";
 
 interface BGMTabProps {
   onOpenAddModal: () => void;
 }
 
 export function BGMTab({ onOpenAddModal }: BGMTabProps) {
+  const { confirm, toast } = useDialog();
   const { tracks, bgmState, playTrack, togglePlay, loadTracks } = useAudio();
   const [selectedCategory, setSelectedCategory] = useState<BGMCategoryType>("TODOS");
 
@@ -19,12 +21,19 @@ export function BGMTab({ onOpenAddModal }: BGMTabProps) {
   });
 
   async function handleDelete(id: string) {
-    if (!window.confirm("Excluir esta faixa da campanha?")) return;
+    const ok = await confirm({
+      title: "Excluir Faixa",
+      message: "Deseja realmente excluir esta faixa da campanha?",
+      variant: "danger",
+    });
+    if (!ok) return;
     try {
       await fetch(`/api/media/${id}`, { method: "DELETE" });
       loadTracks();
+      toast.success("Faixa excluída com sucesso.");
     } catch (err) {
       console.warn("Erro ao excluir faixa:", err);
+      toast.error("Erro ao excluir faixa.");
     }
   }
 

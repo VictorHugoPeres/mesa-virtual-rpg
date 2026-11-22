@@ -6,7 +6,7 @@ import { NewCharacterModal } from "@/components/NewCharacterModal";
 import { CampaignMasterToolbar } from "@/components/CampaignMasterToolbar";
 import { CampaignCharacterCard } from "@/components/CampaignCharacterCard";
 import { InitiativePanel } from "@/core/initiative/InitiativePanel";
-import { SessionNotes } from "@/core/notes/SessionNotes";
+import { CampaignNotesPanel } from "@/core/notes/CampaignNotesPanel";
 import { MasterBestiaryWrapper } from "@/components/MasterBestiaryWrapper";
 import { MasterAudioSection } from "@/core/audio/MasterAudioSection";
 import { MasterMapWrapper } from "@/core/map/MasterMapWrapper";
@@ -24,19 +24,22 @@ export default async function MasterPage({
     where: { id: campaignId },
     include: {
       characters: true,
-      sessions: { orderBy: { number: "desc" } },
+      sessions: { orderBy: { sessionNumber: "desc" } },
     },
   });
 
   if (!campaign) return notFound();
 
-  // Garante que haja pelo menos uma sessão para as anotações
-  let latestSession = campaign.sessions[0];
-  if (!latestSession) {
-    latestSession = await prisma.session.create({
+  // Garante que haja uma sessão ativa para as anotações
+  let activeSession = campaign.sessions.find((s) => s.status === "ACTIVE") || campaign.sessions[0];
+  if (!activeSession) {
+    activeSession = await prisma.session.create({
       data: {
         campaignId: campaign.id,
+        sessionNumber: 1,
         number: 1,
+        title: "Sessão 1 — Início da campanha",
+        status: "ACTIVE",
         notes: "Sessão 1 — Início da campanha.",
       },
     });
@@ -122,12 +125,18 @@ export default async function MasterPage({
           )}
         </section>
 
-        {/* Coluna 3: Anotações da Sessão Atual com Autosave */}
+        {/* Coluna 3: Anotações da Sessão Atual & Notas Gerais da Campanha */}
         <section className="lg:col-span-1">
-          <SessionNotes
-            sessionId={latestSession.id}
-            initialNotes={latestSession.notes}
-            sessionNumber={latestSession.number}
+          <CampaignNotesPanel
+            campaignId={campaign.id}
+            initialGeneralNotes={campaign.generalNotes || ""}
+            activeSession={{
+              id: activeSession.id,
+              sessionNumber: activeSession.sessionNumber || activeSession.number || 1,
+              title: activeSession.title || `Sessão ${activeSession.sessionNumber || activeSession.number || 1}`,
+              notes: activeSession.notes || "",
+              startedAt: activeSession.startedAt,
+            }}
           />
         </section>
       </div>

@@ -3,6 +3,7 @@
 import { FMCharacterData, SpellDef } from "@/systems/feiticeiros-e-maldicoes";
 import { Plus, Trash2, Sparkles, Dices } from "lucide-react";
 import { useDice } from "@/core/dice/DiceContext";
+import { useDialog } from "@/core/ui";
 
 interface SpellsListProps {
   data: FMCharacterData;
@@ -20,11 +21,12 @@ export function SpellsList({
   campaignId,
 }: SpellsListProps) {
   const { openRoller } = useDice();
+  const { toast } = useDialog();
   const cp = data.cursedProfile;
 
   function handleCastSpell(spell: SpellDef) {
     if ((data.energy?.current ?? 0) < spell.peCost) {
-      alert(`PE Insuficiente! Você possui ${data.energy?.current ?? 0} PE, mas "${spell.name}" requer ${spell.peCost} PE.`);
+      toast.warning(`PE Insuficiente! Você possui ${data.energy?.current ?? 0} PE, mas "${spell.name}" requer ${spell.peCost} PE.`);
       return;
     }
 
