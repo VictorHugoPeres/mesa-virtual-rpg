@@ -7,6 +7,7 @@ import { MobileBottomNav, MobileTab } from "./MobileBottomNav";
 import { MobileTabFicha } from "./MobileTabFicha";
 import { MobileTabDados } from "./MobileTabDados";
 import { MobileTabCombate } from "./MobileTabCombate";
+import { MobileTabMapa } from "./MobileTabMapa";
 import { MobileTabGuia } from "./MobileTabGuia";
 
 interface MobilePlayerWorkspaceProps {
@@ -32,7 +33,7 @@ export function MobilePlayerWorkspace({
         sheet={initialSheet}
       />
 
-      <main className="flex-1 p-4 pb-24">
+      <main className={`flex-1 ${activeTab === "mapa" ? "p-2 pb-14 overflow-hidden flex flex-col" : "p-4 pb-24"}`}>
         {activeTab === "ficha" && (
           <MobileTabFicha
             campaignId={campaignId}
@@ -52,6 +53,14 @@ export function MobilePlayerWorkspace({
 
         {activeTab === "combate" && (
           <MobileTabCombate
+            campaignId={campaignId}
+            characterId={characterId}
+            characterName={characterName}
+          />
+        )}
+
+        {activeTab === "mapa" && (
+          <MobileTabMapa
             campaignId={campaignId}
             characterId={characterId}
             characterName={characterName}

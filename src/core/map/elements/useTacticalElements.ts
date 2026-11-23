@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { MapElement } from "./elementTypes";
 import { TacticalMapData } from "../mapTypes";
 import { useCampaignSync } from "../../sync/useCampaignSync";
+import { SyncEvent } from "../../sync/syncTypes";
 
 interface UseTacticalElementsProps {
   campaignId: string;
@@ -14,7 +15,28 @@ export function useTacticalElements({ campaignId, maps }: UseTacticalElementsPro
   const [elementsByMap, setElementsByMap] = useState<Record<string, MapElement[]>>({});
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const saveTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
-  const { emit } = useCampaignSync({ campaignId });
+  const masterClientIdRef = useRef<string>(`master-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`);
+
+  // Escuta movimentos atômicos vindos de celulares e outros clientes em tempo real
+  const handleSyncEvent = useCallback((event: SyncEvent) => {
+    if (event.type === "MAP_ELEMENTS_UPDATE") {
+      const payload = event.payload as { mapId: string; elementsData: string; senderId?: string };
+      if (!payload?.mapId || !payload?.elementsData) return;
+      if (payload.senderId && payload.senderId === masterClientIdRef.current) return;
+
+      try {
+        const parsed = JSON.parse(payload.elementsData);
+        if (Array.isArray(parsed)) {
+          setElementsByMap((prev) => ({
+            ...prev,
+            [payload.mapId]: parsed,
+          }));
+        }
+      } catch {}
+    }
+  }, []);
+
+  const { emit } = useCampaignSync({ campaignId, onEvent: handleSyncEvent });
 
   // Inicializa ou sincroniza os elementos de cada mapa a partir de maps
   useEffect(() => {
@@ -48,8 +70,12 @@ export function useTacticalElements({ campaignId, maps }: UseTacticalElementsPro
     (mapId: string, newElements: MapElement[]) => {
       const jsonStr = JSON.stringify(newElements);
 
-      // Emite sincronização isolada para o Telão com mapId específico
-      emit("MAP_ELEMENTS_UPDATE", { mapId, elementsData: jsonStr });
+      // Emite sincronização isolada para o Telão e Celulares com mapId específico
+      emit("MAP_ELEMENTS_UPDATE", {
+        mapId,
+        elementsData: jsonStr,
+        senderId: masterClientIdRef.current,
+      });
 
       // Salva no SQLite via PUT com debounce por mapa
       if (saveTimersRef.current[mapId]) {
@@ -159,9 +185,17 @@ export function useTacticalElements({ campaignId, maps }: UseTacticalElementsPro
 
       setSelectedElementId(null);
 
-      // Transmite atualizações imediatas para ambos os mapas na TV
-      emit("MAP_ELEMENTS_UPDATE", { mapId: sourceMapId, elementsData: JSON.stringify(newSource) });
-      emit("MAP_ELEMENTS_UPDATE", { mapId: targetMapId, elementsData: JSON.stringify(newTarget) });
+      // Transmite atualizações imediatas para ambos os mapas na TV e Celulares
+      emit("MAP_ELEMENTS_UPDATE", {
+        mapId: sourceMapId,
+        elementsData: JSON.stringify(newSource),
+        senderId: masterClientIdRef.current,
+      });
+      emit("MAP_ELEMENTS_UPDATE", {
+        mapId: targetMapId,
+        elementsData: JSON.stringify(newTarget),
+        senderId: masterClientIdRef.current,
+      });
 
       // Salva imediatamente no banco para ambos os mapas
       try {
