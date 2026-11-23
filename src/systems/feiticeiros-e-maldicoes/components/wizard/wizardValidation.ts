@@ -36,8 +36,11 @@ export const INITIAL_WIZARD_STATE: WizardState = {
       description: "Destrói o terreno no ponto 7:3 derrubando inimigos em 4,5m.",
     },
   ],
-  selectedWeapons: ["katana", "cutelo"],
-  selectedToolKit: "kit-medico",
+  selectedWeapons: ["adaga", "espada-curta"],
+  selectedUniform: "uniforme-comum",
+  selectedShield: "",
+  selectedToolKit: "kit-primeiros-socorros",
+  selectedGear: [],
 };
 
 export function canAdvanceStep(step: number, state: WizardState): boolean {

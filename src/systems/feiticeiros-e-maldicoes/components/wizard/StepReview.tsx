@@ -9,6 +9,13 @@ import {
 } from "@/systems/feiticeiros-e-maldicoes";
 import { WizardState } from "./wizardTypes";
 import { WIZARD_WEAPONS, WIZARD_TOOLKITS } from "./wizardPresets";
+import {
+  WEAPONS_CATALOG,
+  UNIFORMS_CATALOG,
+  SHIELDS_CATALOG,
+  TOOL_KITS_CATALOG,
+  GENERAL_GEAR_CATALOG,
+} from "../../data/equipment";
 import { Loader2, Check } from "lucide-react";
 
 interface StepReviewProps {
@@ -47,18 +54,28 @@ export function StepReview({
   const techAttrVal = getFinalValue(state.techniqueAttribute);
   const techMod = getModifier(techAttrVal);
 
+  const uniformItem = UNIFORMS_CATALOG.find((u) => u.id === (state.selectedUniform || "uniforme-comum"));
+  const shieldItem = SHIELDS_CATALOG.find((s) => s.id === state.selectedShield);
+  const uniformCa = uniformItem ? uniformItem.caBonus : 0;
+  const shieldCa = shieldItem ? shieldItem.caBonus : 0;
+
   const maxHP = specInfo.hpBase + conMod;
   const maxPE = isRestringido ? 0 : specInfo.pePerLevel + (specInfo.addsAttributeToPE ? Math.max(0, techMod) : 0);
-  const totalDefense = 10 + dexMod;
+  const totalDefense = 10 + dexMod + uniformCa + shieldCa;
   const initiative = dexMod;
   const attention = 10 + sabMod + (state.trainedSkills.includes("Percepção") ? 2 : 0);
   const spellDC = calcSpellDC(1, techAttrVal);
   const movement = isRestringido ? 12 : 9;
 
   const weaponNames = state.selectedWeapons.map(
-    (wId) => WIZARD_WEAPONS.find((w) => w.id === wId)?.name || wId
+    (wId) => WEAPONS_CATALOG.find((w) => w.id === wId)?.name || WIZARD_WEAPONS.find((w) => w.id === wId)?.name || wId
   );
-  const kitName = WIZARD_TOOLKITS.find((k) => k.id === state.selectedToolKit)?.name || state.selectedToolKit;
+  const uniformName = uniformItem?.name || "Uniforme Comum";
+  const shieldName = shieldItem?.name;
+  const kitName = TOOL_KITS_CATALOG.find((k) => k.id === state.selectedToolKit)?.name || WIZARD_TOOLKITS.find((k) => k.id === state.selectedToolKit)?.name || state.selectedToolKit;
+  const gearNames = (state.selectedGear || []).map(
+    (gId) => GENERAL_GEAR_CATALOG.find((g) => g.id === gId)?.name || gId
+  );
 
   return (
     <div className="space-y-4">
@@ -165,7 +182,9 @@ export function StepReview({
           <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)]">
             <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase block">Defesa / CA</span>
             <span className="text-base font-bold text-emerald-400">{totalDefense}</span>
-            <span className="text-[10px] text-[var(--text-muted)] block">10 + DEX</span>
+            <span className="text-[10px] text-[var(--text-muted)] block">
+              10 + DES{uniformCa ? ` +${uniformCa}` : ""}{shieldCa ? ` +${shieldCa}` : ""}
+            </span>
           </div>
 
           <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)]">
@@ -193,7 +212,13 @@ export function StepReview({
           <div>
             <span className="font-bold text-[var(--text-secondary)] block mb-1">Equipamentos & Ferramentas:</span>
             <p className="text-[var(--text-muted)]">
-              {weaponNames.join(", ") || "Nenhuma arma"}, Uniforme Jujutsu, {kitName || "Sem kit"}.
+              {[
+                weaponNames.length > 0 ? `Armas: ${weaponNames.join(", ")}` : "Sem armas",
+                uniformName,
+                shieldName ? `Escudo: ${shieldName}` : null,
+                `Kit: ${kitName}`,
+                gearNames.length > 0 ? `Geral: ${gearNames.join(", ")}` : null,
+              ].filter(Boolean).join(" • ")}
             </p>
             <span className="font-bold text-[var(--text-secondary)] block mt-2 mb-0.5">Perícias ({state.trainedSkills.length}):</span>
             <p className="text-[var(--text-muted)] truncate">{state.trainedSkills.join(", ")}</p>

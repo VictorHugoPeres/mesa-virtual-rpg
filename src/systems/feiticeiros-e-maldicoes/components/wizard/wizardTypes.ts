@@ -27,7 +27,10 @@ export interface WizardState {
   techniqueAttribute: AttributeKey;
   spells: WizardSpell[];
   selectedWeapons: string[];
+  selectedUniform?: string;
+  selectedShield?: string;
   selectedToolKit: string;
+  selectedGear?: string[];
 }
 
 export interface OriginInfo {

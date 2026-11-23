@@ -167,10 +167,18 @@ export function CharacterWizardModal({
 
           {currentStep === 6 && (
             <StepEquipment
+              specialization={state.specialization}
+              attributes={state.baseAttributes}
               selectedWeapons={state.selectedWeapons}
               setSelectedWeapons={(wpns) => setState((prev) => ({ ...prev, selectedWeapons: wpns }))}
+              selectedUniform={state.selectedUniform}
+              setSelectedUniform={(u) => setState((prev) => ({ ...prev, selectedUniform: u }))}
+              selectedShield={state.selectedShield}
+              setSelectedShield={(s) => setState((prev) => ({ ...prev, selectedShield: s }))}
               selectedToolKit={state.selectedToolKit}
               setSelectedToolKit={(kit) => setState((prev) => ({ ...prev, selectedToolKit: kit }))}
+              selectedGear={state.selectedGear}
+              setSelectedGear={(g) => setState((prev) => ({ ...prev, selectedGear: g }))}
             />
           )}
 
