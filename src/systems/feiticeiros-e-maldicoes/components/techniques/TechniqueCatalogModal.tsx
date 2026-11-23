@@ -31,6 +31,7 @@ export function TechniqueCatalogModal({
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("todos");
   const [selectedAttr, setSelectedAttr] = useState<string>("todos");
+  const [mobileView, setMobileView] = useState<"list" | "detail">("list");
 
   if (!isOpen) return null;
 
@@ -61,8 +62,8 @@ export function TechniqueCatalogModal({
 
   return (
     <Portal>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-150">
-        <div className="w-full max-w-5xl h-[90vh] bg-[var(--bg-card)] border border-[var(--border-default)] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-150">
+        <div className="w-full max-w-5xl h-[92dvh] sm:h-[85vh] max-h-[92dvh] sm:max-h-[85vh] bg-[var(--bg-card)] border border-[var(--border-default)] rounded-2xl shadow-2xl flex flex-col min-h-0 overflow-hidden animate-in zoom-in-95 duration-150">
           {/* Header Superior */}
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border-default)] bg-[var(--bg-secondary)] shrink-0">
             <div className="flex items-center gap-2.5">
@@ -94,9 +95,11 @@ export function TechniqueCatalogModal({
           {/* Corpo: Grade Dividida (Lista Lateral + Detalhes) */}
           <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
             {/* Coluna Esquerda: Filtros e Lista */}
-            <div className="w-full md:w-80 lg:w-96 border-r border-[var(--border-default)] flex flex-col shrink-0 bg-[var(--bg-card)]">
+            <div className={`w-full md:w-80 lg:w-96 h-full flex-1 md:flex-none border-r border-[var(--border-default)] flex-col min-h-0 bg-[var(--bg-card)] ${
+              mobileView === "detail" ? "hidden md:flex" : "flex"
+            }`}>
               {/* Barra de Busca e Filtros */}
-              <div className="p-3.5 border-b border-[var(--border-default)] space-y-2.5 bg-[var(--bg-secondary)]/30">
+              <div className="p-3.5 border-b border-[var(--border-default)] space-y-2.5 bg-[var(--bg-secondary)]/30 shrink-0">
                 <div className="relative">
                   <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
                   <input
@@ -108,7 +111,7 @@ export function TechniqueCatalogModal({
                   />
                 </div>
 
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                <div className="flex flex-wrap items-center gap-1.5 pt-1 max-h-24 overflow-y-auto scrollbar-none">
                   <button
                     type="button"
                     onClick={() => setSelectedCategory("todos")}
@@ -138,7 +141,7 @@ export function TechniqueCatalogModal({
               </div>
 
               {/* Lista com Scroll */}
-              <div className="flex-1 overflow-y-auto p-2 space-y-1">
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-2 space-y-1 pb-10">
                 {filteredTechs.length === 0 ? (
                   <p className="text-xs text-[var(--text-muted)] p-4 text-center">Nenhuma técnica encontrada.</p>
                 ) : (
@@ -148,7 +151,10 @@ export function TechniqueCatalogModal({
                       <button
                         key={t.id}
                         type="button"
-                        onClick={() => setSelectedTechId(t.id)}
+                        onClick={() => {
+                          setSelectedTechId(t.id);
+                          setMobileView("detail");
+                        }}
                         className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer flex flex-col gap-1 ${
                           isSelected
                             ? "bg-blue-600/15 border-blue-500/50 shadow-xs"
@@ -174,13 +180,16 @@ export function TechniqueCatalogModal({
             </div>
 
             {/* Coluna Direita: Detalhes da Técnica Selecionada */}
-            <div className="flex-1 min-w-0 h-full overflow-hidden">
+            <div className={`flex-1 min-w-0 min-h-0 h-full overflow-hidden flex flex-col ${
+              mobileView === "list" ? "hidden md:flex" : "flex"
+            }`}>
               {activeTech ? (
                 <TechniqueDetailView
                   technique={activeTech}
                   characterLevel={characterLevel}
                   maxSpells={maxSpells}
                   onApply={handleApply}
+                  onBack={() => setMobileView("list")}
                 />
               ) : (
                 <div className="h-full flex items-center justify-center text-xs text-[var(--text-muted)]">

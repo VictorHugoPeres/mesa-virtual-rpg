@@ -113,8 +113,8 @@ export function GuidedSpellBuilderModal({
 
   return (
     <Portal>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-150">
-        <div className="w-full max-w-2xl max-h-[90vh] bg-[var(--bg-card)] border border-[var(--border-default)] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-150">
+        <div className="w-full max-w-2xl h-[92dvh] sm:h-auto max-h-[92dvh] sm:max-h-[85vh] bg-[var(--bg-card)] border border-[var(--border-default)] rounded-2xl shadow-2xl flex flex-col min-h-0 overflow-hidden animate-in zoom-in-95 duration-150">
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border-default)] bg-[var(--bg-secondary)] shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="p-2 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400">
@@ -139,7 +139,7 @@ export function GuidedSpellBuilderModal({
             </button>
           </div>
 
-          <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-5 space-y-4">
+          <form onSubmit={handleSave} className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-5 space-y-4 pb-8">
             <SpellPreviewCard
               name={name}
               level={level}

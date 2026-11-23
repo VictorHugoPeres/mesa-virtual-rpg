@@ -11,6 +11,7 @@ import { AttributeMethod } from "./wizardTypes";
 import { Dices } from "lucide-react";
 import { OriginBonusPicker } from "./OriginBonusPicker";
 import { FixedValuesBar } from "./FixedValuesBar";
+import { RollControlsBar } from "./RollControlsBar";
 import { AttributeCard } from "./AttributeCard";
 
 interface StepAttributesProps {
@@ -202,31 +203,15 @@ export function StepAttributes({
       )}
 
       {method === "roll" && (
-        <div className="p-3 rounded-xl bg-purple-950/30 border border-purple-900/50 space-y-2 text-xs">
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-purple-200">
-              {rolledPool.length > 0 ? "Resultados 4d6 (descarta o menor):" : "Clique abaixo para rolar:"}
-            </span>
-            <div className="flex gap-2">
-              {rolledPool.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => applySuggestedValues(rolledPool)}
-                  className="px-2 py-1 rounded bg-purple-800 hover:bg-purple-700 text-white text-[11px] font-semibold cursor-pointer"
-                >
-                  Auto-Distribuir
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={handleRollAll}
-                className="flex items-center gap-1 px-2.5 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-semibold cursor-pointer"
-              >
-                <Dices className="w-3.5 h-3.5" /> {rolledPool.length > 0 ? "Rolar Novamente" : "Rolar 4d6"}
-              </button>
-            </div>
-          </div>
-        </div>
+        <RollControlsBar
+          rolledPool={rolledPool}
+          onRollAll={handleRollAll}
+          onApplySuggested={() => applySuggestedValues(rolledPool)}
+          onApplyPool={(pool) => {
+            setRolledPool(pool);
+            applySuggestedValues(pool);
+          }}
+        />
       )}
 
       {method === "pointBuy" && (
@@ -238,7 +223,7 @@ export function StepAttributes({
         </div>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {ATTRIBUTE_KEYS.map((key: AttributeKey) => (
           <AttributeCard
             key={key}

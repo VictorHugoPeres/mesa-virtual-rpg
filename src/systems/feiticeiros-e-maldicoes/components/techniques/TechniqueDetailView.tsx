@@ -16,6 +16,7 @@ interface TechniqueDetailViewProps {
     description: string;
     selectedSpells: ReadySpell[];
   }) => void;
+  onBack?: () => void;
 }
 
 export function TechniqueDetailView({
@@ -23,9 +24,11 @@ export function TechniqueDetailView({
   characterLevel = 1,
   maxSpells = 2,
   onApply,
+  onBack,
 }: TechniqueDetailViewProps) {
   const unlockedLevels = getUnlockedSpellLevels(characterLevel);
   const [selectedSpellNames, setSelectedSpellNames] = useState<string[]>([]);
+  const [showFullDesc, setShowFullDesc] = useState(false);
 
   // Pré-seleciona os primeiros feitiços liberados respeitando o limite
   useEffect(() => {
@@ -54,13 +57,24 @@ export function TechniqueDetailView({
     });
   }
 
+  const isLongDesc = technique.description.length > 200;
+
   return (
-    <div className="flex flex-col h-full bg-[var(--bg-card)]">
-      {/* Cabeçalho da Técnica */}
-      <div className="p-4 sm:p-5 border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/40 overflow-y-auto max-h-[45vh] shrink-0">
+    <div className="flex flex-col h-full min-h-0 bg-[var(--bg-card)] overflow-y-auto overscroll-contain touch-pan-y">
+      {/* Cabeçalho Sticky no Topo */}
+      <div className="sticky top-0 z-10 p-4 sm:p-5 border-b border-[var(--border-default)] bg-[var(--bg-card)]/95 backdrop-blur-md shadow-xs shrink-0">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2">
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="md:hidden flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-bold mb-2 cursor-pointer"
+              >
+                ← Voltar às Técnicas
+              </button>
+            )}
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
                 {technique.category}
               </span>
@@ -82,13 +96,29 @@ export function TechniqueDetailView({
             <Check className="w-4 h-4" /> Aplicar Técnica
           </button>
         </div>
+      </div>
 
-        <p className="text-xs text-[var(--text-secondary)] mt-3 leading-relaxed whitespace-pre-wrap">
-          {technique.description}
-        </p>
+      {/* Descrição da Técnica & Funcionamento Básico (no mesmo fluxo de scroll) */}
+      <div className="p-4 sm:p-5 border-b border-[var(--border-default)] bg-[var(--bg-secondary)]/25 space-y-3 shrink-0">
+        <div>
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap">
+            {showFullDesc || !isLongDesc
+              ? technique.description
+              : `${technique.description.slice(0, 200)}...`}
+          </p>
+          {isLongDesc && (
+            <button
+              type="button"
+              onClick={() => setShowFullDesc(!showFullDesc)}
+              className="text-xs text-blue-400 hover:text-blue-300 font-semibold mt-1 inline-block cursor-pointer"
+            >
+              {showFullDesc ? "▲ Recolher descrição" : "▼ Ver descrição completa"}
+            </button>
+          )}
+        </div>
 
         {technique.basicFunction && (
-          <div className="mt-3 p-3 rounded-xl bg-blue-950/20 border border-blue-500/30 text-xs">
+          <div className="p-3.5 rounded-xl bg-blue-950/20 border border-blue-500/30 text-xs">
             <span className="font-bold text-blue-300 block mb-1 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" /> Funcionamento Básico:
             </span>
@@ -100,7 +130,7 @@ export function TechniqueDetailView({
       </div>
 
       {/* Lista de Feitiços */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
+      <div className="p-4 sm:p-5 space-y-3 pb-16">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
             <BookOpen className="w-3.5 h-3.5 text-indigo-400" /> Feitiços Prontos ({technique.spells.length})
