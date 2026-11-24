@@ -146,7 +146,7 @@ export const WIZARD_SPECS: SpecDetailInfo[] = [
     peDesc: "5 PE por nível + Modificador de Atributo",
     savingThrows: "Astúcia ou Vontade",
     skillsDesc: "Percepção, Persuasão + 2 perícias à sua escolha",
-    keyAttributes: ["CAR", "SAB"],
+    keyAttributes: ["PRE", "SAB"],
     features: [
       { title: "Vínculo de Invocação", desc: "Inicia com 1 Shikigami ou Marionete com ficha própria e ações compartilhadas." },
       { title: "Comando Tático", desc: "Pode gastar sua ação bônus para ordenar que sua invocação ataque ou defenda aliados." },
@@ -162,7 +162,7 @@ export const WIZARD_SPECS: SpecDetailInfo[] = [
     peDesc: "5 PE por nível + Modificador de Atributo",
     savingThrows: "Astúcia ou Vontade",
     skillsDesc: "Medicina, Prestidigitação + 3 perícias à sua escolha",
-    keyAttributes: ["CAR", "SAB"],
+    keyAttributes: ["PRE", "SAB"],
     features: [
       { title: "Toque Restaurador", desc: "Canaliza energia reversa para curar PV de aliados em alcance de toque." },
       { title: "Incentivo Moral", desc: "Concede bônus em testes de perícia e jogadas de ataque de companheiros." },

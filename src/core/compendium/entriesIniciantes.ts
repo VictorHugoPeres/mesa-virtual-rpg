@@ -26,7 +26,7 @@ export const INICIANTES_ENTRIES: CompendiumEntry[] = [
       "CON (Constituição): Vigor físico, resistência a toxinas e doenças, e base para seus Pontos de Vida (PV).",
       "INT (Inteligência): Raciocínio lógico, estudo teórico de feitiçaria, rituais, pistas e conhecimentos gerais.",
       "SAB (Sabedoria): Percepção dos arredores, intuição para sentir mentiras, primeiros socorros e força de vontade.",
-      "CAR (Carisma/Presença): Força da personalidade, intimidação, persuasão, encenação e liderança de aliados.",
+      "PRE (Presença): Força da personalidade, intimidação, persuasão, encenação e liderança de aliados.",
       "Modificador: Valor 10 é neutro (+0). A cada 2 pontos acima ou abaixo, o bônus muda em +1 ou -1 (ex: 14 = +2, 16 = +3).",
       "Perícias Treinadas (Mt.): Ao treinar uma perícia, você soma seu Bônus de Maestria (+2 no nível 1) aos seus testes.",
     ],

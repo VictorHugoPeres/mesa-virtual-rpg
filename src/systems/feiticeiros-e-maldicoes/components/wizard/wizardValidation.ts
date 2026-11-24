@@ -11,7 +11,7 @@ export const INITIAL_WIZARD_STATE: WizardState = {
   origin: "Inato",
   specialization: "Lutador",
   attributeMethod: "fixed",
-  baseAttributes: { FOR: 0, DEX: 0, CON: 0, INT: 0, SAB: 0, CAR: 0 },
+  baseAttributes: { FOR: 0, DEX: 0, CON: 0, INT: 0, SAB: 0, PRE: 0 },
   bonusPlus2: "FOR",
   bonusPlus1: "CON",
   trainedSkills: ["Fortitude", "Atletismo", "Luta"],

@@ -30,7 +30,7 @@ export function ThreatFormModal({ campaignId, onSuccess }: ThreatFormModalProps)
     CON: 12,
     INT: 8,
     SAB: 10,
-    CAR: 8,
+    PRE: 8,
   });
 
   const [attacks, setAttacks] = useState<AttackItem[]>([

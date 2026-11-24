@@ -101,7 +101,7 @@ export const WIZARD_TECHNIQUE_PRESETS: TechniquePreset[] = [
     id: "fala-amaldicoada",
     name: "Fala Amaldiçoada",
     description: "Imposição de comandos inescapáveis através da vibração da voz imbuída em energia amaldiçoada.",
-    attribute: "CAR",
+    attribute: "PRE",
     spells: [
       {
         name: "Comando: 'Pare!'",

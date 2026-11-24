@@ -32,7 +32,7 @@ interface StepEquipmentProps {
 
 export function StepEquipment({
   specialization = "Lutador",
-  attributes = { FOR: 10, DEX: 10, CON: 10, INT: 10, SAB: 10, CAR: 10 },
+  attributes = { FOR: 10, DEX: 10, CON: 10, INT: 10, SAB: 10, PRE: 10 },
   selectedWeapons,
   setSelectedWeapons,
   selectedUniform = "uniforme-comum",

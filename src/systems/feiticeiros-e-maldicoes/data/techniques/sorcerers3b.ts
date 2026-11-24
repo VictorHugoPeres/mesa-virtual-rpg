@@ -123,7 +123,7 @@ export const SORCERERS3B_TECHNIQUES: InnateTechnique[] = [
     name: "Milagres",
     characterRef: "Haruta Shigemo",
     category: "Feiticeiro Not\u00e1vel",
-    suggestedAttribute: "CAR",
+    suggestedAttribute: "PRE",
     source: "Enciclop\u00e9dia Amaldi\u00e7oada v0.9",
     description: "Milagres \u00e9 a t\u00e9cnica inata de Haruta Shigemo, a qual armazena pequenos milagres do cotidiano e os libera quando sua vida est\u00e1 em perigo. Para a adapta\u00e7\u00e3o sistem\u00e1tica, al\u00e9m de o salvar, os milagres s\u00e3o convertidos em sorte nos momentos certos. De um ponto narrativo, os milagres acontecem de maneira inesperada, e o personagem n\u00e3o tem no\u00e7\u00e3o deles. Sistematicamente, voc\u00ea os usa voluntariamente, em certas habilidades. Sem ser algo espec\u00edfico, Milagres pode encaixar com qualquer personagem, apenas adicionando um fator de sorte para seja quem for seu usu\u00e1rio.",
     basicFunction: "Ao ver um pequeno milagre, como o rel\u00f3gio estar com todos os d\u00edgitos iguais, ele \u00e9 apagado da sua mem\u00f3ria e armazenado. Voc\u00ea recebe uma quantidade de Milagres igual a 1 + seu b\u00f4nus de maestria. Voc\u00ea recupera todos seus milagres ap\u00f3s um descanso longo. Seus milagres s\u00e3o vis\u00edveis atrav\u00e9s de pequenas marcas abaixo dos seus olhos.",

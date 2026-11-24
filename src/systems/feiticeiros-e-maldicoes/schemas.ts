@@ -2,7 +2,7 @@ import { z } from "zod";
 import { ATTRIBUTE_KEYS } from "./constants";
 
 // ────────────────────────────────────────────
-// Sub-schemas da ficha F&M v2.0
+// Sub-schemas da ficha F&M v2.5
 // ────────────────────────────────────────────
 
 const SkillDataSchema = z.object({
@@ -127,7 +127,7 @@ const InvocationSchema = z.object({
       CON: 10,
       INT: 10,
       SAB: 10,
-      CAR: 10,
+      PRE: 10,
     }),
   actionsAndTraits: z.string().default(""),
 });
@@ -149,7 +149,62 @@ const FeatureSchema = z.object({
   description: z.string().default(""),
 });
 
-export const FMCharacterDataSchema = z.object({
+// Pré-processamento retroativo para converter CAR -> PRE e descartar Luta/Pontaria
+export function migrateLegacyCharacterData(val: unknown): unknown {
+  if (!val || typeof val !== "object") return val;
+  const obj = { ...(val as Record<string, unknown>) };
+
+  // 1. Converte CAR -> PRE nos atributos
+  if (obj.attributes && typeof obj.attributes === "object") {
+    const attrs = { ...(obj.attributes as Record<string, unknown>) };
+    if ("CAR" in attrs && !("PRE" in attrs)) {
+      attrs.PRE = attrs.CAR;
+    }
+    delete attrs.CAR;
+    obj.attributes = attrs;
+  }
+
+  if (obj.keyAttribute === "CAR") {
+    obj.keyAttribute = "PRE";
+  }
+
+  if (obj.cursedProfile && typeof obj.cursedProfile === "object") {
+    const cp = { ...(obj.cursedProfile as Record<string, unknown>) };
+    if (cp.techniqueAttribute === "CAR") {
+      cp.techniqueAttribute = "PRE";
+    }
+    obj.cursedProfile = cp;
+  }
+
+  // 2. Descarta graciosamente antigas perícias Luta e Pontaria
+  if (obj.skills && typeof obj.skills === "object") {
+    const skills = { ...(obj.skills as Record<string, unknown>) };
+    delete skills["Luta"];
+    delete skills["Pontaria"];
+    obj.skills = skills;
+  }
+
+  // 3. Converte CAR -> PRE nas invocações
+  if (Array.isArray(obj.invocations)) {
+    obj.invocations = obj.invocations.map((inv) => {
+      if (!inv || typeof inv !== "object") return inv;
+      const invObj = { ...(inv as Record<string, unknown>) };
+      if (invObj.attributes && typeof invObj.attributes === "object") {
+        const attrs = { ...(invObj.attributes as Record<string, unknown>) };
+        if ("CAR" in attrs && !("PRE" in attrs)) {
+          attrs.PRE = attrs.CAR;
+        }
+        delete attrs.CAR;
+        invObj.attributes = attrs;
+      }
+      return invObj;
+    });
+  }
+
+  return obj;
+}
+
+const RawFMCharacterDataSchema = z.object({
   level: z.number().min(1).max(20).default(1),
   xp: z.number().default(0),
   origin: z.string().default("Inato"),
@@ -167,7 +222,7 @@ export const FMCharacterDataSchema = z.object({
       CON: 10,
       INT: 10,
       SAB: 10,
-      CAR: 10,
+      PRE: 10,
     }),
 
   keyAttribute: z.string().default("FOR"),
@@ -248,7 +303,9 @@ export const FMCharacterDataSchema = z.object({
   notes: z.string().default(""),
 });
 
-export type FMCharacterData = z.infer<typeof FMCharacterDataSchema>;
+export const FMCharacterDataSchema = z.preprocess(migrateLegacyCharacterData, RawFMCharacterDataSchema);
+
+export type FMCharacterData = z.infer<typeof RawFMCharacterDataSchema>;
 
 export function serializeCharacterData(data: FMCharacterData): string {
   return JSON.stringify(data);

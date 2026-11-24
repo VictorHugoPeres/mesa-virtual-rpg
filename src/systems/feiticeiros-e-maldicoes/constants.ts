@@ -1,5 +1,5 @@
 // ────────────────────────────────────────────
-// Constantes do sistema Feiticeiros & Maldições (F&M v2.0)
+// Constantes do sistema Feiticeiros & Maldições (F&M v2.5)
 // ────────────────────────────────────────────
 
 export const ATTRIBUTE_KEYS = [
@@ -8,7 +8,7 @@ export const ATTRIBUTE_KEYS = [
   "CON",
   "INT",
   "SAB",
-  "CAR",
+  "PRE",
 ] as const;
 
 export type AttributeKey = (typeof ATTRIBUTE_KEYS)[number];
@@ -19,51 +19,81 @@ export const ATTRIBUTE_LABELS: Record<AttributeKey, string> = {
   CON: "Constituição",
   INT: "Inteligência",
   SAB: "Sabedoria",
-  CAR: "Carisma",
+  PRE: "Presença",
 };
 
 export interface SkillDef {
   name: string;
   attribute: AttributeKey;
   requiresTraining: boolean;
+  isSavingThrow?: boolean;
 }
 
+// 20 Perícias Canônicas v2.5 (sem Luta/Pontaria) + 5 Testes de Resistência (TR)
 export const SKILLS_LIST: SkillDef[] = [
   // FOR
   { name: "Atletismo", attribute: "FOR", requiresTraining: false },
-  { name: "Luta", attribute: "FOR", requiresTraining: false },
+
   // DEX
   { name: "Acrobacia", attribute: "DEX", requiresTraining: false },
   { name: "Furtividade", attribute: "DEX", requiresTraining: false },
-  { name: "Pontaria", attribute: "DEX", requiresTraining: false },
   { name: "Prestidigitação", attribute: "DEX", requiresTraining: true },
-  { name: "Reflexos", attribute: "DEX", requiresTraining: false },
-  // CON
-  { name: "Fortitude", attribute: "CON", requiresTraining: false },
-  { name: "Integridade", attribute: "CON", requiresTraining: false },
+  { name: "Reflexos", attribute: "DEX", requiresTraining: false, isSavingThrow: true },
+
+  // CON (TRs)
+  { name: "Fortitude", attribute: "CON", requiresTraining: false, isSavingThrow: true },
+  { name: "Integridade", attribute: "CON", requiresTraining: false, isSavingThrow: true },
+
   // INT
-  { name: "Astúcia", attribute: "INT", requiresTraining: false },
+  { name: "Astúcia", attribute: "INT", requiresTraining: false, isSavingThrow: true },
   { name: "Feitiçaria", attribute: "INT", requiresTraining: true },
-  { name: "Investigação", attribute: "INT", requiresTraining: false },
   { name: "História", attribute: "INT", requiresTraining: false },
-  { name: "Ofício 1", attribute: "INT", requiresTraining: true },
-  { name: "Ofício 2", attribute: "INT", requiresTraining: true },
-  { name: "Ofício 3", attribute: "INT", requiresTraining: true },
-  { name: "Ofício 4", attribute: "INT", requiresTraining: true },
-  { name: "Religião", attribute: "INT", requiresTraining: false },
+  { name: "Investigação", attribute: "INT", requiresTraining: false },
+  { name: "Ofício", attribute: "INT", requiresTraining: true },
   { name: "Tecnologia", attribute: "INT", requiresTraining: false },
+  { name: "Teologia", attribute: "INT", requiresTraining: false },
+
   // SAB
+  { name: "Direção", attribute: "SAB", requiresTraining: false },
   { name: "Intuição", attribute: "SAB", requiresTraining: false },
   { name: "Medicina", attribute: "SAB", requiresTraining: true },
-  { name: "Percepção", attribute: "SAB", requiresTraining: false },
   { name: "Ocultismo", attribute: "SAB", requiresTraining: false },
-  { name: "Vontade", attribute: "SAB", requiresTraining: false },
-  // CAR
-  { name: "Persuasão", attribute: "CAR", requiresTraining: false },
-  { name: "Enganação", attribute: "CAR", requiresTraining: false },
-  { name: "Intimidação", attribute: "CAR", requiresTraining: false },
-  { name: "Performance", attribute: "CAR", requiresTraining: false },
+  { name: "Percepção", attribute: "SAB", requiresTraining: false },
+  { name: "Sobrevivência", attribute: "SAB", requiresTraining: false },
+  { name: "Vontade", attribute: "SAB", requiresTraining: false, isSavingThrow: true },
+
+  // PRE
+  { name: "Enganação", attribute: "PRE", requiresTraining: false },
+  { name: "Intimidação", attribute: "PRE", requiresTraining: false },
+  { name: "Performance", attribute: "PRE", requiresTraining: false },
+  { name: "Persuasão", attribute: "PRE", requiresTraining: false },
 ];
+
+export const SAVING_THROWS: SkillDef[] = SKILLS_LIST.filter((s) => s.isSavingThrow);
+
+export const CRAFT_CATEGORIES = [
+  "Alfaiate",
+  "Alquimia",
+  "Canalizador",
+  "Cozinheiro",
+  "Entalhador",
+  "Farmacêutico",
+  "Ferreiro",
+] as const;
+
+export type CraftCategory = (typeof CRAFT_CATEGORIES)[number];
+
+// Tabela de Compra por Pontos v2.5 (10 em todos, 17 pontos disponíveis)
+export const POINT_BUY_TABLE: Record<number, number> = {
+  8: 2,   // Ganha +2 pts
+  9: 1,   // Ganha +1 pt
+  10: 0,  // Base
+  11: -2, // Custo 2 pts
+  12: -3, // Custo 3 pts
+  13: -4, // Custo 4 pts
+  14: -5, // Custo 5 pts
+  15: -7, // Custo 7 pts
+};
 
 export const SPECIALIZATIONS = [
   "Lutador",
@@ -116,7 +146,7 @@ export const SPEC_TABLE: Record<Specialization, SpecInfo> = {
     hitDie: "d8",
     pePerLevel: 5,
     addsAttributeToPE: true,
-    keyAttributes: ["CAR", "SAB"],
+    keyAttributes: ["PRE", "SAB"],
   },
   Suporte: {
     hpBase: 10,
@@ -124,7 +154,7 @@ export const SPEC_TABLE: Record<Specialization, SpecInfo> = {
     hitDie: "d8",
     pePerLevel: 5,
     addsAttributeToPE: true,
-    keyAttributes: ["CAR", "SAB"],
+    keyAttributes: ["PRE", "SAB"],
   },
   Restringido: {
     hpBase: 16,
@@ -132,7 +162,7 @@ export const SPEC_TABLE: Record<Specialization, SpecInfo> = {
     hitDie: "d12",
     pePerLevel: 0,
     addsAttributeToPE: false,
-    keyAttributes: ["FOR", "DEX", "CON", "INT", "SAB", "CAR"],
+    keyAttributes: ["FOR", "DEX", "CON", "INT", "SAB", "PRE"],
   },
 };
 
@@ -144,6 +174,9 @@ export const ORIGINS = [
   "Feto Amaldiçoado Híbrido",
   "Sem Técnica",
   "Corpo Amaldiçoado Mutante",
+  "Feiticeiro Reencarnado",
+  "Maldição",
+  "Fantoche Definitivo",
 ] as const;
 
 export type Origin = (typeof ORIGINS)[number];
@@ -205,7 +238,7 @@ export const TRAININGS_LIST = [
   {
     id: "luta",
     name: "Treino de Luta",
-    benefit: "Acesso a crítico em ataques desarmados (pugilato) e 1x/rodada vantagem em Luta.",
+    benefit: "Acesso a crítico em ataques desarmados (pugilato) e 1x/rodada vantagem em golpes corporais.",
   },
   {
     id: "manejo_arma",

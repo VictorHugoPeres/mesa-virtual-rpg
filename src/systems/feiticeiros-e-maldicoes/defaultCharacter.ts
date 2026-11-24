@@ -42,7 +42,7 @@ export function createDefaultCharacter(
       CON: 10,
       INT: 10,
       SAB: 10,
-      CAR: 10,
+      PRE: 10,
     },
     keyAttribute: spec.keyAttributes[0] || "FOR",
     hp: { current: hpBase, max: hpBase, temp: 0 },

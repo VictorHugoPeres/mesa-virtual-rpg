@@ -31,7 +31,7 @@ export function TabInvocations({ data, onChange }: TabInvocationsProps) {
             CON: 10,
             INT: 6,
             SAB: 10,
-            CAR: 6,
+            PRE: 6,
           },
           actionsAndTraits: "Ataque Básico (Garras/Mordida): 1d6+1 físico",
         },

@@ -37,7 +37,7 @@ const ATTR_TOOLTIPS: Record<AttributeKey, string> = {
   CON: "Vigor físico, base dos Pontos de Vida (PV) e resistência a venenos.",
   INT: "Raciocínio lógico, feitiçaria teórica, investigação e rituais.",
   SAB: "Percepção sensorial, notar mentiras, primeiros socorros e vontade mental.",
-  CAR: "Presença de espírito, persuasão, intimidação e comando social.",
+  PRE: "Presença de espírito, persuasão, intimidação e comando social.",
 };
 
 const FIXED_POOL = [15, 14, 13, 12, 10, 8];
@@ -45,19 +45,19 @@ const FIXED_POOL = [15, 14, 13, 12, 10, 8];
 function getSpecSlotOrder(spec: Specialization): Record<AttributeKey, number> {
   switch (spec) {
     case "Lutador":
-      return { FOR: 0, CON: 1, DEX: 2, SAB: 3, CAR: 4, INT: 5 };
+      return { FOR: 0, CON: 1, DEX: 2, SAB: 3, PRE: 4, INT: 5 };
     case "Especialista em Combate":
-      return { FOR: 0, DEX: 1, CON: 2, SAB: 3, INT: 4, CAR: 5 };
+      return { FOR: 0, DEX: 1, CON: 2, SAB: 3, INT: 4, PRE: 5 };
     case "Especialista em Técnica":
-      return { INT: 0, CON: 1, SAB: 2, DEX: 3, CAR: 4, FOR: 5 };
+      return { INT: 0, CON: 1, SAB: 2, DEX: 3, PRE: 4, FOR: 5 };
     case "Controlador":
-      return { CAR: 0, SAB: 1, CON: 2, DEX: 3, INT: 4, FOR: 5 };
+      return { PRE: 0, SAB: 1, CON: 2, DEX: 3, INT: 4, FOR: 5 };
     case "Suporte":
-      return { SAB: 0, CAR: 1, CON: 2, DEX: 3, INT: 4, FOR: 5 };
+      return { SAB: 0, PRE: 1, CON: 2, DEX: 3, INT: 4, FOR: 5 };
     case "Restringido":
-      return { FOR: 0, DEX: 1, CON: 2, SAB: 3, CAR: 4, INT: 5 };
+      return { FOR: 0, DEX: 1, CON: 2, SAB: 3, PRE: 4, INT: 5 };
     default:
-      return { FOR: 0, CON: 1, DEX: 2, INT: 3, SAB: 4, CAR: 5 };
+      return { FOR: 0, CON: 1, DEX: 2, INT: 3, SAB: 4, PRE: 5 };
   }
 }
 
@@ -66,7 +66,7 @@ function deriveInitialSlots(
   pool: number[]
 ): Record<AttributeKey, number | null> {
   const result: Record<AttributeKey, number | null> = {
-    FOR: null, DEX: null, CON: null, INT: null, SAB: null, CAR: null,
+    FOR: null, DEX: null, CON: null, INT: null, SAB: null, PRE: null,
   };
   const used = new Set<number>();
 
@@ -130,7 +130,7 @@ export function StepAttributes({
       CON: p[order.CON] || 0,
       INT: p[order.INT] || 0,
       SAB: p[order.SAB] || 0,
-      CAR: p[order.CAR] || 0,
+      PRE: p[order.PRE] || 0,
     };
 
     setSlotAssignments(newAssignments);
@@ -205,8 +205,8 @@ export function StepAttributes({
           type="button"
           onClick={() => {
             setMethod("fixed");
-            setSlotAssignments({ FOR: null, DEX: null, CON: null, INT: null, SAB: null, CAR: null });
-            setBaseAttributes({ FOR: 0, DEX: 0, CON: 0, INT: 0, SAB: 0, CAR: 0 });
+            setSlotAssignments({ FOR: null, DEX: null, CON: null, INT: null, SAB: null, PRE: null });
+            setBaseAttributes({ FOR: 0, DEX: 0, CON: 0, INT: 0, SAB: 0, PRE: 0 });
           }}
           className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
             method === "fixed" ? "bg-blue-600 text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
@@ -218,8 +218,8 @@ export function StepAttributes({
           type="button"
           onClick={() => {
             setMethod("pointBuy");
-            setSlotAssignments({ FOR: null, DEX: null, CON: null, INT: null, SAB: null, CAR: null });
-            setBaseAttributes({ FOR: 10, DEX: 10, CON: 10, INT: 10, SAB: 10, CAR: 10 });
+            setSlotAssignments({ FOR: null, DEX: null, CON: null, INT: null, SAB: null, PRE: null });
+            setBaseAttributes({ FOR: 10, DEX: 10, CON: 10, INT: 10, SAB: 10, PRE: 10 });
           }}
           className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
             method === "pointBuy" ? "bg-blue-600 text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
@@ -256,8 +256,8 @@ export function StepAttributes({
             }
           }}
           onReset={() => {
-            setSlotAssignments({ FOR: null, DEX: null, CON: null, INT: null, SAB: null, CAR: null });
-            setBaseAttributes({ FOR: 0, DEX: 0, CON: 0, INT: 0, SAB: 0, CAR: 0 });
+            setSlotAssignments({ FOR: null, DEX: null, CON: null, INT: null, SAB: null, PRE: null });
+            setBaseAttributes({ FOR: 0, DEX: 0, CON: 0, INT: 0, SAB: 0, PRE: 0 });
           }}
           onApplySuggested={() => applySuggestedValues(FIXED_POOL)}
         />
