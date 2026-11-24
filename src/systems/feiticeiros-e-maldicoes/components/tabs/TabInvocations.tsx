@@ -74,7 +74,7 @@ export function TabInvocations({ data, onChange }: TabInvocationsProps) {
           <button
             type="button"
             onClick={handleAddInvocation}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-sm transition-all cursor-pointer active:scale-95"
           >
             <Plus className="w-4 h-4" /> Nova Invocação
           </button>

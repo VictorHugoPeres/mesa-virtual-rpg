@@ -53,12 +53,12 @@ export function SheetHeader({
   const die = data.hitDice?.die || SPEC_TABLE[data.specialization as Specialization]?.hitDie || "d10";
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[var(--border-default)]">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#23272F]">
       {/* Informações Básicas do Personagem */}
       <div className="flex items-center gap-3">
         <Link
           href={`/mestre/${campaignId}`}
-          className="p-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer flex items-center gap-1.5"
+          className="p-2 rounded-lg bg-[#14161A] border border-[#23272F] hover:bg-[#1A1D24] text-zinc-400 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
           title="Voltar ao Painel da Campanha"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -72,26 +72,26 @@ export function SheetHeader({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Nome do Personagem"
-              className="text-2xl font-bold bg-transparent border-b border-transparent hover:border-[var(--border-accent)] focus:border-blue-500 focus:outline-none transition-colors"
+              className="text-2xl font-bold bg-transparent border-b border-transparent hover:border-white/20 focus:border-rose-500/50 focus:outline-none transition-colors text-white"
             />
             <span
-              className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
+              className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${
                 type === "PC"
-                  ? "bg-blue-900/60 text-blue-300 border border-blue-700"
-                  : "bg-red-900/60 text-red-300 border border-red-700"
+                  ? "bg-sky-500/10 text-sky-400 border-sky-500/20"
+                  : "bg-rose-500/10 text-rose-400 border-rose-500/20"
               }`}
             >
               {type}
             </span>
           </div>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+          <p className="text-xs text-zinc-400 mt-0.5">
             {data.origin} · {data.specialization} · Nível {data.level} · {data.grade}
           </p>
         </div>
       </div>
 
       {/* Ações: Telão/Cenas, Rolador, Histórico, Compêndio e Salvamento */}
-      <div className="flex flex-wrap items-center gap-2.5">
+      <div className="flex flex-wrap items-center gap-2">
         {/* Controles de Projeção na TV */}
         <ProjectionToolbar campaignId={campaignId} />
 
@@ -107,75 +107,75 @@ export function SheetHeader({
               campaignId,
             })
           }
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                     bg-blue-600/20 text-blue-300 border border-blue-500/30 hover:bg-blue-600/30
-                     transition-all cursor-pointer shadow-xs"
+          className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-medium
+                     bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-white/20 text-zinc-200 hover:text-white
+                     transition-all cursor-pointer shadow-xs active:scale-95 group"
           title="Abrir rolador de dados (Digital / Físico)"
         >
-          <Dices className="w-3.5 h-3.5 text-blue-400" />
-          Rolar Dado
+          <Dices className="w-3.5 h-3.5 text-sky-400 group-hover:text-sky-300 transition-colors" />
+          <span>Rolar Dado</span>
         </button>
 
         <button
           type="button"
           onClick={openHistory}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                     bg-purple-600/20 text-purple-300 border border-purple-500/30 hover:bg-purple-600/30
-                     transition-all cursor-pointer shadow-xs"
+          className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-medium
+                     bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-white/20 text-zinc-200 hover:text-white
+                     transition-all cursor-pointer shadow-xs active:scale-95 group"
           title="Abrir histórico de rolagens"
         >
-          <History className="w-3.5 h-3.5 text-purple-400" />
-          Histórico
+          <History className="w-3.5 h-3.5 text-violet-400 group-hover:text-violet-300 transition-colors" />
+          <span>Histórico</span>
         </button>
 
         <button
           type="button"
           onClick={openCompendium}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                     bg-amber-600/20 text-amber-300 border border-amber-500/30 hover:bg-amber-600/30
-                     transition-all cursor-pointer shadow-xs"
+          className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-medium
+                     bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-white/20 text-zinc-200 hover:text-white
+                     transition-all cursor-pointer shadow-xs active:scale-95 group"
           title="Abrir compêndio de regras de Feiticeiros e Maldições"
         >
-          <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-          Compêndio
+          <BookOpen className="w-3.5 h-3.5 text-amber-400 group-hover:text-amber-300 transition-colors" />
+          <span>Compêndio</span>
         </button>
 
         {onUpdateSheet && (
           <button
             type="button"
             onClick={() => setIsRestModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
-                       bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30
-                       transition-all cursor-pointer shadow-xs"
+            className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-medium
+                       bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-white/20 text-zinc-200 hover:text-white
+                       transition-all cursor-pointer shadow-xs active:scale-95 group"
             title="Realizar Descanso Curto ou Longo"
           >
-            <Moon className="w-3.5 h-3.5 text-indigo-400" />
+            <Moon className="w-3.5 h-3.5 text-indigo-400 group-hover:text-indigo-300 transition-colors" />
             <span>Descanso</span>
-            <span className="text-[10px] px-1 py-0.2 rounded bg-indigo-950/80 border border-indigo-700/50 text-indigo-300 font-mono">
+            <span className="text-[10px] px-1.5 py-0.2 rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-mono">
               {availDV}/{totalDV} {die}
             </span>
           </button>
         )}
 
         {/* Status de salvamento e botão manual */}
-        <div className="flex items-center gap-2 pl-2 border-l border-[var(--border-default)]">
-          <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
+        <div className="flex items-center gap-2 pl-2 border-l border-[#23272F]">
+          <div className="flex items-center gap-1 text-xs text-zinc-500">
             {saveStatus === "saving" && (
               <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400" />
-                <span className="hidden sm:inline">Salvando...</span>
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400" />
+                <span className="hidden sm:inline text-zinc-400">Salvando...</span>
               </>
             )}
             {saveStatus === "saved" && (
               <>
-                <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
-                <span className="text-green-400 hidden sm:inline">Salvo</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-emerald-400 hidden sm:inline">Salvo</span>
               </>
             )}
             {saveStatus === "error" && (
               <>
-                <AlertCircle className="w-3.5 h-3.5 text-red-400" />
-                <span className="text-red-400 hidden sm:inline">Erro</span>
+                <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
+                <span className="text-rose-400 hidden sm:inline">Erro</span>
               </>
             )}
           </div>
@@ -183,10 +183,10 @@ export function SheetHeader({
           <button
             onClick={onManualSave}
             disabled={saveStatus === "saving"}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] border border-[var(--border-default)] text-[var(--text-primary)] transition-colors cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-1.5 h-8 px-2.5 text-xs font-medium rounded-lg bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] text-zinc-200 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
             title="Salvar alterações no banco de dados agora"
           >
-            <Save className="w-3.5 h-3.5" />
+            <Save className="w-3.5 h-3.5 text-zinc-400" />
             <span className="hidden sm:inline">Salvar</span>
           </button>
         </div>

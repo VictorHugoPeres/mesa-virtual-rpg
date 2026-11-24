@@ -70,11 +70,11 @@ export function SessionJournalDrawer({
   return (
     <Portal>
       <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="w-full max-w-lg h-full bg-zinc-950 border-l border-white/10 shadow-2xl flex flex-col text-white animate-in slide-in-from-right duration-200">
+      <div className="w-full max-w-lg h-full bg-[#14161A] border-l border-[#23272F] shadow-2xl flex flex-col text-white animate-in slide-in-from-right duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 bg-zinc-900/80">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#23272F] bg-[#0B0C0E]">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-amber-950/80 border border-amber-800/60 text-amber-400">
+            <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
               <BookMarked className="w-4 h-4" />
             </div>
             <div>

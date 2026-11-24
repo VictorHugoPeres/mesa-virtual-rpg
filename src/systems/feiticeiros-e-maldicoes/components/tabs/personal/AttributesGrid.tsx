@@ -90,9 +90,11 @@ export function AttributesGrid({
                 type="button"
                 onClick={() => handleRollAttribute(key, mod)}
                 className={`w-full flex items-center justify-center gap-1 text-sm font-bold py-1 px-2 rounded cursor-pointer transition-all ${
-                  mod >= 0
-                    ? "text-green-400 bg-green-950/30 hover:bg-green-900/50 hover:text-green-300"
-                    : "text-red-400 bg-red-950/30 hover:bg-red-900/50 hover:text-red-300"
+                  mod > 0
+                    ? "text-emerald-400 bg-emerald-950/30 hover:bg-emerald-900/50 hover:text-emerald-300"
+                    : mod < 0
+                    ? "text-rose-400 bg-rose-950/30 hover:bg-rose-900/50 hover:text-rose-300"
+                    : "text-zinc-400 bg-[#0B0C0E] hover:bg-zinc-800 hover:text-white"
                 }`}
                 title={`Rolar 1d20 ${mod >= 0 ? `+ ${mod}` : `- ${Math.abs(mod)}`}`}
               >

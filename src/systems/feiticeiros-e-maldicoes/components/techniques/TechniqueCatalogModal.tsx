@@ -65,19 +65,19 @@ export function TechniqueCatalogModal({
       <div className="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-150">
         <div className="w-full max-w-5xl h-[92dvh] sm:h-[85vh] max-h-[92dvh] sm:max-h-[85vh] bg-[var(--bg-card)] border border-[var(--border-default)] rounded-2xl shadow-2xl flex flex-col min-h-0 overflow-hidden animate-in zoom-in-95 duration-150">
           {/* Header Superior */}
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border-default)] bg-[var(--bg-secondary)] shrink-0">
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#23272F] bg-[#0B0C0E] shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400">
+              <div className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
                 <BookOpen className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   Catálogo Oficial de Técnicas Inatas
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-semibold">
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-300 border border-rose-500/20 font-semibold">
                     {READY_TECHNIQUES.length} Técnicas da Obra
                   </span>
                 </h3>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-xs text-zinc-400">
                   Selecione uma técnica pronta para importar seu funcionamento básico e feitiços para a ficha.
                 </p>
               </div>
@@ -86,7 +86,7 @@ export function TechniqueCatalogModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>

@@ -74,11 +74,11 @@ export function FinishSessionModal({
   return (
     <Portal>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="w-full max-w-lg bg-zinc-950 border border-white/15 rounded-2xl shadow-2xl p-5 text-white space-y-4">
+      <div className="w-full max-w-lg bg-[#14161A] border border-[#23272F] rounded-2xl shadow-2xl p-5 text-white space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+        <div className="flex items-center justify-between border-b border-[#23272F] pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-amber-950/80 border border-amber-800/60 text-amber-400">
+            <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
               <Flag className="w-4 h-4" />
             </div>
             <div>
@@ -108,7 +108,7 @@ export function FinishSessionModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ex: A Batalha na Floresta Sombria"
-              className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-white/15 text-white focus:outline-none focus:border-amber-500 text-xs font-semibold"
+              className="w-full px-3 py-2 rounded-xl bg-[#0B0C0E] border border-[#23272F] text-white focus:outline-none focus:border-rose-500/50 text-xs font-semibold"
             />
           </div>
 
@@ -121,11 +121,11 @@ export function FinishSessionModal({
               onChange={(e) => setNotes(e.target.value)}
               rows={4}
               placeholder="Resumo dos eventos da mesa, itens obtidos, ganchos deixados em aberto..."
-              className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-white/15 text-white focus:outline-none focus:border-amber-500 text-xs resize-y leading-relaxed"
+              className="w-full px-3 py-2 rounded-xl bg-[#0B0C0E] border border-[#23272F] text-white focus:outline-none focus:border-rose-500/50 text-xs resize-y leading-relaxed"
             />
           </div>
 
-          <div className="p-3 rounded-xl bg-zinc-900/80 border border-amber-500/20 text-amber-200/90 flex items-start gap-2.5 text-[11px]">
+          <div className="p-3 rounded-xl bg-[#0B0C0E] border border-amber-500/20 text-amber-200/90 flex items-start gap-2.5 text-[11px]">
             <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
             <p className="leading-relaxed">
               Ao concluir, esta sessão será arquivada no <strong>Diário de Sessões</strong> com suas rolagens. A <strong>Sessão #{sessionNumber + 1}</strong> será aberta como ATIVA com histórico limpo. Personagens, fichas e mapas continuam preservados.
@@ -134,12 +134,12 @@ export function FinishSessionModal({
         </div>
 
         {/* Ações */}
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#23272F]">
           <button
             type="button"
             disabled={submitting}
             onClick={onClose}
-            className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white font-semibold text-xs border border-white/10 cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-[#0B0C0E] hover:bg-[#1A1D24] text-zinc-300 hover:text-white font-semibold text-xs border border-[#23272F] cursor-pointer"
           >
             Voltar
           </button>
@@ -147,7 +147,7 @@ export function FinishSessionModal({
             type="button"
             disabled={submitting}
             onClick={handleFinish}
-            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md cursor-pointer disabled:opacity-50"
+            className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm shadow-rose-950/30 cursor-pointer disabled:opacity-50 active:scale-95"
           >
             {submitting ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />

@@ -71,7 +71,7 @@ export function ConfirmDialog({
     <Portal>
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
       <div
-        className="w-full max-w-md bg-zinc-950 border border-white/15 rounded-2xl shadow-2xl p-5 text-white space-y-4 animate-in zoom-in-95 duration-150"
+        className="w-full max-w-md bg-[#14161A] border border-[#23272F] rounded-2xl shadow-2xl p-5 text-white space-y-4 animate-in zoom-in-95 duration-150"
         role="dialog"
         aria-modal="true"
       >
@@ -95,12 +95,12 @@ export function ConfirmDialog({
           {message}
         </p>
 
-        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-white/10">
+        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#23272F]">
           {!isAlert && (
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white text-xs font-semibold border border-white/10 transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-[#0B0C0E] hover:bg-[#1A1D24] text-zinc-300 hover:text-white text-xs font-semibold border border-[#23272F] transition-colors cursor-pointer"
             >
               {cancelText}
             </button>

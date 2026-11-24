@@ -93,16 +93,16 @@ export function ThreatCombatDrawer({
   return (
     <Portal>
       <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="w-full max-w-md bg-zinc-950 border-l border-white/15 h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 text-white">
+      <div className="w-full max-w-md bg-[#14161A] border-l border-[#23272F] h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200 text-white">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10 bg-zinc-900/90">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#23272F] bg-[#0B0C0E]">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-red-950/80 border border-red-800/60 text-red-400">
+            <div className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
               <Skull className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded bg-red-950 text-red-400 border border-red-800/60">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20">
                   {charData?.grade || "Ameaça"}
                 </span>
                 {characterId && (

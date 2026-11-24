@@ -89,15 +89,15 @@ export function TechniqueDetails({
     <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)]">
       <div className="flex items-center justify-between gap-2 mb-4">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-blue-400" />
+          <Sparkles className="w-5 h-5 text-rose-400" />
           <h3 className="text-base font-semibold">Técnica Amaldiçoada & Atributos Mágicos</h3>
         </div>
         <button
           type="button"
           onClick={() => setIsCatalogOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600/20 text-blue-300 border border-blue-500/30 hover:bg-blue-600/30 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-white/20 text-zinc-200 hover:text-white transition-all cursor-pointer shadow-xs active:scale-95"
         >
-          <BookOpen className="w-3.5 h-3.5" /> 📚 Catálogo de Técnicas
+          <BookOpen className="w-3.5 h-3.5 text-amber-400" /> Catálogo de Técnicas
         </button>
       </div>
 

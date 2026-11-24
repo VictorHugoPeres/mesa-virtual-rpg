@@ -77,12 +77,12 @@ export function RollHistoryDrawer({ campaignId: propCampaignId }: { campaignId?:
   return (
     <Portal>
       <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="w-full max-w-md h-full bg-[var(--bg-card)] border-l border-[var(--border-default)] shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
+      <div className="w-full max-w-md h-full bg-[#14161A] border-l border-[#23272F] shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
         {/* Header da gaveta */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-default)]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#23272F] bg-[#0B0C0E]">
           <div className="flex items-center gap-2">
-            <History className="w-5 h-5 text-purple-400" />
-            <h3 className="font-bold text-base">Histórico de Rolagens</h3>
+            <History className="w-5 h-5 text-violet-400" />
+            <h3 className="font-bold text-base text-white">Histórico de Rolagens</h3>
           </div>
 
           <div className="flex items-center gap-2">

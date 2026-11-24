@@ -85,20 +85,20 @@ export function CharacterWizardModal({
     <Portal>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="w-full max-w-4xl h-[90vh] max-h-[90vh] bg-[var(--bg-card)] border border-[var(--border-default)] rounded-2xl shadow-2xl flex flex-col min-h-0 overflow-hidden animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-default)] bg-[var(--bg-secondary)] shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#23272F] bg-[#0B0C0E] shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+            <div className="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
               <Wand2 className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-[var(--text-primary)]">Criador Guiado de Personagem</h2>
-              <p className="text-xs text-[var(--text-muted)]">Sistema Oficial Feiticeiros & Maldições (F&M v2.0)</p>
+              <h2 className="text-base font-bold text-white">Criador Guiado de Personagem</h2>
+              <p className="text-xs text-zinc-400">Sistema Oficial Feiticeiros & Maldições (F&M v2.0)</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -193,14 +193,14 @@ export function CharacterWizardModal({
           )}
         </div>
 
-        <div className="flex items-center justify-between px-6 py-3.5 border-t border-[var(--border-default)] bg-[var(--bg-secondary)] shrink-0">
+        <div className="flex items-center justify-between px-6 py-3.5 border-t border-[#23272F] bg-[#0B0C0E] shrink-0">
           <button
             type="button"
             onClick={() => {
               if (currentStep === 1) onClose();
               else setCurrentStep((prev) => prev - 1);
             }}
-            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg text-zinc-400 hover:text-white hover:bg-[#1A1D24] transition-colors cursor-pointer"
           >
             {currentStep === 1 ? "Cancelar" : <><ArrowLeft className="w-3.5 h-3.5" /> Anterior</>}
           </button>
@@ -216,7 +216,7 @@ export function CharacterWizardModal({
                 type="button"
                 disabled={!isCurrentStepValid}
                 onClick={() => setCurrentStep((prev) => Math.min(7, prev + 1))}
-                className="flex items-center gap-1.5 px-5 py-2 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white shadow-sm transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-5 py-2 text-xs font-semibold rounded-xl bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white shadow-sm shadow-rose-950/30 transition-all cursor-pointer active:scale-95"
               >
                 Próximo Passo
                 <ArrowRight className="w-3.5 h-3.5" />

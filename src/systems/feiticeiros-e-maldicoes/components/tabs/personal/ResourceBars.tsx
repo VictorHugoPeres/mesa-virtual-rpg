@@ -72,9 +72,9 @@ export function ResourceBars({ data, onChange }: ResourceBarsProps) {
       <ResourceBarCard
         label="Pontos de Vida (PV)"
         icon={<Heart className="w-4 h-4" />}
-        colorClass="text-red-400"
-        barColor="bg-red-600"
-        hoverBg="hover:bg-red-950/50"
+        colorClass="text-rose-400"
+        barColor="bg-rose-500"
+        hoverBg="hover:bg-rose-950/40"
         current={data.hp.current}
         max={data.hp.max}
         temp={data.hp.temp}
@@ -83,9 +83,9 @@ export function ResourceBars({ data, onChange }: ResourceBarsProps) {
             type="button"
             onClick={applySuggestedHpPe}
             title="Calcular PV e PE máximos pelas regras de nível e constituição"
-            className="text-[10px] flex items-center gap-1 text-[var(--text-muted)] hover:text-red-300 transition-colors cursor-pointer"
+            className="text-[10px] flex items-center gap-1 text-zinc-500 hover:text-rose-300 transition-colors cursor-pointer"
           >
-            <Sparkles className="w-3 h-3" /> Auto
+            <Sparkles className="w-3 h-3 text-rose-400" /> Auto
           </button>
         }
         onUpdateCurrent={updateHp}
@@ -104,9 +104,9 @@ export function ResourceBars({ data, onChange }: ResourceBarsProps) {
       <ResourceBarCard
         label="Energia Amaldiçoada (PE)"
         icon={<Zap className="w-4 h-4" />}
-        colorClass="text-blue-400"
-        barColor="bg-blue-600"
-        hoverBg="hover:bg-blue-950/50"
+        colorClass="text-sky-400"
+        barColor="bg-sky-400"
+        hoverBg="hover:bg-sky-950/40"
         current={data.energy.current}
         max={data.energy.max}
         temp={data.energy.temp}
@@ -127,8 +127,8 @@ export function ResourceBars({ data, onChange }: ResourceBarsProps) {
         label="Integridade da Alma"
         icon={<Activity className="w-4 h-4" />}
         colorClass="text-purple-400"
-        barColor="bg-purple-600"
-        hoverBg="hover:bg-purple-950/50"
+        barColor="bg-purple-500"
+        hoverBg="hover:bg-purple-950/40"
         current={data.integrity.current}
         max={data.integrity.max}
         temp={data.integrity.temp}
@@ -146,17 +146,17 @@ export function ResourceBars({ data, onChange }: ResourceBarsProps) {
       />
 
       {/* 4. Defesa / Classe de Armadura (CA) */}
-      <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)]">
+      <div className="p-4 rounded-xl bg-[#14161A] border border-[#23272F]">
         <div className="flex items-center justify-between mb-2">
-          <span className="flex items-center gap-1.5 text-sm font-semibold text-amber-400">
-            <Shield className="w-4 h-4" /> Defesa / CA
+          <span className="flex items-center gap-1.5 text-sm font-semibold text-zinc-300">
+            <Shield className="w-4 h-4 text-zinc-400" /> Defesa (CA)
           </span>
-          <span className="text-2xl font-bold text-amber-300">
+          <span className="text-2xl font-bold text-zinc-200">
             {calcDefense(data)}
           </span>
         </div>
 
-        <p className="text-[11px] text-[var(--text-muted)] mb-3">
+        <p className="text-[11px] text-zinc-400 mb-3">
           10 + DEX ({dexMod >= 0 ? `+${dexMod}` : dexMod}) + Uniforme + Escudo + Outros
         </p>
 

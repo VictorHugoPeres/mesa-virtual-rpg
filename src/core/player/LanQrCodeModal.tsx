@@ -69,22 +69,22 @@ export function LanQrCodeModal({
   return (
     <Portal>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="w-full max-w-md bg-[var(--bg-card)] border border-[var(--border-default)] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+      <div className="w-full max-w-md bg-[#14161A] border border-[#23272F] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-default)] bg-[var(--bg-secondary)]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#23272F] bg-[#0B0C0E]">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+            <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
               <Smartphone className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-[var(--text-primary)]">Conectar Celulares (Wi-Fi)</h3>
-              <p className="text-xs text-[var(--text-muted)]">Portal Mobile dos Jogadores</p>
+              <h3 className="text-base font-bold text-white">Conectar Celulares (Wi-Fi)</h3>
+              <p className="text-xs text-zinc-400">Portal Mobile dos Jogadores</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>

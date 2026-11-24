@@ -115,9 +115,9 @@ export function GuidedSpellBuilderModal({
     <Portal>
       <div className="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-150">
         <div className="w-full max-w-2xl h-[92dvh] sm:h-auto max-h-[92dvh] sm:max-h-[85vh] bg-[var(--bg-card)] border border-[var(--border-default)] rounded-2xl shadow-2xl flex flex-col min-h-0 overflow-hidden animate-in zoom-in-95 duration-150">
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border-default)] bg-[var(--bg-secondary)] shrink-0">
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#23272F] bg-[#0B0C0E] shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400">
+              <div className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
                 <Wand2 className="w-5 h-5" />
               </div>
               <div>
@@ -240,7 +240,7 @@ export function GuidedSpellBuilderModal({
                 value={customEffectText}
                 onChange={(e) => setCustomEffectText(e.target.value)}
                 placeholder="Descreva visualmente o feitiço e particularidades da sua técnica..."
-                className="w-full text-xs px-3 py-2 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-white focus:outline-none focus:border-purple-500 resize-none"
+                className="w-full text-xs px-3 py-2 rounded-xl bg-[#0B0C0E] border border-[#23272F] text-white focus:outline-none focus:border-rose-500/50 resize-none"
               />
             </div>
 
@@ -254,18 +254,18 @@ export function GuidedSpellBuilderModal({
               onSelectRitual={setRitual}
             />
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-[var(--border-default)]">
+            <div className="flex justify-end gap-2 pt-3 border-t border-[#23272F]">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-xs rounded-xl border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-white hover:bg-white/5 cursor-pointer"
+                className="px-4 py-2 text-xs rounded-xl border border-[#23272F] text-zinc-400 hover:text-white hover:bg-white/5 cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={!name.trim()}
-                className="flex items-center gap-1.5 px-5 py-2 text-xs font-bold rounded-xl bg-purple-600 hover:bg-purple-500 text-white shadow-md disabled:opacity-40 cursor-pointer"
+                className="flex items-center gap-1.5 px-5 py-2 text-xs font-semibold rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-sm shadow-rose-950/30 disabled:opacity-40 cursor-pointer active:scale-95"
               >
                 <Check className="w-4 h-4" /> Salvar Feitiço no Grimório
               </button>

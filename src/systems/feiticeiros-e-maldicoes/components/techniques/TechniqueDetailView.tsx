@@ -91,7 +91,7 @@ export function TechniqueDetailView({
           <button
             type="button"
             onClick={handleConfirm}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md transition-colors cursor-pointer shrink-0"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white shadow-sm shadow-rose-950/30 transition-all cursor-pointer shrink-0 active:scale-95"
           >
             <Check className="w-4 h-4" /> Aplicar Técnica
           </button>

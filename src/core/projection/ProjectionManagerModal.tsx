@@ -129,16 +129,16 @@ export function ProjectionManagerModal({
   return (
     <Portal>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="w-full max-w-3xl max-h-[90vh] rounded-2xl bg-[var(--bg-card)] border border-[var(--border-default)] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+      <div className="w-full max-w-3xl max-h-[90vh] rounded-2xl bg-[#14161A] border border-[#23272F] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
         {/* Header do Modal */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-default)]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#23272F] bg-[#0B0C0E]">
           <div className="flex items-center gap-2.5">
             <Tv className="w-5 h-5 text-emerald-400" />
             <div>
-              <h3 className="text-base font-bold text-[var(--text-primary)]">
+              <h3 className="text-base font-bold text-white">
                 Projeção no Telão & Cenas
               </h3>
-              <p className="text-xs text-[var(--text-muted)]">
+              <p className="text-xs text-zinc-400">
                 {activeProjection?.title ? (
                   <span className="text-emerald-400 font-medium">
                     Projetando no momento: {activeProjection.title}

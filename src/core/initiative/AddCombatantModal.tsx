@@ -116,55 +116,55 @@ export function AddCombatantModal({
   return (
     <Portal>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="w-full max-w-lg bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      <div className="w-full max-w-lg bg-[#14161A] border border-[#23272F] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
         {/* Topo */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-default)]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#23272F] bg-[#0B0C0E]">
           <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <Plus className="w-5 h-5 text-blue-400" /> Adicionar Combatente
+            <Plus className="w-5 h-5 text-rose-400" /> Adicionar Combatente
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-[var(--text-muted)] hover:text-white hover:bg-[var(--bg-secondary)]"
+            className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Abas */}
-        <div className="flex border-b border-[var(--border-default)] bg-[var(--bg-secondary)] text-xs">
+        <div className="flex border-b border-[#23272F] bg-[#0B0C0E]/60 text-xs">
           <button
             type="button"
             onClick={() => setTab("pcs")}
-            className={`flex-1 py-2.5 font-semibold text-center border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 font-semibold text-center border-b-2 transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
               tab === "pcs"
-                ? "border-blue-500 text-blue-400 bg-[var(--bg-card)]"
-                : "border-transparent text-[var(--text-secondary)] hover:text-white"
+                ? "border-rose-500/60 text-white bg-white/[0.05]"
+                : "border-transparent text-zinc-400 hover:text-white"
             }`}
           >
-            <User className="w-3.5 h-3.5" /> Personagens ({pcs.length})
+            <User className={`w-3.5 h-3.5 ${tab === "pcs" ? "text-sky-400" : "text-zinc-400"}`} /> Personagens ({pcs.length})
           </button>
           <button
             type="button"
             onClick={() => setTab("threats")}
-            className={`flex-1 py-2.5 font-semibold text-center border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 font-semibold text-center border-b-2 transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
               tab === "threats"
-                ? "border-red-500 text-red-400 bg-[var(--bg-card)]"
-                : "border-transparent text-[var(--text-secondary)] hover:text-white"
+                ? "border-rose-500/60 text-white bg-white/[0.05]"
+                : "border-transparent text-zinc-400 hover:text-white"
             }`}
           >
-            <Skull className="w-3.5 h-3.5" /> Ameaças ({threats.length})
+            <Skull className={`w-3.5 h-3.5 ${tab === "threats" ? "text-rose-400" : "text-zinc-400"}`} /> Ameaças ({threats.length})
           </button>
           <button
             type="button"
             onClick={() => setTab("custom")}
-            className={`flex-1 py-2.5 font-semibold text-center border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 font-semibold text-center border-b-2 transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
               tab === "custom"
-                ? "border-purple-500 text-purple-400 bg-[var(--bg-card)]"
-                : "border-transparent text-[var(--text-secondary)] hover:text-white"
+                ? "border-rose-500/60 text-white bg-white/[0.05]"
+                : "border-transparent text-zinc-400 hover:text-white"
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5" /> Rápido / Custom
+            <Sparkles className={`w-3.5 h-3.5 ${tab === "custom" ? "text-amber-400" : "text-zinc-400"}`} /> Rápido / Custom
           </button>
         </div>
 

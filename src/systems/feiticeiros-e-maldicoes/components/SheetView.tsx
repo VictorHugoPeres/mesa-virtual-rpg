@@ -159,7 +159,7 @@ export function SheetView({
       />
 
       {/* Navegação entre as 5 Abas */}
-      <div className="flex overflow-x-auto gap-1 border-b border-[var(--border-default)] pb-px">
+      <div className="flex overflow-x-auto gap-1 border-b border-[#23272F] pb-px">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
           return (
@@ -168,11 +168,13 @@ export function SheetView({
               onClick={() => setActiveTab(tab.key)}
               className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-t-lg transition-all cursor-pointer whitespace-nowrap border-b-2 ${
                 isActive
-                  ? "bg-[var(--bg-card)] border-blue-500 text-blue-400 shadow-xs"
-                  : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-card)]/50"
+                  ? "bg-white/[0.05] border-rose-500/60 text-white shadow-xs"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.02]"
               }`}
             >
-              {tab.icon}
+              <span className={isActive ? "text-rose-400" : "text-zinc-400"}>
+                {tab.icon}
+              </span>
               {tab.label}
             </button>
           );

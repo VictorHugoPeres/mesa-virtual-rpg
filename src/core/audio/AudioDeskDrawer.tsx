@@ -23,18 +23,18 @@ export function AudioDeskDrawer({ campaignId }: AudioDeskDrawerProps) {
     <>
       <Portal>
         <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-        <div className="w-full max-w-2xl bg-[var(--bg-primary)] border-l border-[var(--border-default)] h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
+        <div className="w-full max-w-2xl bg-[#14161A] border-l border-[#23272F] h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
           {/* Cabeçalho */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-default)] bg-[var(--bg-card)]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#23272F] bg-[#0B0C0E]">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-pink-950/60 border border-pink-800 text-pink-400">
+              <div className="p-2 rounded-lg bg-pink-500/10 border border-pink-500/20 text-pink-400">
                 <Music className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-[var(--text-primary)]">
+                <h2 className="text-base font-bold text-white">
                   Mesa de Som (Áudio & SFX)
                 </h2>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-xs text-zinc-400">
                   Músicas ambiente e soundboard de efeitos em tempo real
                 </p>
               </div>

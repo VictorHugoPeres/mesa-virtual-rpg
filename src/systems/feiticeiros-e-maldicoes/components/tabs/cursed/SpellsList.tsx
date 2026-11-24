@@ -170,17 +170,17 @@ export function SpellsList({
           <button
             type="button"
             onClick={() => setIsCatalogOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600/20 text-blue-300 border border-blue-500/30 hover:bg-blue-600/30 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-white/20 text-zinc-200 hover:text-white transition-all cursor-pointer shadow-xs active:scale-95"
           >
-            <BookOpen className="w-3.5 h-3.5" /> Catálogo da Obra
+            <BookOpen className="w-3.5 h-3.5 text-amber-400" /> Catálogo da Obra
           </button>
 
           <button
             type="button"
             onClick={() => setIsBuilderOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-purple-600 hover:bg-purple-500 text-white shadow-sm transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-sm shadow-rose-950/30 transition-all cursor-pointer active:scale-95"
           >
-            <Sparkles className="w-3.5 h-3.5" /> + Feitiço Guiado (F&M 2.5)
+            <Sparkles className="w-3.5 h-3.5 text-white" /> + Feitiço Guiado (F&M 2.5)
           </button>
 
           <button
@@ -206,10 +206,10 @@ export function SpellsList({
                 },
               }));
             }}
-            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-white transition-colors cursor-pointer"
+            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-white/20 text-zinc-300 hover:text-white transition-all cursor-pointer shadow-xs active:scale-95"
             title="Criar feitiço em branco para preenchimento manual"
           >
-            <Plus className="w-3.5 h-3.5" /> Rápido
+            <Plus className="w-3.5 h-3.5 text-zinc-400" /> Rápido
           </button>
         </div>
       </div>

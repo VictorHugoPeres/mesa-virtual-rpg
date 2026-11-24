@@ -44,13 +44,13 @@ export function QuickCompendiumDrawer({ isOpen, onClose }: QuickCompendiumDrawer
   return (
     <Portal>
       <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="w-full max-w-lg h-full bg-[var(--bg-card)] border-l border-[var(--border-default)] shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
+      <div className="w-full max-w-lg h-full bg-[#14161A] border-l border-[#23272F] shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
         {/* Header do Compêndio */}
-        <div className="px-5 py-4 border-b border-[var(--border-default)] space-y-3">
+        <div className="px-5 py-4 border-b border-[#23272F] bg-[#0B0C0E] space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-indigo-400" />
-              <h3 className="font-bold text-base">Compêndio Rápido Jujutsu</h3>
+              <BookOpen className="w-5 h-5 text-amber-400" />
+              <h3 className="font-bold text-base text-white">Compêndio Rápido Jujutsu</h3>
             </div>
             <button
               type="button"

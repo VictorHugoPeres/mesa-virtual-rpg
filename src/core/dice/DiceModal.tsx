@@ -16,52 +16,52 @@ export function DiceModal() {
   return (
     <Portal>
       <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
-        <div className="w-full max-w-md rounded-2xl bg-[var(--bg-card)] border border-[var(--border-default)] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+        <div className="w-full max-w-md rounded-2xl bg-[#14161A] border border-[#23272F] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
           {/* Header do modal */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-default)]">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#23272F] bg-[#0B0C0E]">
             <div>
-              <h3 className="text-base font-bold flex items-center gap-2">
-                <Dices className="w-5 h-5 text-blue-400" />
+              <h3 className="text-base font-bold flex items-center gap-2 text-white">
+                <Dices className="w-5 h-5 text-sky-400" />
                 {activeRequest?.label || "Rolador de Dados"}
               </h3>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                Rolando como: <span className="text-[var(--text-primary)] font-medium">{activeRequest?.roller || "Mestre"}</span>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Rolando como: <span className="text-zinc-200 font-medium">{activeRequest?.roller || "Mestre"}</span>
               </p>
             </div>
 
             <button
               type="button"
               onClick={closeRoller}
-              className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer"
+              className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Abas: Digital vs Físico */}
-          <div className="flex border-b border-[var(--border-default)] bg-[var(--bg-secondary)]">
+          <div className="flex border-b border-[#23272F] bg-[#0B0C0E]/60">
             <button
               type="button"
               onClick={() => setTab("digital")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold transition-all cursor-pointer border-b-2 ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-semibold transition-all cursor-pointer border-b-2 ${
                 tab === "digital"
-                  ? "border-blue-500 text-blue-400 bg-[var(--bg-card)]"
-                  : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                  ? "border-rose-500/60 text-white bg-white/[0.05]"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200"
               }`}
             >
-              <Dices className="w-4 h-4" /> Rolagem Digital (2D)
+              <Dices className={`w-4 h-4 ${tab === "digital" ? "text-sky-400" : "text-zinc-400"}`} /> Rolagem Digital (2D)
             </button>
 
             <button
               type="button"
               onClick={() => setTab("physical")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold transition-all cursor-pointer border-b-2 ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-semibold transition-all cursor-pointer border-b-2 ${
                 tab === "physical"
-                  ? "border-emerald-500 text-emerald-400 bg-[var(--bg-card)]"
-                  : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                  ? "border-rose-500/60 text-white bg-white/[0.05]"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200"
               }`}
             >
-              <Dice5 className="w-4 h-4" /> Dado Físico (Input Real)
+              <Dice5 className={`w-4 h-4 ${tab === "physical" ? "text-emerald-400" : "text-zinc-400"}`} /> Dado Físico (Input Real)
             </button>
           </div>
 
