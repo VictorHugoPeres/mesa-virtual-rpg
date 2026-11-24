@@ -59,8 +59,8 @@ export function ElementEditModal({
   return (
     <Portal>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="w-full max-w-md bg-zinc-950 border border-white/20 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10">
+      <div className="w-full max-w-md bg-[#14161A] border border-[#23272F] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#23272F]">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             Editar {element.type === "TOKEN" ? "Token" : "Objeto de Cenário"}
           </h3>
@@ -82,7 +82,7 @@ export function ElementEditModal({
               required
               value={name || ""}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-zinc-900 border border-white/15 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-xs"
+              className="w-full bg-[#0B0C0E] border border-[#23272F] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-rose-500 text-xs"
             />
           </div>
 
@@ -96,7 +96,7 @@ export function ElementEditModal({
                 max="8"
                 value={widthCells || 1}
                 onChange={(e) => setWidthCells(Number(e.target.value) || 1)}
-                className="w-full bg-zinc-900 border border-white/15 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-xs text-center"
+                className="w-full bg-[#0B0C0E] border border-[#23272F] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-rose-500 text-xs text-center"
               />
             </div>
             <div>
@@ -107,7 +107,7 @@ export function ElementEditModal({
                 max="8"
                 value={heightCells || 1}
                 onChange={(e) => setHeightCells(Number(e.target.value) || 1)}
-                className="w-full bg-zinc-900 border border-white/15 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-xs text-center"
+                className="w-full bg-[#0B0C0E] border border-[#23272F] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-rose-500 text-xs text-center"
               />
             </div>
           </div>
@@ -119,7 +119,7 @@ export function ElementEditModal({
               <button
                 type="button"
                 onClick={() => setShowGallery(!showGallery)}
-                className="text-[11px] text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 cursor-pointer"
+                className="text-[11px] text-rose-400 hover:text-rose-300 font-bold flex items-center gap-1 cursor-pointer"
               >
                 <ImageIcon className="w-3.5 h-3.5" />
                 {showGallery ? "Ocultar Galeria" : "Escolher da Galeria"}
@@ -130,7 +130,7 @@ export function ElementEditModal({
               placeholder="https://exemplo.com/imagem.png"
               value={imageUrl || ""}
               onChange={(e) => setImageUrl(e.target.value)}
-              className="w-full bg-zinc-900 border border-white/15 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-xs"
+              className="w-full bg-[#0B0C0E] border border-[#23272F] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-rose-500 text-xs"
             />
           </div>
 
@@ -199,17 +199,17 @@ export function ElementEditModal({
             </div>
           )}
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-white/10">
+          <div className="flex justify-end gap-2 pt-2 border-t border-[#23272F]">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 rounded-lg border border-white/15 text-zinc-400 hover:text-white cursor-pointer"
+              className="px-3 py-1.5 rounded-lg border border-[#23272F] text-zinc-400 hover:text-white hover:bg-[#1A1D24] cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg font-bold bg-emerald-600 text-white hover:bg-emerald-500 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg font-bold bg-rose-600 text-white hover:bg-rose-500 transition-colors cursor-pointer shadow-sm"
             >
               <Save className="w-3.5 h-3.5" /> Salvar Alterações
             </button>

@@ -55,11 +55,11 @@ export function MapHeaderBar({
   const secondaryMaps = maps.filter((m) => m.id !== selectedMapId);
 
   return (
-    <header className="min-h-14 py-2 px-3 sm:px-4 bg-zinc-950/95 border-b border-white/10 flex flex-wrap items-center justify-between gap-2.5 z-30 shrink-0 backdrop-blur-md">
+    <header className="min-h-14 py-2 px-3 sm:px-4 bg-[#0B0C0E]/95 border-b border-[#23272F] flex flex-wrap items-center justify-between gap-2.5 z-30 shrink-0 backdrop-blur-md">
       {/* Lado Esquerdo: Identificação, Seleção de Mapa e Elementos */}
       <div className="flex flex-wrap items-center gap-2">
         <BrandLogo variant="compact" size="sm" className="hidden sm:inline-flex" />
-        <div className="p-1.5 rounded-lg bg-emerald-950/80 border border-emerald-700/60 text-emerald-400">
+        <div className="p-1.5 rounded-lg bg-[#14161A] border border-[#23272F] text-emerald-400">
           <MapIcon className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
 
@@ -67,11 +67,11 @@ export function MapHeaderBar({
           <select
             value={selectedMapId || ""}
             onChange={(e) => onSelectMapId(e.target.value)}
-            className="bg-zinc-900 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-emerald-500 cursor-pointer max-w-[150px] sm:max-w-[190px] truncate"
+            className="bg-[#14161A] border border-[#23272F] rounded-lg px-2.5 py-1.5 text-xs font-bold text-zinc-100 focus:outline-none focus:border-white/20 cursor-pointer max-w-[150px] sm:max-w-[190px] truncate"
             title="Mapa Principal (Slot 1 na TV)"
           >
             {maps.map((m) => (
-              <option key={m.id} value={m.id} className="bg-zinc-900 text-white">
+              <option key={m.id} value={m.id} className="bg-[#14161A] text-zinc-100">
                 {m.title}
               </option>
             ))}
@@ -83,7 +83,7 @@ export function MapHeaderBar({
         <button
           type="button"
           onClick={onOpenAddModal}
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600/30 transition-colors cursor-pointer"
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600/10 text-rose-300 border border-rose-500/30 hover:bg-rose-600/20 transition-colors cursor-pointer"
         >
           <Plus className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Novo</span> Mapa
         </button>
@@ -92,7 +92,7 @@ export function MapHeaderBar({
           <button
             type="button"
             onClick={onOpenElementsDrawer}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-zinc-800 text-emerald-300 border border-emerald-500/30 hover:bg-zinc-700 hover:text-emerald-200 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#14161A] hover:bg-[#1A1D24] text-zinc-200 border border-[#23272F] transition-colors cursor-pointer"
             title="Adicionar Tokens de Combatentes e Objetos de Cenário"
           >
             <Users className="w-3.5 h-3.5 text-emerald-400" />
@@ -107,8 +107,8 @@ export function MapHeaderBar({
             onClick={onToggleCombatDrawer}
             className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               isCombatOpen
-                ? "bg-purple-600 text-white shadow-md shadow-purple-950 border border-purple-400"
-                : "bg-zinc-800 text-purple-300 hover:text-white border border-purple-500/30 hover:bg-zinc-700"
+                ? "bg-[#1A1D24] text-white border border-purple-500/50 shadow-md shadow-purple-950/20"
+                : "bg-[#14161A] text-zinc-300 hover:text-white border border-[#23272F] hover:bg-[#1A1D24]"
             }`}
             title="Abrir Painel Rápido de Combate & Iniciativa"
           >
@@ -122,10 +122,10 @@ export function MapHeaderBar({
           <button
             type="button"
             onClick={onOpenDiceModal}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-zinc-800 text-blue-300 hover:text-white border border-blue-500/30 hover:bg-zinc-700 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#14161A] text-zinc-300 hover:text-white border border-[#23272F] hover:bg-[#1A1D24] transition-all cursor-pointer"
             title="Abrir Rolador de Dados"
           >
-            <Dices className="w-3.5 h-3.5 text-blue-400" />
+            <Dices className="w-3.5 h-3.5 text-sky-400" />
             <span>Dados</span>
           </button>
         )}
@@ -139,7 +139,7 @@ export function MapHeaderBar({
             <select
               value={displayMode}
               onChange={(e) => onDisplayModeChange(e.target.value as MapDisplayMode)}
-              className="bg-zinc-900 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs font-bold text-zinc-200 focus:outline-none focus:border-emerald-500 cursor-pointer"
+              className="bg-[#14161A] border border-[#23272F] rounded-lg px-2.5 py-1.5 text-xs font-bold text-zinc-200 focus:outline-none focus:border-white/20 cursor-pointer"
               title="Modo de visualização no Telão da TV"
             >
               <option value="fit">📺 Ajustar à Tela (TV)</option>
@@ -152,7 +152,7 @@ export function MapHeaderBar({
               <select
                 value={secondaryMapId || ""}
                 onChange={(e) => onSecondaryMapIdChange(e.target.value)}
-                className="bg-zinc-900 border border-emerald-500/50 rounded-lg px-2.5 py-1.5 text-xs font-bold text-emerald-300 focus:outline-none focus:border-emerald-400 cursor-pointer max-w-[130px] sm:max-w-[160px] truncate animate-in fade-in duration-150"
+                className="bg-[#14161A] border border-emerald-500/40 rounded-lg px-2.5 py-1.5 text-xs font-bold text-emerald-300 focus:outline-none focus:border-emerald-400 cursor-pointer max-w-[130px] sm:max-w-[160px] truncate animate-in fade-in duration-150"
                 title="Selecione o segundo mapa para o Slot 2 do Telão"
               >
                 <option value="">-- 2º Mapa --</option>
@@ -170,8 +170,8 @@ export function MapHeaderBar({
               onClick={onToggleProjection}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 isProjected
-                  ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 ring-2 ring-emerald-400/50"
-                  : "bg-zinc-800 text-zinc-300 hover:text-white border border-white/10"
+                  ? "bg-emerald-600/90 text-white shadow-lg shadow-emerald-900/30 border border-emerald-400/50"
+                  : "bg-[#14161A] text-zinc-300 hover:text-white border border-[#23272F] hover:bg-[#1A1D24]"
               }`}
               title={isProjected ? "Ocultar mapa do Telão" : "Projetar mapa no Telão da TV"}
             >
@@ -179,7 +179,7 @@ export function MapHeaderBar({
                 <>
                   <EyeOff className="w-3.5 h-3.5" />
                   <span>{displayMode === "split" ? "Projetando (Dividido)" : "Projetando na TV"}</span>
-                  <span className="w-2 h-2 rounded-full bg-white animate-ping ml-0.5" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping ml-0.5" />
                 </>
               ) : (
                 <>
@@ -194,7 +194,7 @@ export function MapHeaderBar({
         <button
           type="button"
           onClick={() => window.open(`/telao/${campaignId}`, "_blank")}
-          className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+          className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
           title="Abrir Telão da TV em nova janela"
         >
           <ExternalLink className="w-4 h-4" />
@@ -203,7 +203,7 @@ export function MapHeaderBar({
         <button
           type="button"
           onClick={onClose}
-          className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+          className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
           title="Fechar Tabuleiro"
         >
           <X className="w-5 h-5" />

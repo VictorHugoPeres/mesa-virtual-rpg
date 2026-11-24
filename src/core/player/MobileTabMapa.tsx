@@ -83,7 +83,7 @@ export function MobileTabMapa({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[calc(100dvh-125px)] overflow-hidden rounded-2xl border border-zinc-800 bg-[#050508] shadow-2xl"
+      className="relative w-full h-[calc(100dvh-125px)] overflow-hidden rounded-2xl border border-[#23272F] bg-[#0B0C0E] shadow-2xl"
     >
       <MobileMapToolbar
         isSplit={isSplit}

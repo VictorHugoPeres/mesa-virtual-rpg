@@ -48,8 +48,8 @@ export function TelaoDiceBanner({ roll, onDismiss }: TelaoDiceBannerProps) {
           roll.isCritical
             ? "bg-amber-950/90 border-amber-400 shadow-amber-500/20"
             : roll.isFumble
-            ? "bg-red-950/90 border-red-500 shadow-red-500/20"
-            : "bg-[#0f1017]/95 border-blue-500/40 shadow-blue-500/10"
+            ? "bg-rose-950/90 border-rose-500 shadow-rose-500/20"
+            : "bg-[#14161A]/95 border-[#23272F] text-white shadow-2xl"
         }`}
       >
         {/* Header do Banner: Nome e Tipo de Dado */}
@@ -60,8 +60,8 @@ export function TelaoDiceBanner({ roll, onDismiss }: TelaoDiceBannerProps) {
           <span
             className={`px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold flex items-center gap-1 ${
               roll.mode === "DIGITAL"
-                ? "bg-blue-900/60 text-blue-300 border border-blue-700/60"
-                : "bg-emerald-900/60 text-emerald-300 border border-emerald-700/60"
+                ? "bg-[#0B0C0E] text-sky-300 border border-[#23272F]"
+                : "bg-[#0B0C0E] text-emerald-300 border border-[#23272F]"
             }`}
           >
             {roll.mode === "DIGITAL" ? (

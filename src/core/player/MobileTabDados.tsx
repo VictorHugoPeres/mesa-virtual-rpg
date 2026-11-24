@@ -68,8 +68,8 @@ export function MobileTabDados({
   return (
     <div className="space-y-4 pb-20">
       {/* Botões rápidos de dados */}
-      <div className="p-4 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-default)] space-y-3">
-        <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider block">
+      <div className="p-4 rounded-2xl bg-[#14161A] border border-[#23272F] space-y-3">
+        <span className="text-xs font-bold text-zinc-100 uppercase tracking-wider block">
           Rolagem Rápida de Dados
         </span>
         <div className="grid grid-cols-4 gap-2">
@@ -87,7 +87,7 @@ export function MobileTabDados({
                   campaignId,
                 })
               }
-              className="py-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)] hover:border-blue-500 font-black text-sm text-blue-400 active:scale-95 transition-all shadow-xs touch-manipulation select-none cursor-pointer"
+              className="py-2.5 rounded-xl bg-[#0B0C0E] border border-[#23272F] hover:border-white/20 font-black text-sm text-zinc-200 active:scale-95 transition-all shadow-xs touch-manipulation select-none cursor-pointer"
             >
               {dice}
             </button>
@@ -104,7 +104,7 @@ export function MobileTabDados({
                 campaignId,
               })
             }
-            className="col-span-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs active:scale-95 transition-all flex items-center justify-center gap-1 shadow-xs touch-manipulation select-none cursor-pointer"
+            className="col-span-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs active:scale-95 transition-all flex items-center justify-center gap-1 shadow-xs touch-manipulation select-none cursor-pointer"
           >
             <Dices className="w-3.5 h-3.5" /> Mais
           </button>
@@ -114,18 +114,18 @@ export function MobileTabDados({
       {/* Histórico Recente de Rolagens */}
       <div className="space-y-2">
         <div className="flex items-center justify-between px-1">
-          <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider flex items-center gap-1.5">
+          <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5" /> Histórico Recente (Ao Vivo)
           </span>
-          <span className="text-[10px] text-[var(--text-muted)]">Sincronizado com o Telão</span>
+          <span className="text-[10px] text-zinc-500">Sincronizado com o Telão</span>
         </div>
 
         {loading ? (
-          <div className="p-6 text-center text-xs text-[var(--text-muted)]">
+          <div className="p-6 text-center text-xs text-zinc-500">
             Carregando rolagens...
           </div>
         ) : logs.length === 0 ? (
-          <div className="p-6 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-center text-xs text-[var(--text-muted)]">
+          <div className="p-6 rounded-2xl bg-[#14161A] border border-[#23272F] text-center text-xs text-zinc-500">
             Nenhuma rolagem recente ainda.
           </div>
         ) : (
@@ -133,11 +133,11 @@ export function MobileTabDados({
             {logs.map((log) => (
               <div
                 key={log.id}
-                className="p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] flex items-center justify-between shadow-xs"
+                className="p-3 rounded-xl bg-[#14161A] border border-[#23272F] flex items-center justify-between shadow-xs"
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-[var(--text-primary)]">
+                    <span className="font-bold text-xs text-zinc-100">
                       {log.roller}
                     </span>
                     {log.isCritical && (

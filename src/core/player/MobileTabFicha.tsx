@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import {
   FMCharacterData,
   getSkillBonus,
@@ -11,11 +11,12 @@ import {
 } from "@/systems/feiticeiros-e-maldicoes";
 import { useDice } from "@/core/dice/DiceContext";
 import { useCampaignSync } from "@/core/sync/useCampaignSync";
+import { SyncEvent } from "@/core/sync/syncTypes";
 import { MobileResourceBar } from "./MobileResourceBar";
 import { MobileAttributesGrid } from "./MobileAttributesGrid";
 import { MobileSpellsSection } from "./MobileSpellsSection";
 import { RestModal } from "@/systems/feiticeiros-e-maldicoes/components/RestModal";
-import { Heart, Activity, Sparkles, Swords, Moon, Dices } from "lucide-react";
+import { Heart, Activity, Sparkles, Swords, Moon } from "lucide-react";
 
 interface MobileTabFichaProps {
   campaignId: string;
@@ -34,7 +35,6 @@ export function MobileTabFicha({
   const [sheet, setSheet] = useState<FMCharacterData>(initialSheet);
   const [isRestOpen, setIsRestOpen] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isIncomingSyncRef = useRef(false);
 
   const totalDV = Math.max(sheet.hitDice?.total ?? 1, sheet.level ?? 1);
   const spentDV = sheet.hitDice?.spent ?? 0;
@@ -42,35 +42,47 @@ export function MobileTabFicha({
   const die = sheet.hitDice?.die || SPEC_TABLE[sheet.specialization as Specialization]?.hitDie || "d10";
 
   // Sincronização em tempo real com o PC do Mestre e o Tracker de Combate
-  useCampaignSync({
-    campaignId,
-    onEvent: (event) => {
+  const handleIncomingSync = useCallback(
+    (event: SyncEvent) => {
       if (event.type === "CHARACTER_UPDATE") {
         const payload = event.payload as { characterId: string; data: FMCharacterData };
         if (payload?.characterId === characterId && payload.data) {
-          isIncomingSyncRef.current = true;
           setSheet(payload.data);
         }
       }
     },
+    [characterId]
+  );
+
+  useCampaignSync({
+    campaignId,
+    onEvent: handleIncomingSync,
   });
 
-  function updateSheet(updater: (prev: FMCharacterData) => FMCharacterData) {
-    setSheet((prev) => {
-      const next = updater(prev);
-
+  const scheduleSave = useCallback(
+    (dataToSave: FMCharacterData) => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       saveTimeoutRef.current = setTimeout(() => {
         fetch(`/api/characters/${characterId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ data: next }),
+          body: JSON.stringify({ data: dataToSave }),
         }).catch((err) => console.error("Erro ao salvar ficha mobile:", err));
       }, 500);
+    },
+    [characterId]
+  );
 
-      return next;
-    });
-  }
+  const updateSheet = useCallback(
+    (updater: (prev: FMCharacterData) => FMCharacterData) => {
+      setSheet((prev) => {
+        const next = updater(prev);
+        queueMicrotask(() => scheduleSave(next));
+        return next;
+      });
+    },
+    [scheduleSave]
+  );
 
   const isRestringido = sheet.origin === "Restringido";
 
@@ -94,9 +106,9 @@ export function MobileTabFicha({
           current={sheet.energy.current}
           max={sheet.energy.max}
           temp={sheet.energy.temp}
-          colorClass="bg-blue-950/20 border-blue-900/40 text-blue-300"
-          barColor="bg-blue-500"
-          icon={<Activity className="w-4 h-4 text-blue-400" />}
+          colorClass="bg-sky-950/20 border-sky-900/40 text-sky-300"
+          barColor="bg-sky-400"
+          icon={<Activity className="w-4 h-4 text-sky-400" />}
           onChange={(newVal) => updateSheet((prev) => ({ ...prev, energy: { ...prev.energy, current: newVal } }))}
         />
 
@@ -111,13 +123,13 @@ export function MobileTabFicha({
         />
 
         {/* Dados de Vida e Descanso */}
-        <div className="p-2.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] flex items-center justify-between">
+        <div className="p-2.5 rounded-xl bg-[#14161A] border border-[#23272F] flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-indigo-950/80 border border-indigo-800/60 text-indigo-400">
               <Moon className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider block">
+              <span className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider block">
                 Dados de Vida (DV)
               </span>
               <span className="text-xs font-mono font-bold text-amber-300">
@@ -128,7 +140,7 @@ export function MobileTabFicha({
           <button
             type="button"
             onClick={() => setIsRestOpen(true)}
-            className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs cursor-pointer flex items-center gap-1.5 touch-manipulation"
+            className="px-3 py-1.5 rounded-lg bg-[#1A1D24] hover:bg-[#23272F] border border-[#23272F] text-zinc-200 font-bold text-xs cursor-pointer flex items-center gap-1.5 transition-colors"
           >
             <Moon className="w-3.5 h-3.5" /> Descanso
           </button>
@@ -146,18 +158,18 @@ export function MobileTabFicha({
       {/* 3. Armas & Ataques */}
       {sheet.weapons?.length > 0 && (
         <div className="space-y-2">
-          <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider flex items-center gap-1.5">
+          <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
             <Swords className="w-3.5 h-3.5 text-blue-400" /> Armas & Ataques
           </span>
           <div className="space-y-2">
             {sheet.weapons.map((wpn, idx) => (
               <div
                 key={idx}
-                className="p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] flex items-center justify-between"
+                className="p-3 rounded-xl bg-[#14161A] border border-[#23272F] flex items-center justify-between"
               >
                 <div>
-                  <h4 className="font-bold text-xs text-[var(--text-primary)]">{wpn.name}</h4>
-                  <p className="text-[11px] text-[var(--text-muted)]">
+                  <h4 className="font-bold text-xs text-zinc-100">{wpn.name}</h4>
+                  <p className="text-[11px] text-zinc-400">
                     Dano: {wpn.damage} ({wpn.damageType}) • Crit: {wpn.critical}
                   </p>
                 </div>
@@ -175,7 +187,7 @@ export function MobileTabFicha({
                         linkedDamage: wpn.damage?.trim() || undefined,
                       })
                     }
-                    className="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-[11px] cursor-pointer touch-manipulation select-none"
+                    className="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-[11px] cursor-pointer transition-colors"
                   >
                     Ataque (+{wpn.attackBonus})
                   </button>
@@ -191,7 +203,7 @@ export function MobileTabFicha({
                         campaignId,
                       })
                     }
-                    className="px-2.5 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] text-rose-300 font-bold text-[11px] cursor-pointer active:scale-95 touch-manipulation select-none"
+                    className="px-2.5 py-1.5 rounded-lg bg-[#1A1D24] hover:bg-[#23272F] border border-[#23272F] text-rose-300 font-bold text-[11px] cursor-pointer transition-colors"
                   >
                     Dano
                   </button>
@@ -213,7 +225,7 @@ export function MobileTabFicha({
 
       {/* 5. Perícias Treinadas */}
       <div className="space-y-2">
-        <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider block">
+        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">
           Perícias Treinadas (Toque para Rolar)
         </span>
         <div className="grid grid-cols-2 gap-2 text-xs">
@@ -243,11 +255,11 @@ export function MobileTabFicha({
                     campaignId,
                   })
                 }
-                className="p-2.5 rounded-xl bg-[var(--bg-secondary)] border border-blue-900/50 hover:border-blue-400 active:scale-95 text-left flex items-center justify-between cursor-pointer transition-all shadow-xs touch-manipulation select-none"
+                className="p-2.5 rounded-xl bg-[#14161A] border border-[#23272F] hover:border-zinc-500 text-left flex items-center justify-between cursor-pointer transition-colors shadow-xs"
               >
                 <div className="truncate mr-1">
-                  <span className="font-semibold block truncate text-[var(--text-primary)]">{skill.name}</span>
-                  <span className="text-[10px] text-[var(--text-muted)]">{skill.attribute}</span>
+                  <span className="font-semibold block truncate text-zinc-200">{skill.name}</span>
+                  <span className="text-[10px] text-zinc-400">{skill.attribute}</span>
                 </div>
                 <span className="text-xs font-bold text-emerald-400">{bonusStr}</span>
               </button>

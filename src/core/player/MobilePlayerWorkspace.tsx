@@ -26,7 +26,7 @@ export function MobilePlayerWorkspace({
   const [activeTab, setActiveTab] = useState<MobileTab>("ficha");
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] flex flex-col max-w-lg mx-auto relative select-none">
+    <div className="min-h-screen bg-[#0B0C0E] text-zinc-100 flex flex-col max-w-lg mx-auto relative">
       <MobilePlayerHeader
         campaignId={campaignId}
         characterName={characterName}

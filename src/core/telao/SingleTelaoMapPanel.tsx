@@ -82,7 +82,7 @@ export function SingleTelaoMapPanel({
   }, [displayMode, mapData.cameraState, containerSize, imageSize]);
 
   return (
-    <div ref={containerRef} className="relative w-full h-full overflow-hidden bg-[#050508]">
+    <div ref={containerRef} className="relative w-full h-full overflow-hidden bg-[#0B0C0E]">
       <MapCanvas
         imageUrl={mapData.imageUrl}
         gridEnabled={mapData.gridEnabled}
@@ -130,8 +130,8 @@ export function SingleTelaoMapPanel({
       </MapCanvas>
 
       {/* Rótulo de título do mapa na TV */}
-      <div className="absolute top-4 left-4 z-40 pointer-events-none opacity-70 hover:opacity-100 transition-opacity">
-        <span className="px-3 py-1.5 rounded-lg bg-black/85 border border-white/15 text-white font-mono text-xs backdrop-blur-md shadow-lg flex items-center gap-2">
+      <div className="absolute top-4 left-4 z-40 pointer-events-none opacity-80 hover:opacity-100 transition-opacity">
+        <span className="px-3 py-1.5 rounded-lg bg-[#14161A]/90 border border-[#23272F] text-white font-mono text-xs backdrop-blur-md shadow-lg flex items-center gap-2">
           {labelPrefix && (
             <span className="text-emerald-400 font-bold uppercase tracking-wider text-[10px]">
               {labelPrefix}

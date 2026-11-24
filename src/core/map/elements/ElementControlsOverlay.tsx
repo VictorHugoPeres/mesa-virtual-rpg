@@ -56,18 +56,18 @@ export function ElementControlsOverlay({
   return (
     <>
       <div
-        className="absolute top-4 right-4 z-30 w-72 p-3.5 rounded-2xl bg-zinc-950/95 backdrop-blur-xl border border-white/20 shadow-[0_12px_40px_rgba(0,0,0,0.85)] text-xs text-white select-none space-y-3 animate-in fade-in slide-in-from-top-2 duration-150 pointer-events-auto"
+        className="absolute top-4 right-4 z-30 w-72 p-3.5 rounded-2xl bg-[#14161A]/95 backdrop-blur-xl border border-[#23272F] shadow-2xl text-xs text-white select-none space-y-3 animate-in fade-in slide-in-from-top-2 duration-150 pointer-events-auto"
         onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Cabeçalho do Inspetor */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+        <div className="flex items-center justify-between border-b border-[#23272F] pb-2.5">
           <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
             <div
               className={`p-1.5 rounded-lg border ${
                 isToken
-                  ? "bg-emerald-950/80 border-emerald-700/60 text-emerald-400"
-                  : "bg-amber-950/80 border-amber-700/60 text-amber-400"
+                  ? "bg-emerald-950/60 border-emerald-700/60 text-emerald-400"
+                  : "bg-amber-950/60 border-amber-700/60 text-amber-400"
               }`}
             >
               {isToken ? <User className="w-4 h-4" /> : <Box className="w-4 h-4" />}
@@ -78,7 +78,7 @@ export function ElementControlsOverlay({
                 <span className="text-[10px] text-zinc-400 font-medium">
                   {isToken ? "Token de Personagem" : "Objeto de Cenário"}
                 </span>
-                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-300">
+                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#0B0C0E] border border-[#23272F] text-zinc-300">
                   {element.widthCells}x{element.heightCells}
                 </span>
               </div>
@@ -88,7 +88,7 @@ export function ElementControlsOverlay({
           <button
             type="button"
             onClick={onDeselect}
-            className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
             title="Fechar inspetor"
           >
             <X className="w-4 h-4" />
@@ -105,7 +105,7 @@ export function ElementControlsOverlay({
             <button
               type="button"
               onClick={() => rotate(-45)}
-              className="flex items-center justify-center gap-1.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-zinc-200 transition-colors cursor-pointer text-xs font-semibold"
+              className="flex items-center justify-center gap-1.5 py-1.5 rounded-xl bg-[#0B0C0E] hover:bg-[#1A1D24] border border-[#23272F] text-zinc-200 transition-colors cursor-pointer text-xs font-semibold"
             >
               <RotateCcw className="w-3.5 h-3.5 text-zinc-400" />
               <span>-45°</span>
@@ -113,7 +113,7 @@ export function ElementControlsOverlay({
             <button
               type="button"
               onClick={() => rotate(45)}
-              className="flex items-center justify-center gap-1.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-zinc-200 transition-colors cursor-pointer text-xs font-semibold"
+              className="flex items-center justify-center gap-1.5 py-1.5 rounded-xl bg-[#0B0C0E] hover:bg-[#1A1D24] border border-[#23272F] text-zinc-200 transition-colors cursor-pointer text-xs font-semibold"
             >
               <RotateCw className="w-3.5 h-3.5 text-zinc-400" />
               <span>+45°</span>
@@ -135,8 +135,8 @@ export function ElementControlsOverlay({
                   onClick={() => setSize(size)}
                   className={`py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     element.widthCells === size
-                      ? "bg-emerald-600 text-white shadow-md shadow-emerald-950 border border-emerald-400"
-                      : "bg-zinc-900 text-zinc-400 hover:text-white border border-white/10"
+                      ? "bg-emerald-600/90 text-white shadow-md shadow-emerald-950/30 border border-emerald-400/50"
+                      : "bg-[#0B0C0E] text-zinc-400 hover:text-white border border-[#23272F]"
                   }`}
                 >
                   {size}x{size}
@@ -191,7 +191,7 @@ export function ElementControlsOverlay({
 
         {/* Linha 3: Mover para outro mapa (se houver mais de 1) */}
         {availableMaps && availableMaps.length > 0 && onTransfer && (
-          <div className="pt-2 border-t border-white/10">
+          <div className="pt-2 border-t border-[#23272F]">
             <span className="block text-[11px] text-zinc-400 font-semibold mb-1 flex items-center gap-1">
               <ArrowRightLeft className="w-3 h-3 text-indigo-400" />
               Mover para outro mapa
@@ -201,7 +201,7 @@ export function ElementControlsOverlay({
               onChange={(e) => {
                 if (e.target.value) onTransfer(e.target.value);
               }}
-              className="w-full bg-zinc-900 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-zinc-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
+              className="w-full bg-[#0B0C0E] border border-[#23272F] rounded-xl px-2.5 py-1.5 text-xs font-semibold text-zinc-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
               <option value="">Selecione o mapa destino...</option>
               {availableMaps.map((m) => (
@@ -214,11 +214,11 @@ export function ElementControlsOverlay({
         )}
 
         {/* Linha 4: Ações (Editar Completo e Excluir) */}
-        <div className="flex items-center gap-2 pt-2 border-t border-white/10">
+        <div className="flex items-center gap-2 pt-2 border-t border-[#23272F]">
           <button
             type="button"
             onClick={() => setIsEditOpen(true)}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl font-bold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-white/10 transition-colors cursor-pointer text-xs"
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl font-bold bg-[#0B0C0E] hover:bg-[#1A1D24] text-zinc-200 border border-[#23272F] transition-colors cursor-pointer text-xs"
             title="Editar nome, avatar e propriedades completas"
           >
             <Edit3 className="w-3.5 h-3.5 text-emerald-400" />
@@ -228,7 +228,7 @@ export function ElementControlsOverlay({
           <button
             type="button"
             onClick={() => onDelete(element.id)}
-            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold bg-red-950/60 hover:bg-red-900/60 text-red-300 border border-red-800/60 transition-colors cursor-pointer text-xs"
+            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 transition-colors cursor-pointer text-xs"
             title="Remover do mapa"
           >
             <Trash2 className="w-3.5 h-3.5" />

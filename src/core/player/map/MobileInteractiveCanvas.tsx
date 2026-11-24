@@ -120,7 +120,7 @@ export function MobileInteractiveCanvas({
 
   return (
     <div
-      className={`relative w-full h-full overflow-hidden select-none bg-[#050508] ${
+      className={`relative w-full h-full overflow-hidden select-none bg-[#0B0C0E] ${
         tapToMove ? "cursor-crosshair" : "cursor-default"
       }`}
       onClick={handleCanvasClick}

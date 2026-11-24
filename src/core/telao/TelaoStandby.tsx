@@ -8,10 +8,10 @@ interface TelaoStandbyProps {
 
 export function TelaoStandby({ campaignName }: TelaoStandbyProps) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
+    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500 bg-[#0B0C0E]">
       <div className="relative mb-8">
-        <div className="absolute -inset-8 bg-red-600/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative p-6 sm:p-8 rounded-3xl bg-zinc-950/80 border border-white/10 shadow-2xl backdrop-blur-xl">
+        <div className="absolute -inset-8 bg-rose-600/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative p-6 sm:p-8 rounded-3xl bg-[#14161A]/90 border border-[#23272F] shadow-2xl backdrop-blur-xl">
           <BrandLogo variant="hero" size="xl" />
         </div>
       </div>

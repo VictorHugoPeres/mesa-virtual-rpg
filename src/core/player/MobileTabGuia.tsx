@@ -29,13 +29,13 @@ export function MobileTabGuia() {
     <div className="space-y-3 pb-20">
       {/* Busca */}
       <div className="relative">
-        <Search className="w-4 h-4 absolute left-3 top-2.5 text-[var(--text-muted)]" />
+        <Search className="w-4 h-4 absolute left-3 top-2.5 text-zinc-400" />
         <input
           type="text"
           placeholder="Pesquisar regras, d20, feitiços..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)] focus:outline-none focus:border-blue-500"
+          className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-[#14161A] border border-[#23272F] text-zinc-100 focus:outline-none focus:border-rose-500"
         />
       </div>
 
@@ -46,8 +46,8 @@ export function MobileTabGuia() {
           onClick={() => setSelectedCategory("todos")}
           className={`px-3 py-1 rounded-full whitespace-nowrap text-xs font-semibold transition-all cursor-pointer ${
             selectedCategory === "todos"
-              ? "bg-blue-600 text-white shadow-xs"
-              : "bg-[var(--bg-secondary)] text-[var(--text-secondary)]"
+              ? "bg-rose-600 text-white shadow-xs"
+              : "bg-[#14161A] border border-[#23272F] text-zinc-400 hover:text-white"
           }`}
         >
           Todos
@@ -59,8 +59,8 @@ export function MobileTabGuia() {
             onClick={() => setSelectedCategory(cat.id)}
             className={`px-3 py-1 rounded-full whitespace-nowrap text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 ${
               selectedCategory === cat.id
-                ? "bg-blue-600 text-white shadow-xs"
-                : "bg-[var(--bg-secondary)] text-[var(--text-secondary)]"
+                ? "bg-rose-600 text-white shadow-xs"
+                : "bg-[#14161A] border border-[#23272F] text-zinc-400 hover:text-white"
             }`}
           >
             {cat.id === "iniciantes" && <GraduationCap className="w-3 h-3 text-emerald-300" />}
@@ -77,29 +77,29 @@ export function MobileTabGuia() {
           return (
             <div
               key={entry.id}
-              className="rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] overflow-hidden shadow-xs"
+              className="rounded-xl bg-[#14161A] border border-[#23272F] overflow-hidden shadow-xs"
             >
               <button
                 type="button"
                 onClick={() => setExpandedId(isExpanded ? null : entry.id)}
-                className="w-full p-3 text-left flex items-center justify-between cursor-pointer touch-manipulation select-none active:bg-[var(--bg-card)]/40 transition-colors"
+                className="w-full p-3 text-left flex items-center justify-between cursor-pointer touch-manipulation select-none active:bg-[#1A1D24] transition-colors"
               >
                 <div>
-                  <h4 className="font-bold text-xs text-[var(--text-primary)]">{entry.title}</h4>
-                  <p className="text-[11px] text-[var(--text-muted)] line-clamp-1 mt-0.5">
+                  <h4 className="font-bold text-xs text-zinc-100">{entry.title}</h4>
+                  <p className="text-[11px] text-zinc-400 line-clamp-1 mt-0.5">
                     {entry.summary}
                   </p>
                 </div>
                 {isExpanded ? (
-                  <ChevronUp className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
+                  <ChevronUp className="w-4 h-4 text-zinc-400 shrink-0" />
                 ) : (
-                  <ChevronDown className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
+                  <ChevronDown className="w-4 h-4 text-zinc-400 shrink-0" />
                 )}
               </button>
 
               {isExpanded && (
-                <div className="px-3 pb-3 pt-1 border-t border-[var(--border-default)]/60 bg-[var(--bg-card)]/50 text-xs space-y-1.5">
-                  <ul className="list-disc list-inside space-y-1 text-[var(--text-secondary)] text-[11px] leading-relaxed">
+                <div className="px-3 pb-3 pt-1 border-t border-[#23272F] bg-[#0B0C0E]/50 text-xs space-y-1.5">
+                  <ul className="list-disc list-inside space-y-1 text-zinc-300 text-[11px] leading-relaxed">
                     {entry.details.map((d, i) => (
                       <li key={i}>{d}</li>
                     ))}

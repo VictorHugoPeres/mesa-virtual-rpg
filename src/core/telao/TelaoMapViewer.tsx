@@ -20,7 +20,7 @@ export function TelaoMapViewer({ mapData, rulersByMap }: TelaoMapViewerProps) {
 
   if (isSplitMode && mapData.secondaryMapData) {
     return (
-      <div className="absolute inset-0 z-10 w-full h-full bg-[#050508] grid grid-cols-2 divide-x-2 divide-emerald-500/30 animate-in fade-in duration-300">
+      <div className="absolute inset-0 z-10 w-full h-full bg-[#0B0C0E] grid grid-cols-2 divide-x-2 divide-[#23272F] animate-in fade-in duration-300">
         <SingleTelaoMapPanel
           mapData={mapData}
           displayMode="fit"
@@ -38,7 +38,7 @@ export function TelaoMapViewer({ mapData, rulersByMap }: TelaoMapViewerProps) {
   }
 
   return (
-    <div className="absolute inset-0 z-10 w-full h-full bg-[#050508] animate-in fade-in duration-300">
+    <div className="absolute inset-0 z-10 w-full h-full bg-[#0B0C0E] animate-in fade-in duration-300">
       <SingleTelaoMapPanel
         mapData={mapData}
         displayMode={mapData.displayMode === "follow" ? "follow" : "fit"}

@@ -28,9 +28,9 @@ export function MobileAttributesGrid({
     <div className="space-y-3">
       {/* 4 Estatísticas Principais */}
       <div className="grid grid-cols-4 gap-2 text-center text-xs">
-        <div className="p-2 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)]">
-          <span className="text-[10px] text-[var(--text-muted)] font-bold block">Defesa</span>
-          <span className="text-base font-black text-emerald-400">{sheet.defense?.total ?? 10}</span>
+        <div className="p-2 rounded-xl bg-[#14161A] border border-[#23272F]">
+          <span className="text-[10px] text-zinc-400 font-bold block">Defesa</span>
+          <span className="text-base font-black text-zinc-300">{sheet.defense?.total ?? 10}</span>
         </div>
         <button
           type="button"
@@ -44,26 +44,26 @@ export function MobileAttributesGrid({
               campaignId,
             })
           }
-          className="p-2 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] hover:border-amber-400 active:scale-95 transition-all cursor-pointer touch-manipulation select-none"
+          className="p-2 rounded-xl bg-[#14161A] border border-[#23272F] hover:border-amber-400/50 hover:bg-[#1A1D24] active:scale-95 transition-all cursor-pointer touch-manipulation select-none"
         >
-          <span className="text-[10px] text-[var(--text-muted)] font-bold block">Iniciativa</span>
+          <span className="text-[10px] text-zinc-400 font-bold block">Iniciativa</span>
           <span className="text-base font-black text-amber-400">
             {sheet.initiative >= 0 ? `+${sheet.initiative}` : sheet.initiative}
           </span>
         </button>
-        <div className="p-2 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)]">
-          <span className="text-[10px] text-[var(--text-muted)] font-bold block">Desloc.</span>
-          <span className="text-base font-black text-blue-400">{sheet.movement ?? 9}m</span>
+        <div className="p-2 rounded-xl bg-[#14161A] border border-[#23272F]">
+          <span className="text-[10px] text-zinc-400 font-bold block">Desloc.</span>
+          <span className="text-base font-black text-sky-400">{sheet.movement ?? 9}m</span>
         </div>
-        <div className="p-2 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)]">
-          <span className="text-[10px] text-[var(--text-muted)] font-bold block">Atenção</span>
+        <div className="p-2 rounded-xl bg-[#14161A] border border-[#23272F]">
+          <span className="text-[10px] text-zinc-400 font-bold block">Atenção</span>
           <span className="text-base font-black text-purple-400">{sheet.attention ?? 10}</span>
         </div>
       </div>
 
       {/* Grid de Atributos */}
       <div className="space-y-1.5">
-        <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider block">
+        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">
           Atributos (Toque para Rolar)
         </span>
         <div className="grid grid-cols-3 gap-2">
@@ -86,11 +86,13 @@ export function MobileAttributesGrid({
                     campaignId,
                   })
                 }
-                className="p-2.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] hover:border-blue-500 active:scale-95 text-center transition-all cursor-pointer shadow-xs touch-manipulation select-none"
+                className="p-2.5 rounded-xl bg-[#14161A] border border-[#23272F] hover:border-white/20 hover:bg-[#1A1D24] active:scale-95 text-center transition-all cursor-pointer shadow-xs touch-manipulation select-none"
               >
-                <span className="text-[11px] font-bold text-[var(--text-secondary)] block">{k}</span>
-                <span className="text-sm font-black text-[var(--text-primary)] block leading-tight">{val}</span>
-                <span className="text-xs font-bold text-emerald-400 block">{modStr}</span>
+                <span className="text-[11px] font-bold text-zinc-400 block">{k}</span>
+                <span className="text-sm font-black text-zinc-100 block leading-tight">{val}</span>
+                <span className={`text-xs font-bold block ${mod >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                  {modStr}
+                </span>
               </button>
             );
           })}

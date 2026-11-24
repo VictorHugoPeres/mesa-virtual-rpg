@@ -32,14 +32,14 @@ export function GridControlsOverlay({
   return (
     <div className="absolute top-4 left-4 z-20 flex flex-col items-start gap-2">
       {/* Botão de Toggle Rápido / Expandir Painel */}
-      <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 shadow-xl text-xs">
+      <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-[#14161A]/90 backdrop-blur-md border border-[#23272F] shadow-xl text-xs">
         <button
           type="button"
           onClick={() => onChange({ gridEnabled: !Boolean(gridEnabled) })}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
             gridEnabled
-              ? "bg-emerald-600 text-white shadow-md shadow-emerald-950 border border-emerald-400"
-              : "bg-zinc-800 text-zinc-400 border border-white/10 hover:text-zinc-200"
+              ? "bg-emerald-600/90 text-white shadow-md shadow-emerald-950/30 border border-emerald-400/50"
+              : "bg-[#0B0C0E] text-zinc-400 border border-[#23272F] hover:text-zinc-200"
           }`}
           title={gridEnabled ? "Clique para desligar a grade" : "Clique para ligar a grade"}
         >
@@ -54,7 +54,7 @@ export function GridControlsOverlay({
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+          className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
           title="Configurações da Grade"
         >
           <Sliders className="w-4 h-4" />
@@ -63,8 +63,8 @@ export function GridControlsOverlay({
 
       {/* Painel de Ajustes Expandido */}
       {isExpanded && (
-        <div className="w-72 p-4 rounded-xl bg-black/90 backdrop-blur-md border border-white/15 shadow-2xl text-xs space-y-3.5 text-white animate-in fade-in zoom-in-95 duration-150">
-          <div className="flex items-center justify-between border-b border-white/10 pb-2">
+        <div className="w-72 p-4 rounded-xl bg-[#14161A]/95 backdrop-blur-md border border-[#23272F] shadow-2xl text-xs space-y-3.5 text-white animate-in fade-in zoom-in-95 duration-150">
+          <div className="flex items-center justify-between border-b border-[#23272F] pb-2">
             <span className="font-bold flex items-center gap-1.5 text-emerald-400">
               <Grid className="w-4 h-4" /> Ajuste do Grid
             </span>

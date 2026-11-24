@@ -25,7 +25,9 @@ export function useCombatTargets(campaignId?: string, excludeName?: string) {
       return;
     }
 
-    fetch(`/api/campaigns/${campaignId}/combat`)
+    const abortController = new AbortController();
+
+    fetch(`/api/campaigns/${campaignId}/combat`, { signal: abortController.signal })
       .then((res) => res.json())
       .then((data) => {
         if (data.combatState) {
@@ -50,7 +52,15 @@ export function useCombatTargets(campaignId?: string, excludeName?: string) {
           }
         }
       })
-      .catch((err) => console.warn("Erro ao buscar alvos de combate:", err));
+      .catch((err) => {
+        if (err.name !== "AbortError") {
+          console.warn("Erro ao buscar alvos de combate:", err);
+        }
+      });
+
+    return () => {
+      abortController.abort();
+    };
   }, [campaignId, excludeName]);
 
   const selectedTarget = targets.find((t) => t.id === selectedTargetId) || null;

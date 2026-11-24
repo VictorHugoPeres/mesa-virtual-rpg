@@ -20,7 +20,7 @@ export function SplitEditingToolbar({
   onToggleGmSplitView,
 }: SplitEditingToolbarProps) {
   return (
-    <div className="h-10 px-4 bg-zinc-900/90 border-b border-emerald-500/30 flex items-center justify-between gap-3 text-xs z-20 shrink-0 backdrop-blur-md animate-in fade-in duration-150">
+    <div className="h-10 px-4 bg-[#14161A]/95 border-b border-[#23272F] flex items-center justify-between gap-3 text-xs z-20 shrink-0 backdrop-blur-md animate-in fade-in duration-150">
       <div className="flex items-center gap-2">
         <span className="text-zinc-400 font-semibold flex items-center gap-1.5">
           <Edit3 className="w-3.5 h-3.5 text-emerald-400" />
@@ -33,8 +33,8 @@ export function SplitEditingToolbar({
           onClick={() => onSelectSlot(1)}
           className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
             activeEditSlot === 1
-              ? "bg-emerald-600 text-white shadow-md shadow-emerald-900/40 ring-1 ring-emerald-400"
-              : "bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700"
+              ? "bg-emerald-600/90 text-white shadow-md shadow-emerald-900/30 border border-emerald-400/50"
+              : "bg-[#0B0C0E] text-zinc-300 hover:text-white hover:bg-[#1A1D24] border border-[#23272F]"
           }`}
         >
           <span className="text-[10px] uppercase font-mono px-1 rounded bg-black/40">Slot 1</span>
@@ -47,8 +47,8 @@ export function SplitEditingToolbar({
           onClick={() => onSelectSlot(2)}
           className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
             activeEditSlot === 2
-              ? "bg-emerald-600 text-white shadow-md shadow-emerald-900/40 ring-1 ring-emerald-400"
-              : "bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700"
+              ? "bg-emerald-600/90 text-white shadow-md shadow-emerald-900/30 border border-emerald-400/50"
+              : "bg-[#0B0C0E] text-zinc-300 hover:text-white hover:bg-[#1A1D24] border border-[#23272F]"
           }`}
         >
           <span className="text-[10px] uppercase font-mono px-1 rounded bg-black/40">Slot 2</span>
@@ -62,8 +62,8 @@ export function SplitEditingToolbar({
         onClick={onToggleGmSplitView}
         className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
           gmSplitView
-            ? "bg-emerald-950/80 text-emerald-300 border border-emerald-500/50"
-            : "bg-zinc-800/80 text-zinc-400 hover:text-zinc-200 border border-white/10"
+            ? "bg-emerald-950/60 text-emerald-300 border border-emerald-500/40"
+            : "bg-[#0B0C0E] text-zinc-400 hover:text-zinc-200 border border-[#23272F] hover:bg-[#1A1D24]"
         }`}
         title={
           gmSplitView

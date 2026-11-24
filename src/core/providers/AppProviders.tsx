@@ -1,12 +1,25 @@
 "use client";
 
 import { ReactNode } from "react";
+import dynamic from "next/dynamic";
 import { DialogProvider } from "../ui";
 import { DiceProvider } from "../dice/DiceContext";
-import { DiceModal } from "../dice/DiceModal";
-import { RollHistoryDrawer } from "../dice/RollHistoryDrawer";
 import { CompendiumProvider, useCompendium } from "../compendium/CompendiumContext";
-import { QuickCompendiumDrawer } from "../compendium/QuickCompendiumDrawer";
+
+const DiceModal = dynamic(
+  () => import("../dice/DiceModal").then((mod) => mod.DiceModal),
+  { ssr: false }
+);
+
+const RollHistoryDrawer = dynamic(
+  () => import("../dice/RollHistoryDrawer").then((mod) => mod.RollHistoryDrawer),
+  { ssr: false }
+);
+
+const QuickCompendiumDrawer = dynamic(
+  () => import("../compendium/QuickCompendiumDrawer").then((mod) => mod.QuickCompendiumDrawer),
+  { ssr: false }
+);
 
 function GlobalDrawers() {
   const { isCompendiumOpen, closeCompendium } = useCompendium();

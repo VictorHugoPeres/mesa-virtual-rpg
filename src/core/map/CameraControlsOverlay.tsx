@@ -28,11 +28,11 @@ export function CameraControlsOverlay({ camera, onChange }: CameraControlsOverla
   }
 
   return (
-    <div className="absolute bottom-4 right-4 z-20 flex items-center gap-1.5 p-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 shadow-xl text-xs text-white">
+    <div className="absolute bottom-4 right-4 z-20 flex items-center gap-1.5 p-1.5 rounded-xl bg-[#14161A]/90 backdrop-blur-md border border-[#23272F] shadow-xl text-xs text-white">
       <button
         type="button"
         onClick={zoomOut}
-        className="p-2 rounded-lg hover:bg-white/10 text-white/80 hover:text-white transition-colors cursor-pointer"
+        className="p-2 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white transition-colors cursor-pointer"
         title="Diminuir Zoom (-)"
       >
         <ZoomOut className="w-4 h-4" />
@@ -45,18 +45,18 @@ export function CameraControlsOverlay({ camera, onChange }: CameraControlsOverla
       <button
         type="button"
         onClick={zoomIn}
-        className="p-2 rounded-lg hover:bg-white/10 text-white/80 hover:text-white transition-colors cursor-pointer"
+        className="p-2 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white transition-colors cursor-pointer"
         title="Aumentar Zoom (+)"
       >
         <ZoomIn className="w-4 h-4" />
       </button>
 
-      <div className="w-[1px] h-4 bg-white/20 mx-0.5" />
+      <div className="w-[1px] h-4 bg-[#23272F] mx-0.5" />
 
       <button
         type="button"
         onClick={resetCamera}
-        className="p-2 rounded-lg hover:bg-white/10 text-white/80 hover:text-white transition-colors cursor-pointer"
+        className="p-2 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white transition-colors cursor-pointer"
         title="Centralizar Câmera (Resetar Posição)"
       >
         <Maximize2 className="w-4 h-4" />

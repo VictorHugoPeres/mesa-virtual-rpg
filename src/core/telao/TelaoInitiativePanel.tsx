@@ -65,11 +65,11 @@ export function TelaoInitiativePanel({ initiative }: TelaoInitiativePanelProps) 
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 bg-black/85 backdrop-blur-md border-t border-white/10 shadow-2xl transition-all duration-300">
+    <div className="fixed bottom-0 left-0 right-0 z-30 bg-[#0B0C0E]/95 backdrop-blur-md border-t border-[#23272F] shadow-2xl transition-all duration-300">
       {/* Barra de Título / Rodada */}
-      <div className="px-6 py-2 bg-gradient-to-r from-red-950/50 via-purple-950/40 to-black/60 border-b border-white/5 flex items-center justify-between">
+      <div className="px-6 py-2 bg-[#14161A] border-b border-[#23272F] flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-lg bg-red-600/30 text-red-400 border border-red-500/40">
+          <div className="p-1.5 rounded-lg bg-rose-600/20 text-rose-400 border border-rose-500/30">
             <Swords className="w-4 h-4 animate-pulse" />
           </div>
           <span className="text-xs font-black tracking-widest uppercase text-white/90">
@@ -95,10 +95,10 @@ export function TelaoInitiativePanel({ initiative }: TelaoInitiativePanelProps) 
               key={p.id}
               className={`min-w-[190px] max-w-[230px] p-3 rounded-xl border flex flex-col justify-between transition-all duration-200 shrink-0 ${
                 isActing
-                  ? "bg-gradient-to-b from-blue-950/70 to-indigo-950/50 border-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.35)] ring-2 ring-blue-500/60 scale-[1.02]"
+                  ? "bg-[#1A1D24] border-emerald-500/80 shadow-[0_0_20px_rgba(16,185,129,0.25)] ring-2 ring-emerald-500/50 scale-[1.02]"
                   : p.healthStatus === "Derrotado"
-                  ? "bg-black/40 border-zinc-800 opacity-40"
-                  : "bg-zinc-950/60 border-white/10 hover:border-white/20"
+                  ? "bg-[#0B0C0E]/60 border-[#23272F] opacity-40"
+                  : "bg-[#14161A] border-[#23272F] hover:border-white/20"
               }`}
             >
               {/* Topo do Card */}
@@ -107,8 +107,8 @@ export function TelaoInitiativePanel({ initiative }: TelaoInitiativePanelProps) 
                   <span
                     className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider border ${
                       isPC
-                        ? "bg-blue-950/80 text-blue-300 border-blue-700/60"
-                        : "bg-red-950/80 text-red-300 border-red-700/60"
+                        ? "bg-blue-950/40 text-blue-300 border-blue-700/40"
+                        : "bg-rose-950/40 text-rose-300 border-rose-700/40"
                     }`}
                   >
                     {isPC ? (
@@ -130,7 +130,7 @@ export function TelaoInitiativePanel({ initiative }: TelaoInitiativePanelProps) 
                 {/* Nome */}
                 <h4
                   className={`text-sm font-bold truncate ${
-                    isActing ? "text-blue-200" : "text-white"
+                    isActing ? "text-emerald-300 font-black" : "text-white"
                   } ${p.healthStatus === "Derrotado" ? "line-through text-zinc-500" : ""}`}
                 >
                   {p.name}
@@ -138,7 +138,7 @@ export function TelaoInitiativePanel({ initiative }: TelaoInitiativePanelProps) 
 
                 {/* Badge de Turno Ativo */}
                 {isActing && (
-                  <div className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-500 text-white font-black text-[10px] tracking-wider uppercase shadow-xs animate-pulse">
+                  <div className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-600 text-white font-black text-[10px] tracking-wider uppercase shadow-xs animate-pulse">
                     <ChevronRight className="w-3 h-3" /> Turno Atual
                   </div>
                 )}

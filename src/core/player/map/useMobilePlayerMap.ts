@@ -46,15 +46,17 @@ export function useMobilePlayerMap({ campaignId, characterId }: UseMobilePlayerM
     }
   }, []);
 
-  // 1. Busca inicial da projeção ativa
+  // 1. Busca inicial da projeção ativa com AbortController
   useEffect(() => {
-    let mounted = true;
+    const abortController = new AbortController();
     async function loadActiveMap() {
       try {
-        const res = await fetch(`/api/campaigns/${campaignId}/maps/active`);
+        const res = await fetch(`/api/campaigns/${campaignId}/maps/active`, {
+          signal: abortController.signal,
+        });
         if (res.ok) {
           const data = await res.json();
-          if (mounted && data.activeMap) {
+          if (data.activeMap) {
             setActiveMap(data.activeMap);
             syncMapDataIntoState(data.activeMap);
 
@@ -68,15 +70,17 @@ export function useMobilePlayerMap({ campaignId, characterId }: UseMobilePlayerM
             }
           }
         }
-      } catch (err) {
-        console.warn("Aviso ao carregar mapa ativo mobile:", err);
+      } catch (err: unknown) {
+        if ((err as Error)?.name !== "AbortError") {
+          console.warn("Aviso ao carregar mapa ativo mobile:", err);
+        }
       } finally {
-        if (mounted) setIsLoading(false);
+        setIsLoading(false);
       }
     }
     loadActiveMap();
     return () => {
-      mounted = false;
+      abortController.abort();
     };
   }, [campaignId, characterId, syncMapDataIntoState]);
 

@@ -104,30 +104,30 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
   return (
     <Portal>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="w-full max-w-lg bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-lg bg-[#14161A] border border-[#23272F] rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Cabeçalho */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border-default)]">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#23272F]">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <MapIcon className="w-4 h-4 text-emerald-400" /> Adicionar Mapa Tático
+            <MapIcon className="w-4 h-4 text-rose-500" /> Adicionar Mapa Tático
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-[var(--text-muted)] hover:text-white"
+            className="p-1 rounded-lg text-zinc-400 hover:text-white"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Abas */}
-        <div className="flex border-b border-[var(--border-default)] bg-[var(--bg-secondary)] text-xs">
+        <div className="flex border-b border-[#23272F] bg-[#0B0C0E] text-xs">
           <button
             type="button"
             onClick={() => setTab("upload")}
-            className={`flex-1 py-2.5 font-semibold text-center border-b-2 flex items-center justify-center gap-1.5 transition-colors ${
+            className={`flex-1 py-2.5 font-semibold text-center border-b-2 flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
               tab === "upload"
-                ? "border-emerald-500 text-emerald-400 bg-[var(--bg-card)]"
-                : "border-transparent text-[var(--text-secondary)] hover:text-white"
+                ? "border-rose-500 text-rose-400 bg-[#14161A]"
+                : "border-transparent text-zinc-400 hover:text-white"
             }`}
           >
             <Upload className="w-3.5 h-3.5" /> Upload
@@ -135,10 +135,10 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
           <button
             type="button"
             onClick={() => setTab("url")}
-            className={`flex-1 py-2.5 font-semibold text-center border-b-2 flex items-center justify-center gap-1.5 transition-colors ${
+            className={`flex-1 py-2.5 font-semibold text-center border-b-2 flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
               tab === "url"
-                ? "border-emerald-500 text-emerald-400 bg-[var(--bg-card)]"
-                : "border-transparent text-[var(--text-secondary)] hover:text-white"
+                ? "border-rose-500 text-rose-400 bg-[#14161A]"
+                : "border-transparent text-zinc-400 hover:text-white"
             }`}
           >
             <Link2 className="w-3.5 h-3.5" /> Link / URL Web
@@ -146,10 +146,10 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
           <button
             type="button"
             onClick={() => setTab("gallery")}
-            className={`flex-1 py-2.5 font-semibold text-center border-b-2 flex items-center justify-center gap-1.5 transition-colors ${
+            className={`flex-1 py-2.5 font-semibold text-center border-b-2 flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
               tab === "gallery"
-                ? "border-emerald-500 text-emerald-400 bg-[var(--bg-card)]"
-                : "border-transparent text-[var(--text-secondary)] hover:text-white"
+                ? "border-rose-500 text-rose-400 bg-[#14161A]"
+                : "border-transparent text-zinc-400 hover:text-white"
             }`}
           >
             <ImageIcon className="w-3.5 h-3.5" /> Da Galeria
@@ -159,13 +159,13 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
         {/* Formulário */}
         <form onSubmit={handleSubmit} className="p-4 space-y-3.5 text-xs overflow-y-auto">
           {error && (
-            <div className="p-2.5 rounded-lg bg-red-950/70 border border-red-800 text-red-200">
+            <div className="p-2.5 rounded-lg bg-rose-950/40 border border-rose-800/60 text-rose-300">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-[var(--text-secondary)] font-medium mb-1">
+            <label className="block text-zinc-300 font-medium mb-1">
               Nome do Mapa / Local
             </label>
             <input
@@ -174,7 +174,7 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
               placeholder="Ex: Templo Subterrâneo, Estação de Shibuya..."
               value={title || ""}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-[var(--bg-input)] border border-[var(--border-default)] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 text-xs"
+              className="w-full bg-[#0B0C0E] border border-[#23272F] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-rose-500 text-xs"
             />
           </div>
 
@@ -239,18 +239,18 @@ export function AddMapModal({ campaignId, isOpen, onClose, onSuccess }: AddMapMo
             </div>
           )}
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border-default)]">
+          <div className="flex justify-end gap-2 pt-2 border-t border-[#23272F]">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-white"
+              className="px-3 py-1.5 rounded-lg border border-[#23272F] text-zinc-300 hover:text-white hover:bg-[#1A1D24] cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading || !title.trim()}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg font-semibold bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-40 cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg font-semibold bg-rose-600 text-white hover:bg-rose-500 disabled:opacity-40 cursor-pointer transition-colors shadow-sm"
             >
               {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               {loading ? "Criando..." : "Criar Mapa"}

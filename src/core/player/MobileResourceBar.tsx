@@ -44,7 +44,7 @@ export function MobileResourceBar({
           <button
             type="button"
             onClick={() => onChange(Math.max(0, current - 5))}
-            className="w-7 h-7 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[10px] font-bold text-[var(--text-secondary)] active:scale-95 cursor-pointer touch-manipulation select-none"
+            className="w-7 h-7 rounded-md bg-[#14161A] border border-[#23272F] text-[10px] font-bold text-zinc-300 hover:bg-[#1A1D24] active:scale-95 cursor-pointer touch-manipulation select-none"
             title="-5"
           >
             -5
@@ -52,20 +52,20 @@ export function MobileResourceBar({
           <button
             type="button"
             onClick={() => onChange(Math.max(0, current - 1))}
-            className="w-7 h-7 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-default)] text-xs font-bold text-[var(--text-secondary)] active:scale-95 cursor-pointer flex items-center justify-center touch-manipulation select-none"
+            className="w-7 h-7 rounded-md bg-[#14161A] border border-[#23272F] text-xs font-bold text-zinc-300 hover:bg-[#1A1D24] active:scale-95 cursor-pointer flex items-center justify-center touch-manipulation select-none"
             title="-1"
           >
             <Minus className="w-3 h-3" />
           </button>
 
-          <span className="font-mono font-black text-sm px-2 min-w-14 text-center select-none">
-            {current} <span className="text-[11px] font-normal opacity-70">/ {max}</span>
+          <span className="font-mono font-black text-sm px-2 min-w-14 text-center select-none text-zinc-100">
+            {current} <span className="text-[11px] font-normal opacity-70 text-zinc-400">/ {max}</span>
           </span>
 
           <button
             type="button"
             onClick={() => onChange(current + 1)}
-            className="w-7 h-7 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-default)] text-xs font-bold text-[var(--text-secondary)] active:scale-95 cursor-pointer flex items-center justify-center touch-manipulation select-none"
+            className="w-7 h-7 rounded-md bg-[#14161A] border border-[#23272F] text-xs font-bold text-zinc-300 hover:bg-[#1A1D24] active:scale-95 cursor-pointer flex items-center justify-center touch-manipulation select-none"
             title="+1"
           >
             <Plus className="w-3 h-3" />
@@ -73,7 +73,7 @@ export function MobileResourceBar({
           <button
             type="button"
             onClick={() => onChange(current + 5)}
-            className="w-7 h-7 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[10px] font-bold text-[var(--text-secondary)] active:scale-95 cursor-pointer touch-manipulation select-none"
+            className="w-7 h-7 rounded-md bg-[#14161A] border border-[#23272F] text-[10px] font-bold text-zinc-300 hover:bg-[#1A1D24] active:scale-95 cursor-pointer touch-manipulation select-none"
             title="+5"
           >
             +5
@@ -82,7 +82,7 @@ export function MobileResourceBar({
       </div>
 
       {/* Barra de Progresso visual */}
-      <div className="w-full h-1.5 bg-[var(--bg-primary)]/60 rounded-full overflow-hidden">
+      <div className="w-full h-1.5 bg-[#0B0C0E]/60 rounded-full overflow-hidden">
         <div
           className={`h-full ${barColor} transition-all duration-300 rounded-full`}
           style={{ width: `${percent}%` }}

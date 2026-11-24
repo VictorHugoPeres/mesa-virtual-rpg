@@ -71,12 +71,12 @@ export function MobileTabCombate({
     <div className="space-y-4 pb-20">
       {/* Status do Combate */}
       {!isActive ? (
-        <div className="p-8 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-default)] text-center space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mx-auto">
+        <div className="p-8 rounded-2xl bg-[#14161A] border border-[#23272F] text-center space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-rose-600/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mx-auto">
             <Swords className="w-6 h-6" />
           </div>
-          <h3 className="font-bold text-sm text-[var(--text-primary)]">Nenhum Combate Ativo</h3>
-          <p className="text-xs text-[var(--text-muted)] max-w-xs mx-auto">
+          <h3 className="font-bold text-sm text-zinc-100">Nenhum Combate Ativo</h3>
+          <p className="text-xs text-zinc-400 max-w-xs mx-auto">
             Aguarde o Mestre iniciar a ordem de iniciativa para visualizar os turnos ao vivo.
           </p>
         </div>
@@ -86,16 +86,16 @@ export function MobileTabCombate({
           <div
             className={`p-4 rounded-2xl border text-center space-y-1 shadow-md transition-all ${
               isMyTurn
-                ? "bg-emerald-950/40 border-emerald-500 animate-pulse"
-                : "bg-blue-950/30 border-blue-900/50"
+                ? "bg-emerald-950/40 border-emerald-500/60 animate-pulse"
+                : "bg-[#14161A] border border-[#23272F]"
             }`}
           >
-            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 block">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-rose-400 block">
               Rodada {combatData?.round ?? 1}
             </span>
             <div className="flex items-center justify-center gap-2">
-              <span className="text-xs text-[var(--text-muted)]">Turno de:</span>
-              <span className="text-base font-black text-[var(--text-primary)]">
+              <span className="text-xs text-zinc-400">Turno de:</span>
+              <span className="text-base font-black text-zinc-100">
                 {currentParticipant?.name || "Aguardando..."}
               </span>
             </div>
@@ -109,10 +109,10 @@ export function MobileTabCombate({
           {/* Ordem de Iniciativa */}
           <div className="space-y-2">
             <div className="flex items-center justify-between px-1">
-              <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
                 Ordem de Turnos ({combatData?.participants.length ?? 0})
               </span>
-              <span className="text-[10px] text-[var(--text-muted)]">Modo sem spoilers</span>
+              <span className="text-[10px] text-zinc-500">Modo sem spoilers</span>
             </div>
 
             <div className="space-y-2">
@@ -125,14 +125,14 @@ export function MobileTabCombate({
                     key={p.id}
                     className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
                       isCurrent
-                        ? "bg-blue-950/50 border-blue-500 shadow-md ring-1 ring-blue-500/50"
-                        : "bg-[var(--bg-secondary)] border-[var(--border-default)]"
+                        ? "bg-[#1A1D24] border-emerald-500/60 shadow-md ring-1 ring-emerald-500/40"
+                        : "bg-[#14161A] border border-[#23272F]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
                       <div
                         className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs ${
-                          isCurrent ? "bg-blue-600 text-white" : "bg-[var(--bg-card)] text-[var(--text-muted)]"
+                          isCurrent ? "bg-emerald-600 text-white" : "bg-[#0B0C0E] text-zinc-400 border border-[#23272F]"
                         }`}
                       >
                         {p.initiative}
@@ -142,13 +142,13 @@ export function MobileTabCombate({
                         <div className="flex items-center gap-1.5">
                           <span
                             className={`font-bold text-xs ${
-                              isCurrent ? "text-blue-300" : "text-[var(--text-primary)]"
+                              isCurrent ? "text-emerald-300 font-black" : "text-zinc-100"
                             }`}
                           >
                             {p.name}
                           </span>
                           {!isPC && (
-                            <span className="text-[9px] text-red-400 bg-red-950/60 px-1 rounded border border-red-900/60 font-semibold">
+                            <span className="text-[9px] text-rose-300 bg-rose-950/60 px-1 rounded border border-rose-900/60 font-semibold">
                               Ameaça
                             </span>
                           )}
@@ -156,9 +156,9 @@ export function MobileTabCombate({
 
                         {/* Barra de vida apenas para PCs; Ameaças mostram apenas status */}
                         {isPC && p.hpPercent !== undefined && (
-                          <div className="w-24 h-1 bg-[var(--bg-primary)] rounded-full overflow-hidden mt-1">
+                          <div className="w-24 h-1 bg-[#0B0C0E] rounded-full overflow-hidden mt-1">
                             <div
-                              className="h-full bg-emerald-500 rounded-full"
+                              className="h-full bg-rose-500 rounded-full"
                               style={{ width: `${p.hpPercent}%` }}
                             />
                           </div>
