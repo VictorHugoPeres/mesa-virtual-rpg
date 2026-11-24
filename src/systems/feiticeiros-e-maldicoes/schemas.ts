@@ -208,6 +208,7 @@ const RawFMCharacterDataSchema = z.object({
   level: z.number().min(1).max(20).default(1),
   xp: z.number().default(0),
   origin: z.string().default("Inato"),
+  clan: z.string().default(""),
   specialization: z.string().default("Lutador"),
   technique: z.string().default(""),
   grade: z.string().default("4° Grau"),

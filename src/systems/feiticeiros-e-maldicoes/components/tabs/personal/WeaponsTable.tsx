@@ -1,8 +1,12 @@
 "use client";
 
-import { FMCharacterData } from "@/systems/feiticeiros-e-maldicoes";
+import {
+  FMCharacterData,
+  getProficiencyBonus,
+  calcAttackBonus,
+} from "@/systems/feiticeiros-e-maldicoes";
 import { useDice } from "@/core/dice/DiceContext";
-import { Plus, Trash2, Swords, Sparkles } from "lucide-react";
+import { Plus, Trash2, Swords } from "lucide-react";
 
 interface WeaponsTableProps {
   data: FMCharacterData;
@@ -20,6 +24,8 @@ export function WeaponsTable({
   campaignId,
 }: WeaponsTableProps) {
   const { openRoller } = useDice();
+  const prof = getProficiencyBonus(data.level);
+  const halfLevel = Math.floor(data.level / 2);
 
   function handleRollAttack(name: string, bonus: number, damage?: string) {
     openRoller({
@@ -45,23 +51,30 @@ export function WeaponsTable({
   }
 
   return (
-    <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)]">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-          Registro Rápido de Armas & Ataques
-        </h3>
+    <div className="p-4 rounded-xl bg-[#14161A] border border-[#23272F]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+        <div>
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-200">
+            Registro Rápido de Armas & Ataques
+          </h3>
+          <p className="text-xs text-zinc-400 font-mono">
+            Acerto v2.5 = Mod. Atributo + ⌊N/2⌋ (+{halfLevel}) + (se proficiente: BT +{prof})
+          </p>
+        </div>
         <button
+          type="button"
           onClick={() => {
+            const initialBonus = calcAttackBonus(data.attributes["FOR"] ?? 10, data.level, true);
             onChange((prev) => ({
               ...prev,
               weapons: [
                 ...prev.weapons,
                 {
                   name: "Nova Arma",
-                  attackBonus: 0,
+                  attackBonus: initialBonus,
                   damage: "1d6",
                   critical: "20",
-                  damageType: "Físico",
+                  damageType: "Impacto",
                   range: "Corpo a corpo",
                 },
               ],
@@ -74,16 +87,16 @@ export function WeaponsTable({
       </div>
 
       {data.weapons.length === 0 ? (
-        <p className="text-xs text-[var(--text-muted)] py-4 text-center">
+        <p className="text-xs text-zinc-400 py-4 text-center">
           Nenhuma arma cadastrada. Clique em &quot;Adicionar Arma&quot;.
         </p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-[var(--border-default)] text-[var(--text-muted)] uppercase tracking-wider text-[10px]">
+              <tr className="border-b border-[#23272F] text-zinc-400 uppercase tracking-wider text-[10px]">
                 <th className="py-2 px-2">Arma</th>
-                <th className="py-2 px-2 text-center">Acerto</th>
+                <th className="py-2 px-2 text-center" title="Bônus de Acerto total da jogada de ataque">Acerto</th>
                 <th className="py-2 px-2">Dano</th>
                 <th className="py-2 px-2 text-center">Crítico</th>
                 <th className="py-2 px-2">Tipo</th>
@@ -92,9 +105,9 @@ export function WeaponsTable({
                 <th className="py-2 px-2 text-right"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border-default)]">
+            <tbody className="divide-y divide-[#23272F]">
               {data.weapons.map((w, idx) => (
-                <tr key={idx} className="hover:bg-[var(--bg-secondary)]/50">
+                <tr key={idx} className="hover:bg-[#1A1D24]/50 transition-colors">
                   <td className="py-2 px-2">
                     <input
                       type="text"
@@ -107,7 +120,7 @@ export function WeaponsTable({
                           return { ...prev, weapons };
                         });
                       }}
-                      className="w-full px-2 py-1 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)] font-medium"
+                      className="w-full px-2 py-1 rounded bg-[#0B0C0E] border border-[#23272F] text-zinc-100 font-medium"
                     />
                   </td>
                   <td className="py-2 px-2 text-center">
@@ -122,7 +135,7 @@ export function WeaponsTable({
                           return { ...prev, weapons };
                         });
                       }}
-                      className="w-14 text-center py-1 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)] text-green-400 font-bold"
+                      className="w-14 text-center py-1 rounded bg-[#0B0C0E] border border-[#23272F] text-emerald-400 font-bold"
                     />
                   </td>
                   <td className="py-2 px-2">
@@ -138,7 +151,7 @@ export function WeaponsTable({
                           return { ...prev, weapons };
                         });
                       }}
-                      className="w-24 px-2 py-1 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)] font-mono"
+                      className="w-24 px-2 py-1 rounded bg-[#0B0C0E] border border-[#23272F] text-zinc-100 font-mono"
                     />
                   </td>
                   <td className="py-2 px-2 text-center">
@@ -153,13 +166,12 @@ export function WeaponsTable({
                           return { ...prev, weapons };
                         });
                       }}
-                      className="w-14 text-center py-1 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)]"
+                      className="w-14 text-center py-1 rounded bg-[#0B0C0E] border border-[#23272F] text-zinc-300 font-mono"
                     />
                   </td>
                   <td className="py-2 px-2">
                     <input
                       type="text"
-                      placeholder="Ex: Cortante"
                       value={w.damageType}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -169,13 +181,12 @@ export function WeaponsTable({
                           return { ...prev, weapons };
                         });
                       }}
-                      className="w-20 px-2 py-1 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)]"
+                      className="w-20 px-2 py-1 rounded bg-[#0B0C0E] border border-[#23272F] text-zinc-300 text-xs"
                     />
                   </td>
                   <td className="py-2 px-2">
                     <input
                       type="text"
-                      placeholder="Ex: 9m"
                       value={w.range}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -185,40 +196,42 @@ export function WeaponsTable({
                           return { ...prev, weapons };
                         });
                       }}
-                      className="w-20 px-2 py-1 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)]"
+                      className="w-24 px-2 py-1 rounded bg-[#0B0C0E] border border-[#23272F] text-zinc-300 text-xs"
                     />
                   </td>
                   <td className="py-2 px-2 text-center">
-                    <div className="flex items-center justify-center gap-1.5">
+                    <div className="flex gap-1 justify-center">
                       <button
                         type="button"
                         onClick={() => handleRollAttack(w.name, w.attackBonus, w.damage)}
-                        className="px-2 py-1 text-[11px] font-bold rounded bg-blue-900/40 border border-blue-700/60 text-blue-300 hover:bg-blue-800/60 transition-all cursor-pointer flex items-center gap-1"
-                        title="Rolar Ataque (1d20 + bônus)"
+                        className="px-2 py-1 text-[11px] rounded bg-rose-600 hover:bg-rose-500 text-white font-bold cursor-pointer"
+                        title="Rolar Jogada de Ataque (1d20 + acerto)"
                       >
-                        <Swords className="w-3 h-3" /> Acerto
+                        Ataque ({w.attackBonus >= 0 ? `+${w.attackBonus}` : w.attackBonus})
                       </button>
                       <button
                         type="button"
                         onClick={() => handleRollDamage(w.name, w.damage)}
-                        className="px-2 py-1 text-[11px] font-bold rounded bg-rose-900/40 border border-rose-700/60 text-rose-300 hover:bg-rose-800/60 transition-all cursor-pointer flex items-center gap-1"
+                        className="px-2 py-1 text-[11px] rounded bg-[#1A1D24] hover:bg-[#23272F] border border-[#23272F] text-rose-300 font-bold cursor-pointer"
                         title="Rolar Dano da Arma"
                       >
-                        <Sparkles className="w-3 h-3" /> Dano
+                        Dano
                       </button>
                     </div>
                   </td>
                   <td className="py-2 px-2 text-right">
                     <button
+                      type="button"
                       onClick={() => {
                         onChange((prev) => ({
                           ...prev,
                           weapons: prev.weapons.filter((_, i) => i !== idx),
                         }));
                       }}
-                      className="p-1 rounded text-red-400 hover:text-red-300 hover:bg-red-950/30 transition-colors cursor-pointer"
+                      className="p-1 text-zinc-500 hover:text-rose-400 cursor-pointer"
+                      title="Excluir arma"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </td>
                 </tr>

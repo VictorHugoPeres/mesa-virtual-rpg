@@ -39,8 +39,9 @@ export function TechniqueDetails({
 
   const techAttr = (cp.techniqueAttribute || "INT") as AttributeKey;
   const techAttrMod = getModifier(data.attributes[techAttr] ?? 10);
-  const calcDC = 8 + prof + techAttrMod;
-  const calcAttack = prof + techAttrMod;
+  const halfLevel = Math.floor(data.level / 2);
+  const calcDC = 10 + halfLevel + prof + techAttrMod;
+  const calcAttack = halfLevel + prof + techAttrMod;
 
   function handleApplyFromCatalog(techData: {
     name: string;
@@ -86,11 +87,11 @@ export function TechniqueDetails({
   }
 
   return (
-    <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)]">
+    <div className="p-4 rounded-xl bg-[#14161A] border border-[#23272F]">
       <div className="flex items-center justify-between gap-2 mb-4">
         <div className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-rose-400" />
-          <h3 className="text-base font-semibold">Técnica Amaldiçoada & Atributos Mágicos</h3>
+          <h3 className="text-base font-semibold text-zinc-100">Técnica Amaldiçoada & Atributos Mágicos</h3>
         </div>
         <button
           type="button"
@@ -103,7 +104,7 @@ export function TechniqueDetails({
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
         <div className="md:col-span-2">
-          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
+          <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
             Nome da Técnica
           </label>
           <input
@@ -117,12 +118,12 @@ export function TechniqueDetails({
                 cursedProfile: { ...prev.cursedProfile, techniqueName: val },
               }));
             }}
-            className="w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)] font-semibold"
+            className="w-full px-3 py-2 rounded-lg bg-[#0B0C0E] border border-[#23272F] text-zinc-100 font-semibold"
           />
         </div>
 
         <div>
-          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
+          <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
             Atributo da Técnica
           </label>
           <select
@@ -134,7 +135,7 @@ export function TechniqueDetails({
                 cursedProfile: { ...prev.cursedProfile, techniqueAttribute: val },
               }));
             }}
-            className="w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)]"
+            className="w-full px-3 py-2 rounded-lg bg-[#0B0C0E] border border-[#23272F] text-zinc-100"
           >
             {ATTRIBUTE_KEYS.map((k) => (
               <option key={k} value={k}>
@@ -145,7 +146,7 @@ export function TechniqueDetails({
         </div>
 
         <div>
-          <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
+          <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
             Perícia da Técnica
           </label>
           <input
@@ -159,20 +160,20 @@ export function TechniqueDetails({
                 cursedProfile: { ...prev.cursedProfile, techniqueSkill: val },
               }));
             }}
-            className="w-full px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)]"
+            className="w-full px-3 py-2 rounded-lg bg-[#0B0C0E] border border-[#23272F] text-zinc-100"
           />
         </div>
       </div>
 
-      {/* Cards de CD e Ataque Mágico Clicável */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] mb-4">
+      {/* Cards de CD e Ataque Mágico Clicável v2.5 */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 rounded-lg bg-[#0B0C0E] border border-[#23272F] mb-4">
         <div className="text-center">
-          <p className="text-[10px] uppercase font-bold text-[var(--text-muted)]">
-            CD de Resistência
+          <p className="text-[10px] uppercase font-bold text-zinc-400">
+            CD de Resistência (v2.5)
           </p>
-          <p className="text-2xl font-bold text-blue-400">{calcDC}</p>
-          <p className="text-[10px] text-[var(--text-muted)]">
-            8 + Maestria (+{prof}) + Mod ({techAttrMod >= 0 ? `+${techAttrMod}` : techAttrMod})
+          <p className="text-2xl font-bold text-sky-400">{calcDC}</p>
+          <p className="text-[10px] text-zinc-500 font-mono">
+            10 + ⌊N/2⌋ (+{halfLevel}) + BT (+{prof}) + Mod ({techAttrMod >= 0 ? `+${techAttrMod}` : techAttrMod})
           </p>
         </div>
 
@@ -180,40 +181,49 @@ export function TechniqueDetails({
         <button
           type="button"
           onClick={handleRollSpellAttack}
-          className="text-center p-1.5 rounded-lg border border-transparent hover:border-green-500/50 hover:bg-[var(--bg-card)] transition-all cursor-pointer group"
+          className="text-center p-1.5 rounded-lg border border-transparent hover:border-emerald-500/50 hover:bg-[#14161A] transition-all cursor-pointer group"
           title="Clique para rolar Acerto Mágico (1d20 + bônus)"
         >
           <div className="flex items-center justify-center gap-1">
-            <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] group-hover:text-green-300">
+            <p className="text-[10px] uppercase font-bold text-zinc-400 group-hover:text-emerald-300">
               Acerto de Feitiço
             </p>
-            <Dices className="w-3 h-3 text-green-400 opacity-60 group-hover:opacity-100" />
+            <Dices className="w-3 h-3 text-emerald-400 opacity-60 group-hover:opacity-100" />
           </div>
-          <p className="text-2xl font-bold text-green-400">
+          <p className="text-2xl font-bold text-emerald-400">
             {calcAttack >= 0 ? `+${calcAttack}` : calcAttack}
           </p>
-          <p className="text-[10px] text-[var(--text-muted)]">
-            1d20 + Maestria (+{prof}) + Mod
+          <p className="text-[10px] text-zinc-500 font-mono">
+            Mod ({techAttrMod >= 0 ? `+${techAttrMod}` : techAttrMod}) + ⌊N/2⌋ (+{halfLevel}) + BT (+{prof})
           </p>
         </button>
 
-        <div className="text-center col-span-2 flex flex-col justify-center">
-          <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">
-            Funcionamento Básico
+        <div className="text-center">
+          <p className="text-[10px] uppercase font-bold text-zinc-400">
+            Bônus de Treino (BT)
           </p>
-          <p className="text-xs text-[var(--text-secondary)] italic">
-            Todo feiticeiro inicia com sua técnica e o funcionamento básico acordado com o Mestre.
+          <p className="text-2xl font-bold text-zinc-200">+{prof}</p>
+          <p className="text-[10px] text-zinc-500 font-mono">Nível {data.level}</p>
+        </div>
+
+        <div className="text-center">
+          <p className="text-[10px] uppercase font-bold text-zinc-400">
+            Modificador ({techAttr})
           </p>
+          <p className="text-2xl font-bold text-zinc-200">
+            {techAttrMod >= 0 ? `+${techAttrMod}` : techAttrMod}
+          </p>
+          <p className="text-[10px] text-zinc-500 font-mono">Valor {data.attributes[techAttr] ?? 10}</p>
         </div>
       </div>
 
       <div>
-        <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
-          Descrição e Regras da Técnica
+        <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
+          Descrição & Funcionamento Básico da Técnica
         </label>
         <textarea
           rows={3}
-          placeholder="Descreva as características inatas, condições e restrições da sua técnica..."
+          placeholder="Descreva o conceito, regras e efeito da técnica inata..."
           value={cp.techniqueDesc}
           onChange={(e) => {
             const val = e.target.value;
@@ -222,15 +232,13 @@ export function TechniqueDetails({
               cursedProfile: { ...prev.cursedProfile, techniqueDesc: val },
             }));
           }}
-          className="w-full text-xs p-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[var(--text-primary)]"
+          className="w-full px-3 py-2 rounded-lg bg-[#0B0C0E] border border-[#23272F] text-zinc-200 text-xs"
         />
       </div>
 
       <TechniqueCatalogModal
         isOpen={isCatalogOpen}
         onClose={() => setIsCatalogOpen(false)}
-        characterLevel={data.level}
-        maxSpells={4}
         onApplyTechnique={handleApplyFromCatalog}
       />
     </div>

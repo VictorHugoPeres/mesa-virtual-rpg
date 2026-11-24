@@ -27,6 +27,7 @@ export interface SkillDef {
   attribute: AttributeKey;
   requiresTraining: boolean;
   isSavingThrow?: boolean;
+  isCustom?: boolean;
 }
 
 // 20 Perícias Canônicas v2.5 (sem Luta/Pontaria) + 5 Testes de Resistência (TR)

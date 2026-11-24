@@ -8,6 +8,7 @@ import {
   calcDefense,
   calcSuggestedHP,
   calcSuggestedPE,
+  getSoulState,
 } from "@/systems/feiticeiros-e-maldicoes";
 import { ResourceBarCard } from "./ResourceBarCard";
 import { Heart, Zap, Shield, Activity, Sparkles } from "lucide-react";
@@ -53,8 +54,11 @@ export function ResourceBars({ data, onChange }: ResourceBarsProps) {
     const keyAttr = data.keyAttribute as AttributeKey;
     const keyMod = getModifier(data.attributes[keyAttr] ?? 10);
 
-    const sugHp = calcSuggestedHP(data.specialization as Specialization, data.level, conMod);
-    const sugPe = calcSuggestedPE(data.specialization as Specialization, data.level, keyMod);
+    const sugHp = calcSuggestedHP(data.specialization as Specialization, data.level, conMod, data.clan);
+    const sugPe = calcSuggestedPE(data.specialization as Specialization, data.level, keyMod, {
+      origin: data.origin,
+      clan: data.clan,
+    });
 
     onChange((prev) => ({
       ...prev,
@@ -65,6 +69,9 @@ export function ResourceBars({ data, onChange }: ResourceBarsProps) {
   }
 
   const dexMod = getModifier(data.attributes["DEX"] ?? 10);
+  const halfLevel = Math.floor(data.level / 2);
+  const isRestringido = data.origin === "Restringido" || data.specialization === "Restringido";
+  const soul = getSoulState(data.integrity.current, data.integrity.max);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -82,10 +89,10 @@ export function ResourceBars({ data, onChange }: ResourceBarsProps) {
           <button
             type="button"
             onClick={applySuggestedHpPe}
-            title="Calcular PV e PE máximos pelas regras de nível e constituição"
-            className="text-[10px] flex items-center gap-1 text-zinc-500 hover:text-rose-300 transition-colors cursor-pointer"
+            title="Calcular PV e PE máximos v2.5 pelas regras de nível, especialização e clã"
+            className="text-[10px] flex items-center gap-1 text-zinc-400 hover:text-rose-300 transition-colors cursor-pointer"
           >
-            <Sparkles className="w-3 h-3 text-rose-400" /> Auto
+            <Sparkles className="w-3 h-3 text-rose-400" /> Auto v2.5
           </button>
         }
         onUpdateCurrent={updateHp}
@@ -100,13 +107,13 @@ export function ResourceBars({ data, onChange }: ResourceBarsProps) {
         }
       />
 
-      {/* 2. Energia Amaldiçoada (PE) */}
+      {/* 2. Energia Amaldiçoada (PE) ou Estamina */}
       <ResourceBarCard
-        label="Energia Amaldiçoada (PE)"
+        label={isRestringido ? "Estamina / Vigor" : "Energia Amaldiçoada (PE)"}
         icon={<Zap className="w-4 h-4" />}
-        colorClass="text-sky-400"
-        barColor="bg-sky-400"
-        hoverBg="hover:bg-sky-950/40"
+        colorClass={isRestringido ? "text-amber-400" : "text-sky-400"}
+        barColor={isRestringido ? "bg-amber-400" : "bg-sky-400"}
+        hoverBg={isRestringido ? "hover:bg-amber-950/40" : "hover:bg-sky-950/40"}
         current={data.energy.current}
         max={data.energy.max}
         temp={data.energy.temp}
@@ -122,7 +129,7 @@ export function ResourceBars({ data, onChange }: ResourceBarsProps) {
         }
       />
 
-      {/* 3. Integridade da Alma */}
+      {/* 3. Integridade da Alma com Badge de Estado da Alma v2.5 */}
       <ResourceBarCard
         label="Integridade da Alma"
         icon={<Activity className="w-4 h-4" />}
@@ -133,6 +140,24 @@ export function ResourceBars({ data, onChange }: ResourceBarsProps) {
         max={data.integrity.max}
         temp={data.integrity.temp}
         tempLabel="Temporária:"
+        headerAction={
+          <span
+            className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
+              soul.state === "Estável"
+                ? "bg-emerald-950/50 border-emerald-800/60 text-emerald-300"
+                : soul.state === "Danificado"
+                ? "bg-amber-950/50 border-amber-800/60 text-amber-300"
+                : soul.state === "Instável"
+                ? "bg-orange-950/50 border-orange-800/60 text-orange-300"
+                : soul.state === "Crítico"
+                ? "bg-rose-950/60 border-rose-800/80 text-rose-300 animate-pulse"
+                : "bg-red-950/80 border-red-800 text-red-400"
+            }`}
+            title={soul.description}
+          >
+            {soul.state} {soul.state === "Danificado" ? "(-3 / +2 PE)" : soul.state === "Instável" ? "(-6 / +3 PE)" : soul.state === "Crítico" ? "(-8 / +5 PE)" : ""}
+          </span>
+        }
         onUpdateCurrent={updateIntegrity}
         onChangeCurrent={(val) =>
           onChange((prev) => ({ ...prev, integrity: { ...prev.integrity, current: val } }))
@@ -145,24 +170,24 @@ export function ResourceBars({ data, onChange }: ResourceBarsProps) {
         }
       />
 
-      {/* 4. Defesa / Classe de Armadura (CA) */}
+      {/* 4. Defesa / Classe de Armadura (CA) v2.5 */}
       <div className="p-4 rounded-xl bg-[#14161A] border border-[#23272F]">
         <div className="flex items-center justify-between mb-2">
           <span className="flex items-center gap-1.5 text-sm font-semibold text-zinc-300">
             <Shield className="w-4 h-4 text-zinc-400" /> Defesa (CA)
           </span>
-          <span className="text-2xl font-bold text-zinc-200">
+          <span className="text-2xl font-bold text-zinc-100">
             {calcDefense(data)}
           </span>
         </div>
 
-        <p className="text-[11px] text-zinc-400 mb-3">
-          10 + DEX ({dexMod >= 0 ? `+${dexMod}` : dexMod}) + Uniforme + Escudo + Outros
+        <p className="text-[11px] text-zinc-400 mb-3 font-mono leading-relaxed">
+          10 + DES ({dexMod >= 0 ? `+${dexMod}` : dexMod}) + ⌊N/2⌋ (+{halfLevel}) + Unif + Esc + Outros
         </p>
 
         <div className="grid grid-cols-3 gap-2 text-xs">
           <div>
-            <label className="block text-[10px] text-[var(--text-muted)] mb-0.5">Uniforme</label>
+            <label className="block text-[10px] text-zinc-400 mb-0.5">Uniforme</label>
             <input
               type="number"
               value={data.defense.uniform}
@@ -174,11 +199,11 @@ export function ResourceBars({ data, onChange }: ResourceBarsProps) {
                   return next;
                 });
               }}
-              className="w-full text-center py-1 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)]"
+              className="w-full text-center py-1 rounded bg-[#0B0C0E] border border-[#23272F] text-zinc-100"
             />
           </div>
           <div>
-            <label className="block text-[10px] text-[var(--text-muted)] mb-0.5">Escudo</label>
+            <label className="block text-[10px] text-zinc-400 mb-0.5">Escudo</label>
             <input
               type="number"
               value={data.defense.shield}
@@ -190,11 +215,11 @@ export function ResourceBars({ data, onChange }: ResourceBarsProps) {
                   return next;
                 });
               }}
-              className="w-full text-center py-1 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)]"
+              className="w-full text-center py-1 rounded bg-[#0B0C0E] border border-[#23272F] text-zinc-100"
             />
           </div>
           <div>
-            <label className="block text-[10px] text-[var(--text-muted)] mb-0.5">Outros</label>
+            <label className="block text-[10px] text-zinc-400 mb-0.5">Outros</label>
             <input
               type="number"
               value={data.defense.other}
@@ -206,7 +231,7 @@ export function ResourceBars({ data, onChange }: ResourceBarsProps) {
                   return next;
                 });
               }}
-              className="w-full text-center py-1 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)]"
+              className="w-full text-center py-1 rounded bg-[#0B0C0E] border border-[#23272F] text-zinc-100"
             />
           </div>
         </div>

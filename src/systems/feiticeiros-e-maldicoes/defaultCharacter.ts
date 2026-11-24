@@ -31,6 +31,7 @@ export function createDefaultCharacter(
     level: 1,
     xp: 0,
     origin,
+    clan: "",
     specialization,
     technique: "",
     grade: "4° Grau",

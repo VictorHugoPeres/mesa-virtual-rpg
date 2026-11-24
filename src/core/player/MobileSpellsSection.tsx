@@ -1,6 +1,12 @@
 "use client";
 
-import { FMCharacterData, SpellDef } from "@/systems/feiticeiros-e-maldicoes";
+import {
+  FMCharacterData,
+  SpellDef,
+  AttributeKey,
+  getModifier,
+  getProficiencyBonus,
+} from "@/systems/feiticeiros-e-maldicoes";
 import { useDice } from "@/core/dice/DiceContext";
 import { useDialog } from "@/core/ui";
 import { Wand2, Sparkles, Dices } from "lucide-react";
@@ -22,8 +28,14 @@ export function MobileSpellsSection({
 }: MobileSpellsSectionProps) {
   const { openRoller } = useDice();
   const { toast } = useDialog();
-  const isRestringido = sheet.origin === "Restringido";
+  const isRestringido = sheet.origin === "Restringido" || sheet.specialization === "Restringido";
   const spells = sheet.cursedProfile?.spells || [];
+
+  const techAttr = (sheet.cursedProfile?.techniqueAttribute || "INT") as AttributeKey;
+  const techAttrMod = getModifier(sheet.attributes[techAttr] ?? 10);
+  const halfLevel = Math.floor(sheet.level / 2);
+  const prof = getProficiencyBonus(sheet.level);
+  const calcDC = 10 + halfLevel + prof + techAttrMod;
 
   if (spells.length === 0) return null;
 
@@ -40,7 +52,6 @@ export function MobileSpellsSection({
       energy: { ...prev.energy, current: nextPE },
     }));
 
-    // Registra no histórico e telão via API
     fetch("/api/rolls", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -60,7 +71,6 @@ export function MobileSpellsSection({
       }),
     }).catch((err) => console.warn("Erro ao registrar feitiço mobile:", err));
 
-    // Se houver dados descritos no efeito (ex: 2d8, 1d10+3), abre o rolador
     const diceMatch = sp.effect?.match(/(\d*d\d+(?:\s*[+-]\s*\d+)?)/i);
     if (diceMatch) {
       openRoller({
@@ -76,10 +86,17 @@ export function MobileSpellsSection({
 
   return (
     <div className="space-y-2">
-      <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-        <Wand2 className="w-3.5 h-3.5 text-rose-500" />
-        {isRestringido ? "Habilidades Marciais" : `Técnica: ${sheet.cursedProfile?.techniqueName || "Inata"}`}
-      </span>
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+          <Wand2 className="w-3.5 h-3.5 text-rose-500" />
+          {isRestringido ? "Habilidades Marciais" : `Técnica: ${sheet.cursedProfile?.techniqueName || "Inata"}`}
+        </span>
+        {!isRestringido && (
+          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-sky-950/50 border border-sky-800/60 text-sky-400">
+            CD {calcDC}
+          </span>
+        )}
+      </div>
 
       <div className="space-y-2">
         {spells.map((sp) => {
@@ -108,7 +125,7 @@ export function MobileSpellsSection({
               </div>
 
               {sp.effect && (
-                <p className="text-[11px] text-zinc-300 leading-relaxed bg-[#0B0C0E]/60 p-2 rounded-xl border border-[#23272F]/50">
+                <p className="text-[11px] text-zinc-300 leading-relaxed bg-[#0B0C0E] p-2 rounded-xl border border-[#23272F]">
                   {sp.effect}
                 </p>
               )}
@@ -128,7 +145,7 @@ export function MobileSpellsSection({
                         campaignId,
                       })
                     }
-                    className="px-2.5 py-1.5 rounded-xl bg-[#0B0C0E] border border-[#23272F] text-zinc-300 hover:text-white font-bold text-[11px] active:scale-95 touch-manipulation select-none cursor-pointer flex items-center gap-1 transition-colors"
+                    className="px-2.5 py-1.5 rounded-xl bg-[#0B0C0E] border border-[#23272F] text-zinc-300 hover:text-white font-bold text-[11px] cursor-pointer flex items-center gap-1 transition-colors"
                   >
                     <Dices className="w-3.5 h-3.5 text-sky-400" /> Rolar ({diceMatch[1]})
                   </button>
@@ -137,9 +154,9 @@ export function MobileSpellsSection({
                 <button
                   type="button"
                   onClick={() => handleCastSpell(sp)}
-                  className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-bold text-[11px] flex items-center gap-1.5 shadow-xs touch-manipulation select-none cursor-pointer transition-all"
+                  className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-[11px] flex items-center gap-1.5 shadow-xs cursor-pointer transition-colors"
                 >
-                  <Sparkles className="w-3.5 h-3.5" /> Usar (-{sp.peCost} PE)
+                  <Sparkles className="w-3.5 h-3.5" /> Usar (-{sp.peCost} {isRestringido ? "Vigor" : "PE"})
                 </button>
               </div>
             </div>

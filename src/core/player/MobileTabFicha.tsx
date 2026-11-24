@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from "react";
 import {
   FMCharacterData,
   getSkillBonus,
+  getSoulState,
   SKILLS_LIST,
   SkillDef,
   SPEC_TABLE,
@@ -16,7 +17,7 @@ import { MobileResourceBar } from "./MobileResourceBar";
 import { MobileAttributesGrid } from "./MobileAttributesGrid";
 import { MobileSpellsSection } from "./MobileSpellsSection";
 import { RestModal } from "@/systems/feiticeiros-e-maldicoes/components/RestModal";
-import { Heart, Activity, Sparkles, Swords, Moon } from "lucide-react";
+import { Heart, Activity, Sparkles, Swords, Moon, Zap } from "lucide-react";
 
 interface MobileTabFichaProps {
   campaignId: string;
@@ -84,11 +85,39 @@ export function MobileTabFicha({
     [scheduleSave]
   );
 
-  const isRestringido = sheet.origin === "Restringido";
+  const isRestringido = sheet.origin === "Restringido" || sheet.specialization === "Restringido";
+  const soul = getSoulState(sheet.integrity.current, sheet.integrity.max);
+
+  // Perícias treinadas + subcategorias de Ofício configuradas
+  const customCrafts = Object.keys(sheet.skills || {})
+    .filter((k) => (k.startsWith("Ofício:") || k.startsWith("Ofício (")) && sheet.skills[k]?.trained && !SKILLS_LIST.some((s) => s.name === k))
+    .map((name) => ({
+      name,
+      attribute: "INT" as const,
+      requiresTraining: true,
+      isSavingThrow: false,
+    }));
+
+  const trainedList = [
+    ...SKILLS_LIST.filter((s: SkillDef) => sheet.skills[s.name]?.trained),
+    ...customCrafts,
+  ];
+
+  const getSoulBadgeClass = () => {
+    switch (soul.state) {
+      case "Estável": return "bg-emerald-950/50 border-emerald-800/60 text-emerald-300";
+      case "Danificado": return "bg-amber-950/50 border-amber-800/60 text-amber-300";
+      case "Instável": return "bg-orange-950/50 border-orange-800/60 text-orange-300";
+      case "Crítico": return "bg-rose-950/60 border-rose-800/80 text-rose-300 animate-pulse";
+      default: return "bg-red-950/80 border-red-800 text-red-400";
+    }
+  };
+
+  const soulPenalty = soul.state === "Danificado" ? "(-3)" : soul.state === "Instável" ? "(-6)" : soul.state === "Crítico" ? "(-8)" : "";
 
   return (
     <div className="space-y-4 pb-20">
-      {/* 1. Barras de Recursos */}
+      {/* 1. Barras de Recursos v2.5 */}
       <div className="space-y-2">
         <MobileResourceBar
           label="Pontos de Vida (PV)"
@@ -106,9 +135,9 @@ export function MobileTabFicha({
           current={sheet.energy.current}
           max={sheet.energy.max}
           temp={sheet.energy.temp}
-          colorClass="bg-sky-950/20 border-sky-900/40 text-sky-300"
-          barColor="bg-sky-400"
-          icon={<Activity className="w-4 h-4 text-sky-400" />}
+          colorClass={isRestringido ? "bg-amber-950/20 border-amber-900/40 text-amber-300" : "bg-sky-950/20 border-sky-900/40 text-sky-300"}
+          barColor={isRestringido ? "bg-amber-400" : "bg-sky-400"}
+          icon={isRestringido ? <Zap className="w-4 h-4 text-amber-400" /> : <Activity className="w-4 h-4 text-sky-400" />}
           onChange={(newVal) => updateSheet((prev) => ({ ...prev, energy: { ...prev.energy, current: newVal } }))}
         />
 
@@ -119,6 +148,11 @@ export function MobileTabFicha({
           colorClass="bg-purple-950/20 border-purple-900/40 text-purple-300"
           barColor="bg-purple-500"
           icon={<Sparkles className="w-4 h-4 text-purple-400" />}
+          badge={
+            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${getSoulBadgeClass()}`} title={soul.description}>
+              {soul.state} {soulPenalty}
+            </span>
+          }
           onChange={(newVal) => updateSheet((prev) => ({ ...prev, integrity: { ...prev.integrity, current: newVal } }))}
         />
 
@@ -147,7 +181,7 @@ export function MobileTabFicha({
         </div>
       </div>
 
-      {/* 2. Estatísticas e Atributos */}
+      {/* 2. Estatísticas e Atributos v2.5 */}
       <MobileAttributesGrid
         sheet={sheet}
         characterName={characterName}
@@ -155,7 +189,7 @@ export function MobileTabFicha({
         campaignId={campaignId}
       />
 
-      {/* 3. Armas & Ataques */}
+      {/* 3. Armas & Ataques v2.5 */}
       {sheet.weapons?.length > 0 && (
         <div className="space-y-2">
           <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -176,33 +210,22 @@ export function MobileTabFicha({
                 <div className="flex gap-1.5">
                   <button
                     type="button"
-                    onClick={() =>
-                      openRoller({
-                        label: `Ataque: ${wpn.name}`,
-                        modifier: wpn.attackBonus ?? 0,
-                        defaultDice: "1d20",
-                        roller: characterName,
-                        characterId,
-                        campaignId,
-                        linkedDamage: wpn.damage?.trim() || undefined,
-                      })
-                    }
+                    onClick={() => openRoller({
+                      label: `Ataque: ${wpn.name}`,
+                      modifier: wpn.attackBonus ?? 0,
+                      defaultDice: "1d20",
+                      roller: characterName,
+                      characterId,
+                      campaignId,
+                      linkedDamage: wpn.damage?.trim() || undefined,
+                    })}
                     className="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-[11px] cursor-pointer transition-colors"
                   >
                     Ataque (+{wpn.attackBonus})
                   </button>
                   <button
                     type="button"
-                    onClick={() =>
-                      openRoller({
-                        label: `Dano: ${wpn.name}`,
-                        modifier: 0,
-                        defaultDice: wpn.damage || "1d6",
-                        roller: characterName,
-                        characterId,
-                        campaignId,
-                      })
-                    }
+                    onClick={() => openRoller({ label: `Dano: ${wpn.name}`, modifier: 0, defaultDice: wpn.damage || "1d6", roller: characterName, characterId, campaignId })}
                     className="px-2.5 py-1.5 rounded-lg bg-[#1A1D24] hover:bg-[#23272F] border border-[#23272F] text-rose-300 font-bold text-[11px] cursor-pointer transition-colors"
                   >
                     Dano
@@ -223,49 +246,40 @@ export function MobileTabFicha({
         onUpdateSheet={updateSheet}
       />
 
-      {/* 5. Perícias Treinadas */}
+      {/* 5. Perícias e TRs Treinados (Toque para Rolar) */}
       <div className="space-y-2">
         <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">
-          Perícias Treinadas (Toque para Rolar)
+          Perícias & TRs Treinados ({trainedList.length})
         </span>
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          {SKILLS_LIST.filter((s: SkillDef) => sheet.skills[s.name]?.trained).map((skill: SkillDef) => {
-            const attrVal = sheet.attributes[skill.attribute] ?? 10;
-            const skillData = sheet.skills[skill.name];
-            const bonus = getSkillBonus(
-              attrVal,
-              sheet.level,
-              skillData?.trained ?? false,
-              skillData?.expert ?? false,
-              skillData?.otherBonus ?? 0
-            );
-            const bonusStr = bonus >= 0 ? `+${bonus}` : `${bonus}`;
+        {trainedList.length === 0 ? (
+          <p className="text-xs text-zinc-500 italic p-3 rounded-xl bg-[#14161A] border border-[#23272F]">
+            Nenhuma perícia ou TR marcado como treinado na ficha.
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            {trainedList.map((skill) => {
+              const attrVal = sheet.attributes[skill.attribute] ?? 10;
+              const skillData = sheet.skills[skill.name];
+              const bonus = getSkillBonus(attrVal, sheet.level, skillData?.trained ?? false, skillData?.expert ?? false, skillData?.otherBonus ?? 0, { attributeKey: skill.attribute, origin: sheet.origin });
+              const bonusStr = bonus >= 0 ? `+${bonus}` : `${bonus}`;
 
-            return (
-              <button
-                key={skill.name}
-                type="button"
-                onClick={() =>
-                  openRoller({
-                    label: `Perícia: ${skill.name} (${skill.attribute})`,
-                    modifier: bonus,
-                    defaultDice: "1d20",
-                    roller: characterName,
-                    characterId,
-                    campaignId,
-                  })
-                }
-                className="p-2.5 rounded-xl bg-[#14161A] border border-[#23272F] hover:border-zinc-500 text-left flex items-center justify-between cursor-pointer transition-colors shadow-xs"
-              >
-                <div className="truncate mr-1">
-                  <span className="font-semibold block truncate text-zinc-200">{skill.name}</span>
-                  <span className="text-[10px] text-zinc-400">{skill.attribute}</span>
-                </div>
-                <span className="text-xs font-bold text-emerald-400">{bonusStr}</span>
-              </button>
-            );
-          })}
-        </div>
+              return (
+                <button
+                  key={skill.name}
+                  type="button"
+                  onClick={() => openRoller({ label: `Perícia: ${skill.name} (${skill.attribute})`, modifier: bonus, defaultDice: "1d20", roller: characterName, characterId, campaignId })}
+                  className="p-2.5 rounded-xl bg-[#14161A] border border-[#23272F] hover:border-zinc-500 text-left flex items-center justify-between cursor-pointer transition-colors shadow-xs"
+                >
+                  <div className="truncate mr-1">
+                    <span className="font-semibold block truncate text-zinc-200">{skill.name}</span>
+                    <span className="text-[10px] text-zinc-400 font-mono">{skill.attribute}</span>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-400">{bonusStr}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <RestModal

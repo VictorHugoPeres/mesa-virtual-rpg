@@ -6,6 +6,7 @@ import {
   ATTRIBUTE_LABELS,
   AttributeKey,
   getModifier,
+  calcDefense,
 } from "@/systems/feiticeiros-e-maldicoes";
 import { useDice } from "@/core/dice/DiceContext";
 
@@ -23,14 +24,15 @@ export function MobileAttributesGrid({
   campaignId,
 }: MobileAttributesGridProps) {
   const { openRoller } = useDice();
+  const def = calcDefense(sheet);
 
   return (
     <div className="space-y-3">
-      {/* 4 Estatísticas Principais */}
+      {/* 4 Estatísticas Principais v2.5 */}
       <div className="grid grid-cols-4 gap-2 text-center text-xs">
         <div className="p-2 rounded-xl bg-[#14161A] border border-[#23272F]">
-          <span className="text-[10px] text-zinc-400 font-bold block">Defesa</span>
-          <span className="text-base font-black text-zinc-300">{sheet.defense?.total ?? 10}</span>
+          <span className="text-[10px] text-zinc-400 font-bold block">Defesa (CA)</span>
+          <span className="text-base font-black text-zinc-100">{def}</span>
         </div>
         <button
           type="button"
@@ -44,7 +46,7 @@ export function MobileAttributesGrid({
               campaignId,
             })
           }
-          className="p-2 rounded-xl bg-[#14161A] border border-[#23272F] hover:border-amber-400/50 hover:bg-[#1A1D24] active:scale-95 transition-all cursor-pointer touch-manipulation select-none"
+          className="p-2 rounded-xl bg-[#14161A] border border-[#23272F] hover:border-amber-400/50 hover:bg-[#1A1D24] transition-colors cursor-pointer"
         >
           <span className="text-[10px] text-zinc-400 font-bold block">Iniciativa</span>
           <span className="text-base font-black text-amber-400">
@@ -61,10 +63,10 @@ export function MobileAttributesGrid({
         </div>
       </div>
 
-      {/* Grid de Atributos */}
+      {/* Grid de Atributos (PRE incluído) */}
       <div className="space-y-1.5">
         <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">
-          Atributos (Toque para Rolar)
+          Atributos Base (Toque para Rolar)
         </span>
         <div className="grid grid-cols-3 gap-2">
           {ATTRIBUTE_KEYS.map((k: AttributeKey) => {
@@ -78,7 +80,7 @@ export function MobileAttributesGrid({
                 type="button"
                 onClick={() =>
                   openRoller({
-                    label: `Teste de ${ATTRIBUTE_LABELS[k]}`,
+                    label: `Teste de ${ATTRIBUTE_LABELS[k]} (${k})`,
                     modifier: mod,
                     defaultDice: "1d20",
                     roller: characterName,
@@ -86,7 +88,7 @@ export function MobileAttributesGrid({
                     campaignId,
                   })
                 }
-                className="p-2.5 rounded-xl bg-[#14161A] border border-[#23272F] hover:border-white/20 hover:bg-[#1A1D24] active:scale-95 text-center transition-all cursor-pointer shadow-xs touch-manipulation select-none"
+                className="p-2.5 rounded-xl bg-[#14161A] border border-[#23272F] hover:border-white/20 hover:bg-[#1A1D24] text-center transition-colors cursor-pointer shadow-xs"
               >
                 <span className="text-[11px] font-bold text-zinc-400 block">{k}</span>
                 <span className="text-sm font-black text-zinc-100 block leading-tight">{val}</span>
