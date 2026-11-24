@@ -1,6 +1,6 @@
 "use client";
 
-import { AttributeKey, ATTRIBUTE_LABELS, getModifier } from "@/systems/feiticeiros-e-maldicoes";
+import { AttributeKey, ATTRIBUTE_LABELS, ATTRIBUTE_KEYS, getModifier } from "@/systems/feiticeiros-e-maldicoes";
 import { AttributeMethod } from "./wizardTypes";
 
 interface AttributeCardProps {
@@ -10,8 +10,9 @@ interface AttributeCardProps {
   finalVal: number;
   method: AttributeMethod;
   currentPool: number[];
-  otherAttributes: Record<AttributeKey, number>;
-  onSelectFixedOrRolled: (val: number) => void;
+  assignedSlot: number | null;
+  slotAssignments: Record<AttributeKey, number | null>;
+  onSelectSlot: (slotIndex: number) => void;
   onPointBuyChange: (val: number) => void;
   remainingPoints: number;
 }
@@ -23,8 +24,9 @@ export function AttributeCard({
   finalVal,
   method,
   currentPool,
-  otherAttributes,
-  onSelectFixedOrRolled,
+  assignedSlot,
+  slotAssignments,
+  onSelectSlot,
   onPointBuyChange,
   remainingPoints,
 }: AttributeCardProps) {
@@ -41,7 +43,9 @@ export function AttributeCard({
       }`}
     >
       <div className="flex items-center justify-between mb-1 min-w-0 gap-1">
-        <span className="font-bold text-sm text-[var(--text-primary)] truncate">{ATTRIBUTE_LABELS[attrKey]}</span>
+        <span className="font-bold text-sm text-[var(--text-primary)] truncate">
+          {ATTRIBUTE_LABELS[attrKey]}
+        </span>
         <span className="text-[11px] font-bold text-blue-400 bg-blue-950/60 px-1.5 py-0.5 rounded border border-blue-800/50 shrink-0">
           {attrKey}
         </span>
@@ -54,18 +58,18 @@ export function AttributeCard({
       <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-[var(--border-default)] min-w-0">
         {method === "fixed" || (method === "roll" && currentPool.length > 0) ? (
           <select
-            value={baseVal}
-            onChange={(e) => onSelectFixedOrRolled(Number(e.target.value))}
-            className="px-2 py-1 rounded bg-[var(--bg-card)] border border-[var(--border-default)] text-xs font-semibold max-w-[130px] sm:max-w-[150px] truncate cursor-pointer"
+            value={assignedSlot !== null ? assignedSlot : -1}
+            onChange={(e) => onSelectSlot(Number(e.target.value))}
+            className="px-2 py-1 rounded bg-[var(--bg-card)] border border-[var(--border-default)] text-xs font-semibold max-w-[145px] sm:max-w-[175px] truncate cursor-pointer"
           >
-            <option value={0}>Selecione...</option>
+            <option value={-1}>Selecione...</option>
             {currentPool.map((v, i) => {
-              const usedBy = (Object.keys(otherAttributes) as AttributeKey[]).find(
-                (k) => k !== attrKey && otherAttributes[k] === v
+              const usedBy = (ATTRIBUTE_KEYS as readonly AttributeKey[]).find(
+                (k) => k !== attrKey && slotAssignments[k] === i
               );
               return (
-                <option key={`${v}-${i}`} value={v}>
-                  {v} {usedBy ? `(em ${usedBy} - trocar)` : ""}
+                <option key={i} value={i}>
+                  {v} • Dado #{i + 1} {usedBy ? `(em ${usedBy} - trocar)` : ""}
                 </option>
               );
             })}

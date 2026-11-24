@@ -42,6 +42,48 @@ const ATTR_TOOLTIPS: Record<AttributeKey, string> = {
 
 const FIXED_POOL = [15, 14, 13, 12, 10, 8];
 
+function getSpecSlotOrder(spec: Specialization): Record<AttributeKey, number> {
+  switch (spec) {
+    case "Lutador":
+      return { FOR: 0, CON: 1, DEX: 2, SAB: 3, CAR: 4, INT: 5 };
+    case "Especialista em Combate":
+      return { FOR: 0, DEX: 1, CON: 2, SAB: 3, INT: 4, CAR: 5 };
+    case "Especialista em Técnica":
+      return { INT: 0, CON: 1, SAB: 2, DEX: 3, CAR: 4, FOR: 5 };
+    case "Controlador":
+      return { CAR: 0, SAB: 1, CON: 2, DEX: 3, INT: 4, FOR: 5 };
+    case "Suporte":
+      return { SAB: 0, CAR: 1, CON: 2, DEX: 3, INT: 4, FOR: 5 };
+    case "Restringido":
+      return { FOR: 0, DEX: 1, CON: 2, SAB: 3, CAR: 4, INT: 5 };
+    default:
+      return { FOR: 0, CON: 1, DEX: 2, INT: 3, SAB: 4, CAR: 5 };
+  }
+}
+
+function deriveInitialSlots(
+  baseAttrs: Record<AttributeKey, number>,
+  pool: number[]
+): Record<AttributeKey, number | null> {
+  const result: Record<AttributeKey, number | null> = {
+    FOR: null, DEX: null, CON: null, INT: null, SAB: null, CAR: null,
+  };
+  const used = new Set<number>();
+
+  (ATTRIBUTE_KEYS as readonly AttributeKey[]).forEach((key) => {
+    const val = baseAttrs[key];
+    if (val > 0) {
+      const idx = pool.findIndex((pVal, pIdx) => pVal === val && !used.has(pIdx));
+      if (idx !== -1) {
+        result[key] = idx;
+        used.add(idx);
+      }
+    }
+  });
+
+  return result;
+}
+
 export function StepAttributes({
   origin,
   specialization,
@@ -56,6 +98,11 @@ export function StepAttributes({
 }: StepAttributesProps) {
   const isRestringido = origin === "Restringido";
   const [rolledPool, setRolledPool] = useState<number[]>([]);
+  const currentPool = method === "roll" ? rolledPool : FIXED_POOL;
+
+  const [slotAssignments, setSlotAssignments] = useState<Record<AttributeKey, number | null>>(() =>
+    deriveInitialSlots(baseAttributes, currentPool)
+  );
 
   const pointsSpent = Object.values(baseAttributes).reduce((acc, val) => {
     return acc + (POINT_COSTS[val] ?? 0);
@@ -68,63 +115,66 @@ export function StepAttributes({
       Math.floor(Math.random() * 6) + 1,
       Math.floor(Math.random() * 6) + 1,
       Math.floor(Math.random() * 6) + 1,
-    ];
-    rolls.sort((a, b) => a - b);
+    ].sort((a, b) => a - b);
     return rolls[1] + rolls[2] + rolls[3];
   }
 
+  function applySuggestedValues(pool: number[]) {
+    const p = [...pool].sort((a, b) => b - a);
+    const order = getSpecSlotOrder(specialization);
+
+    const newAssignments: Record<AttributeKey, number | null> = { ...order };
+    const newAttrs: Record<AttributeKey, number> = {
+      FOR: p[order.FOR] || 0,
+      DEX: p[order.DEX] || 0,
+      CON: p[order.CON] || 0,
+      INT: p[order.INT] || 0,
+      SAB: p[order.SAB] || 0,
+      CAR: p[order.CAR] || 0,
+    };
+
+    setSlotAssignments(newAssignments);
+    setBaseAttributes(newAttrs);
+  }
+
   function handleRollAll() {
-    const rolled = Array.from({ length: 6 }, () => roll4d6DropLowest());
-    rolled.sort((a, b) => b - a);
+    const rolled = Array.from({ length: 6 }, () => roll4d6DropLowest()).sort((a, b) => b - a);
     setRolledPool(rolled);
     applySuggestedValues(rolled);
   }
 
-  function applySuggestedValues(pool: number[] = FIXED_POOL) {
-    const p = [...pool].sort((a, b) => b - a);
-    let s: Record<AttributeKey, number>;
-    switch (specialization) {
-      case "Lutador":
-        s = { FOR: p[0], CON: p[1], DEX: p[2], SAB: p[3], CAR: p[4], INT: p[5] };
-        break;
-      case "Especialista em Combate":
-        s = { FOR: p[0], DEX: p[1], CON: p[2], SAB: p[3], INT: p[4], CAR: p[5] };
-        break;
-      case "Especialista em Técnica":
-        s = { INT: p[0], CON: p[1], SAB: p[2], DEX: p[3], CAR: p[4], FOR: p[5] };
-        break;
-      case "Controlador":
-        s = { CAR: p[0], SAB: p[1], CON: p[2], DEX: p[3], INT: p[4], FOR: p[5] };
-        break;
-      case "Suporte":
-        s = { SAB: p[0], CAR: p[1], CON: p[2], DEX: p[3], INT: p[4], FOR: p[5] };
-        break;
-      case "Restringido":
-        s = { FOR: p[0], DEX: p[1], CON: p[2], SAB: p[3], CAR: p[4], INT: p[5] };
-        break;
-      default:
-        s = { FOR: p[0], CON: p[1], DEX: p[2], INT: p[3], SAB: p[4], CAR: p[5] };
-    }
-    setBaseAttributes(s);
-  }
+  function handleSelectSlot(attrKey: AttributeKey, newSlotIndex: number) {
+    const nextAssignments = { ...slotAssignments };
+    const nextBase = { ...baseAttributes };
 
-  function handleSelectFixedOrRolled(attrKey: AttributeKey, newVal: number) {
-    const next = { ...baseAttributes };
-    if (newVal === 0) {
-      next[attrKey] = 0;
-      setBaseAttributes(next);
+    if (newSlotIndex === -1) {
+      nextAssignments[attrKey] = null;
+      nextBase[attrKey] = 0;
+      setSlotAssignments(nextAssignments);
+      setBaseAttributes(nextBase);
       return;
     }
 
-    const currentValOfThis = baseAttributes[attrKey] || 0;
-    (ATTRIBUTE_KEYS as readonly AttributeKey[]).forEach((otherKey) => {
-      if (otherKey !== attrKey && baseAttributes[otherKey] === newVal) {
-        next[otherKey] = currentValOfThis;
-      }
-    });
+    const currentSlotOfThis = slotAssignments[attrKey];
+    const prevOwner = (ATTRIBUTE_KEYS as readonly AttributeKey[]).find(
+      (k) => k !== attrKey && slotAssignments[k] === newSlotIndex
+    );
 
-    next[attrKey] = newVal;
-    setBaseAttributes(next);
+    nextAssignments[attrKey] = newSlotIndex;
+    nextBase[attrKey] = currentPool[newSlotIndex] || 0;
+
+    if (prevOwner) {
+      if (currentSlotOfThis !== null) {
+        nextAssignments[prevOwner] = currentSlotOfThis;
+        nextBase[prevOwner] = currentPool[currentSlotOfThis] || 0;
+      } else {
+        nextAssignments[prevOwner] = null;
+        nextBase[prevOwner] = 0;
+      }
+    }
+
+    setSlotAssignments(nextAssignments);
+    setBaseAttributes(nextBase);
   }
 
   function getFinalValue(key: AttributeKey): number {
@@ -141,14 +191,12 @@ export function StepAttributes({
     return base + bonus;
   }
 
-  const currentPool = method === "roll" ? rolledPool : FIXED_POOL;
-
   return (
     <div className="space-y-4">
       <div>
         <h3 className="text-base font-bold text-[var(--text-primary)]">Passo 3: Distribuição de Atributos</h3>
         <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-          Distribua os atributos e configure os bônus da Origem ({origin}). Cada valor só pode ser alocado em um atributo.
+          Distribua os atributos e configure os bônus da Origem ({origin}). Cada dado só pode ser alocado em um atributo.
         </p>
       </div>
 
@@ -157,6 +205,7 @@ export function StepAttributes({
           type="button"
           onClick={() => {
             setMethod("fixed");
+            setSlotAssignments({ FOR: null, DEX: null, CON: null, INT: null, SAB: null, CAR: null });
             setBaseAttributes({ FOR: 0, DEX: 0, CON: 0, INT: 0, SAB: 0, CAR: 0 });
           }}
           className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
@@ -169,6 +218,7 @@ export function StepAttributes({
           type="button"
           onClick={() => {
             setMethod("pointBuy");
+            setSlotAssignments({ FOR: null, DEX: null, CON: null, INT: null, SAB: null, CAR: null });
             setBaseAttributes({ FOR: 10, DEX: 10, CON: 10, INT: 10, SAB: 10, CAR: 10 });
           }}
           className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
@@ -196,8 +246,19 @@ export function StepAttributes({
         <FixedValuesBar
           specialization={specialization}
           baseAttributes={baseAttributes}
-          onAssignValue={handleSelectFixedOrRolled}
-          onReset={() => setBaseAttributes({ FOR: 0, DEX: 0, CON: 0, INT: 0, SAB: 0, CAR: 0 })}
+          onAssignValue={(_, val) => {
+            const idx = FIXED_POOL.indexOf(val);
+            if (idx !== -1) {
+              const targetKey = (ATTRIBUTE_KEYS as readonly AttributeKey[]).find(
+                (k) => slotAssignments[k] === null || baseAttributes[k] === 0
+              );
+              if (targetKey) handleSelectSlot(targetKey, idx);
+            }
+          }}
+          onReset={() => {
+            setSlotAssignments({ FOR: null, DEX: null, CON: null, INT: null, SAB: null, CAR: null });
+            setBaseAttributes({ FOR: 0, DEX: 0, CON: 0, INT: 0, SAB: 0, CAR: 0 });
+          }}
           onApplySuggested={() => applySuggestedValues(FIXED_POOL)}
         />
       )}
@@ -233,8 +294,9 @@ export function StepAttributes({
             finalVal={getFinalValue(key)}
             method={method}
             currentPool={currentPool}
-            otherAttributes={baseAttributes}
-            onSelectFixedOrRolled={(val) => handleSelectFixedOrRolled(key, val)}
+            assignedSlot={slotAssignments[key]}
+            slotAssignments={slotAssignments}
+            onSelectSlot={(slotIdx) => handleSelectSlot(key, slotIdx)}
             onPointBuyChange={(val) => setBaseAttributes({ ...baseAttributes, [key]: val })}
             remainingPoints={remainingPoints}
           />
