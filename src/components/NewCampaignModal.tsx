@@ -48,8 +48,8 @@ export function NewCampaignModal() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
-                   bg-red-600 hover:bg-red-700 text-white transition-colors shadow-sm cursor-pointer"
+        className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold
+                   bg-rose-600 hover:bg-rose-500 text-white transition-all shadow-sm cursor-pointer select-none active:scale-95"
       >
         <Plus className="w-4 h-4" />
         Nova Campanha

@@ -71,20 +71,22 @@ export default async function MasterPage({
       </div>
 
       {/* Header da campanha */}
-      <header className="pb-4 border-b border-[var(--border-default)]">
+      <header className="pb-4 border-b border-[#23272F]">
         <div className="flex items-center gap-3 mb-1">
           <BrandLogo variant="full" size="lg" />
-          <div className="h-6 w-px bg-white/10" />
+          <div className="h-6 w-px bg-[#23272F]" />
           <h1 className="text-2xl font-bold tracking-tight text-white">{campaign.name}</h1>
         </div>
-        <p className="text-sm text-[var(--text-secondary)]">
+        <p className="text-xs sm:text-sm text-zinc-400">
           Sistema:{" "}
-          <span className="text-[var(--accent-purple)] font-medium">
+          <span className="text-zinc-300 font-medium">
             {systemLabel}
           </span>
           {" · "}
-          {campaign.sessions.length}{" "}
-          {campaign.sessions.length === 1 ? "sessão" : "sessões"}
+          <span className="text-zinc-500">
+            {campaign.sessions.length}{" "}
+            {campaign.sessions.length === 1 ? "sessão" : "sessões"}
+          </span>
         </p>
       </header>
 
@@ -102,16 +104,16 @@ export default async function MasterPage({
         {/* Coluna 1 & 2: Personagens da Campanha */}
         <section className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold flex items-center gap-2">
-              <User className="w-5 h-5 text-[var(--accent-blue)]" />
+            <h2 className="text-sm sm:text-base font-semibold text-zinc-100 flex items-center gap-2">
+              <User className="w-4 h-4 text-zinc-400" />
               Personagens Jogadores ({playerCharacters.length})
             </h2>
             <NewCharacterModal campaignId={campaign.id} />
           </div>
 
           {playerCharacters.length === 0 ? (
-            <div className="p-6 rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] text-center">
-              <p className="text-[var(--text-muted)] text-sm">
+            <div className="p-8 rounded-xl border border-dashed border-[#23272F] bg-[#14161A] text-center">
+              <p className="text-zinc-500 text-sm">
                 Nenhum personagem cadastrado nesta campanha.
               </p>
             </div>

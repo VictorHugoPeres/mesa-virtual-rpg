@@ -142,6 +142,9 @@ export function InitiativeControls({
     });
   }
 
+  const btnNeutro =
+    "inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-medium bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-white/20 text-zinc-200 hover:text-white transition-all shadow-xs cursor-pointer select-none active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed";
+
   return (
     <>
       <div className="flex flex-wrap items-center gap-1.5">
@@ -149,10 +152,11 @@ export function InitiativeControls({
         <button
           type="button"
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600/30 transition-colors cursor-pointer"
+          className={btnNeutro}
           title="Adicionar jogador, ameaça ou combatente rápido"
         >
-          <Plus className="w-3.5 h-3.5" /> Combatente
+          <Plus className="w-3.5 h-3.5 text-zinc-400" />
+          <span>Combatente</span>
         </button>
 
         {/* Rolar Iniciativas Pendentes */}
@@ -160,11 +164,11 @@ export function InitiativeControls({
           type="button"
           onClick={rollPendingInitiatives}
           disabled={!combatState.participants.length}
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600/30 disabled:opacity-40 transition-colors cursor-pointer"
+          className={btnNeutro}
           title="Rolar iniciativa apenas para quem está pendente (preserva iniciativas já roladas)"
         >
-          <Dices className="w-3.5 h-3.5 text-indigo-400" />
-          {pendingCount > 0 ? `Rolar Inic. (${pendingCount})` : "Rolar Inic."}
+          <Dices className="w-3.5 h-3.5 text-sky-400" />
+          <span>{pendingCount > 0 ? `Rolar Inic. (${pendingCount})` : "Rolar Inic."}</span>
         </button>
 
         {/* Zerar Iniciativas */}
@@ -172,10 +176,11 @@ export function InitiativeControls({
           type="button"
           onClick={resetInitiatives}
           disabled={!combatState.participants.length}
-          className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium text-[var(--text-muted)] hover:text-amber-300 hover:bg-amber-950/20 border border-[var(--border-default)] disabled:opacity-40 transition-colors cursor-pointer"
+          className={btnNeutro}
           title="Zerar iniciativas de todos os participantes para nova cena"
         >
-          <RotateCcw className="w-3.5 h-3.5" /> Zerar Inic.
+          <RotateCcw className="w-3.5 h-3.5 text-zinc-400" />
+          <span>Zerar Inic.</span>
         </button>
 
         {/* Ordenar */}
@@ -183,7 +188,7 @@ export function InitiativeControls({
           type="button"
           onClick={sortByInitiative}
           disabled={!combatState.participants.length}
-          className="p-1.5 rounded-lg text-xs font-semibold bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border-default)] hover:text-white disabled:opacity-40 transition-colors cursor-pointer"
+          className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-xs font-medium bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] text-zinc-400 hover:text-white transition-all shadow-xs cursor-pointer select-none active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
           title="Ordenar turnos por iniciativa (maior → menor)"
         >
           <ArrowUpDown className="w-3.5 h-3.5" />
@@ -194,20 +199,22 @@ export function InitiativeControls({
           type="button"
           onClick={startOrPauseCombat}
           disabled={!combatState.participants.length}
-          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors disabled:opacity-40 cursor-pointer ${
-            combatState.isActive
-              ? "bg-amber-600/20 text-amber-300 border border-amber-500/30 hover:bg-amber-600/30"
-              : "bg-blue-600/20 text-blue-300 border border-blue-500/30 hover:bg-blue-600/30"
+          className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold transition-all shadow-xs cursor-pointer select-none active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
+            !combatState.isActive
+              ? "bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-950/40"
+              : "bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] text-zinc-200 hover:text-white"
           }`}
           title={combatState.isActive ? "Pausar Combate" : "Iniciar Combate"}
         >
           {combatState.isActive ? (
             <>
-              <Pause className="w-3.5 h-3.5" /> Pausar
+              <Pause className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Pausar</span>
             </>
           ) : (
             <>
-              <Play className="w-3.5 h-3.5" /> Iniciar
+              <Play className="w-3.5 h-3.5 text-white fill-white" />
+              <span>Iniciar</span>
             </>
           )}
         </button>
@@ -217,30 +224,37 @@ export function InitiativeControls({
           type="button"
           onClick={nextTurn}
           disabled={!combatState.participants.length}
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-purple-600/20 text-purple-300 border border-purple-500/30 hover:bg-purple-600/30 disabled:opacity-40 transition-colors cursor-pointer"
+          className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold transition-all shadow-xs cursor-pointer select-none active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
+            combatState.isActive
+              ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-950/40"
+              : "bg-[#14161A] border border-[#23272F] text-zinc-500"
+          }`}
           title="Avançar para o próximo combatente"
         >
-          <RefreshCw className="w-3.5 h-3.5" /> Próx. Turno
+          <RefreshCw className={`w-3.5 h-3.5 ${combatState.isActive ? "text-white" : "text-zinc-600"}`} />
+          <span>Próx. Turno</span>
         </button>
 
         {/* Exibir no Telão */}
         <button
           type="button"
           onClick={toggleShowOnTv}
-          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+          className={`inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-medium transition-all shadow-xs cursor-pointer select-none active:scale-95 ${
             combatState.showOnTv
-              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 shadow-xs"
-              : "bg-[var(--bg-secondary)] text-[var(--text-muted)] border border-[var(--border-default)] hover:text-white"
+              ? "bg-emerald-950/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-950/30"
+              : "bg-[#14161A] border border-[#23272F] text-zinc-400 hover:text-zinc-200 hover:bg-[#1A1D24]"
           }`}
           title={combatState.showOnTv ? "Iniciativa visível no Telão da TV" : "Iniciativa oculta no Telão"}
         >
           {combatState.showOnTv ? (
             <>
-              <Eye className="w-3.5 h-3.5 text-emerald-400" /> TV ON
+              <Eye className="w-3.5 h-3.5 text-emerald-400" />
+              <span>TV ON</span>
             </>
           ) : (
             <>
-              <EyeOff className="w-3.5 h-3.5" /> TV OFF
+              <EyeOff className="w-3.5 h-3.5 text-zinc-500" />
+              <span>TV OFF</span>
             </>
           )}
         </button>
@@ -249,7 +263,7 @@ export function InitiativeControls({
         <button
           type="button"
           onClick={resetCombat}
-          className="p-1.5 rounded-lg text-red-400/70 hover:text-red-400 hover:bg-red-950/30 transition-colors cursor-pointer"
+          className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-zinc-500 hover:text-rose-400 hover:bg-rose-950/20 transition-colors cursor-pointer select-none active:scale-95"
           title="Resetar combate"
         >
           <XCircle className="w-3.5 h-3.5" />

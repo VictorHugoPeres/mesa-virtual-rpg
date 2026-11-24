@@ -25,8 +25,8 @@ export function NewCharacterModal({ campaignId }: { campaignId: string }) {
     <>
       <button
         onClick={handleOpen}
-        className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium
-                   bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer"
+        className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold
+                   bg-rose-600 hover:bg-rose-500 text-white transition-all shadow-sm cursor-pointer select-none active:scale-95"
       >
         <UserPlus className="w-4 h-4" />
         Novo Personagem

@@ -140,32 +140,32 @@ export function CampaignNotesPanel({
   const currentStatus = activeTab === "session" ? sessionSaveStatus : generalSaveStatus;
 
   return (
-    <section className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] shadow-xs overflow-hidden flex flex-col">
+    <section className="rounded-xl border border-[#23272F] bg-[#14161A] shadow-sm overflow-hidden flex flex-col">
       {/* Abas e Status */}
-      <div className="flex items-center justify-between border-b border-[var(--border-default)] px-4 pt-3 pb-2 bg-[var(--bg-secondary)]/40">
+      <div className="flex items-center justify-between border-b border-[#23272F] px-3.5 pt-2.5 pb-2 bg-[#0B0C0E]/70">
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={() => setActiveTab("session")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs transition-all cursor-pointer ${
               activeTab === "session"
-                ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                : "text-[var(--text-muted)] hover:text-white"
+                ? "bg-white/[0.05] text-white border border-rose-500/60 font-semibold shadow-xs"
+                : "text-zinc-400 hover:text-zinc-200 font-medium"
             }`}
           >
-            <ScrollText className="w-3.5 h-3.5" />
+            <ScrollText className={`w-3.5 h-3.5 ${activeTab === "session" ? "text-rose-400" : "text-zinc-400"}`} />
             <span>Sessão #{session.sessionNumber}</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("general")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs transition-all cursor-pointer ${
               activeTab === "general"
-                ? "bg-blue-500/20 text-blue-300 border border-blue-500/40"
-                : "text-[var(--text-muted)] hover:text-white"
+                ? "bg-white/[0.05] text-white border border-rose-500/60 font-semibold shadow-xs"
+                : "text-zinc-400 hover:text-zinc-200 font-medium"
             }`}
           >
-            <Globe className="w-3.5 h-3.5" />
+            <Globe className={`w-3.5 h-3.5 ${activeTab === "general" ? "text-rose-400" : "text-zinc-400"}`} />
             <span>Notas Gerais</span>
           </button>
         </div>
@@ -173,8 +173,8 @@ export function CampaignNotesPanel({
         {/* Indicador de Salvamento */}
         <div className="text-[11px] font-medium">
           {currentStatus === "saving" && (
-            <span className="text-amber-400 flex items-center gap-1">
-              <Loader2 className="w-3 h-3 animate-spin" /> Salvando...
+            <span className="text-zinc-400 flex items-center gap-1">
+              <Loader2 className="w-3 h-3 animate-spin text-zinc-400" /> Salvando...
             </span>
           )}
           {currentStatus === "saved" && (
@@ -183,12 +183,12 @@ export function CampaignNotesPanel({
             </span>
           )}
           {currentStatus === "error" && (
-            <span className="text-red-400 flex items-center gap-1">
+            <span className="text-rose-400 flex items-center gap-1">
               <AlertCircle className="w-3 h-3" /> Erro ao salvar
             </span>
           )}
           {currentStatus === "idle" && (
-            <span className="text-[var(--text-muted)] hidden sm:inline">Auto-save</span>
+            <span className="text-zinc-500 hidden sm:inline">Auto-save</span>
           )}
         </div>
       </div>

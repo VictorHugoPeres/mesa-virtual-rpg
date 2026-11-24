@@ -31,29 +31,29 @@ export function CampaignCharacterCard({
   return (
     <Link
       href={`/mestre/${campaignId}/fichas/${char.id}`}
-      className="group block p-5 rounded-xl border border-[var(--border-default)]
-                 bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)]
-                 hover:border-blue-500/50 transition-all duration-200"
+      className="group block p-4 sm:p-5 rounded-xl border border-[#23272F]
+                 bg-[#14161A] hover:bg-[#1A1D24]
+                 hover:border-white/20 transition-all duration-200 shadow-sm"
     >
       <div className="flex justify-between items-start mb-3">
         <div>
           <div className="flex items-center gap-1.5">
-            <h3 className="text-base font-semibold group-hover:text-blue-400 transition-colors">
+            <h3 className="text-base font-semibold text-zinc-100 group-hover:text-white transition-colors">
               {char.name}
             </h3>
-            <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-blue-400" />
+            <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-400" />
           </div>
           {sheet && (
-            <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+            <p className="text-xs text-zinc-400 mt-0.5">
               Nível {sheet.level} · {sheet.specialization} · {sheet.grade}
             </p>
           )}
         </div>
         <span
-          className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+          className={`text-[11px] px-2 py-0.5 rounded-full font-semibold border ${
             char.type === "PC"
-              ? "bg-blue-900/50 text-blue-300"
-              : "bg-red-900/50 text-red-300"
+              ? "bg-sky-500/10 text-sky-400 border-sky-500/20"
+              : "bg-rose-500/10 text-rose-400 border-rose-500/20"
           }`}
         >
           {char.type}
@@ -68,19 +68,19 @@ export function CampaignCharacterCard({
               label="PV"
               current={sheet.hp.current}
               max={sheet.hp.max}
-              color="var(--accent-red)"
+              color="#f43f5e"
             />
             <ResourceMini
               label="PE"
               current={sheet.energy.current}
               max={sheet.energy.max}
-              color="var(--accent-blue)"
+              color="#38bdf8"
             />
             <ResourceMini
               label="Defesa"
               current={sheet.defense.total}
               max={null}
-              color="var(--accent-amber)"
+              color="#d4d4d8"
             />
           </div>
 
@@ -94,15 +94,19 @@ export function CampaignCharacterCard({
               return (
                 <div
                   key={key}
-                  className="py-1.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)]"
+                  className="py-1 rounded-lg bg-[#0B0C0E] border border-[#23272F]"
                 >
-                  <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                  <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
                     {key}
                   </p>
-                  <p className="text-sm font-bold">{val}</p>
+                  <p className="text-xs font-bold text-zinc-200">{val}</p>
                   <p
-                    className={`text-xs font-medium ${
-                      mod >= 0 ? "text-green-400" : "text-red-400"
+                    className={`text-[11px] font-medium ${
+                      mod > 0
+                        ? "text-emerald-400"
+                        : mod < 0
+                        ? "text-rose-400"
+                        : "text-zinc-400"
                     }`}
                   >
                     {mod >= 0 ? `+${mod}` : mod}
@@ -131,18 +135,18 @@ function ResourceMini({
   const pct = max ? Math.min(100, (current / max) * 100) : 100;
   return (
     <div>
-      <p className="text-[10px] font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wider">
+      <p className="text-[10px] font-semibold text-zinc-500 mb-1 uppercase tracking-wider">
         {label}
       </p>
-      <div className="w-full h-2 rounded-full bg-[var(--bg-secondary)] overflow-hidden">
+      <div className="w-full h-1.5 rounded-full bg-zinc-800 overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-300"
           style={{ width: `${pct}%`, backgroundColor: color }}
         />
       </div>
-      <p className="text-xs font-medium mt-0.5" style={{ color }}>
+      <p className="text-xs font-semibold mt-0.5" style={{ color }}>
         {current}
-        {max !== null && <span className="text-[var(--text-muted)]">/{max}</span>}
+        {max !== null && <span className="text-zinc-500 font-normal">/{max}</span>}
       </p>
     </div>
   );

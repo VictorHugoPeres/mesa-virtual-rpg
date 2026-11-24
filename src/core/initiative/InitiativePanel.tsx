@@ -137,18 +137,18 @@ export function InitiativePanel({ campaignId, characters }: InitiativePanelProps
   };
 
   return (
-    <section className="mb-8 p-4 rounded-xl border border-[var(--border-default)] bg-[var(--bg-card)] shadow-xs">
+    <section className="mb-8 p-4 rounded-xl border border-[#23272F] bg-[#14161A] shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
-          <Shield className="w-5 h-5 text-blue-400" />
-          <h2 className="text-base font-bold text-white">Tracker de Combate & Iniciativa</h2>
+          <Shield className="w-4 h-4 text-zinc-400" />
+          <h2 className="text-sm font-semibold text-zinc-100">Tracker de Combate & Iniciativa</h2>
           {combatState.isActive ? (
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-purple-950/80 text-purple-300 border border-purple-800/60">
-              <Swords className="w-3 h-3 text-purple-400 animate-pulse" />
+            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-rose-950/30 text-rose-300 border border-rose-500/30">
+              <Swords className="w-3 h-3 text-rose-400 animate-pulse" />
               Rodada {combatState.round}
             </span>
           ) : (
-            <span className="text-xs text-[var(--text-muted)]">(Inativo)</span>
+            <span className="text-xs text-zinc-500 font-normal">(Inativo)</span>
           )}
         </div>
 
@@ -161,9 +161,9 @@ export function InitiativePanel({ campaignId, characters }: InitiativePanelProps
       </div>
 
       {combatState.participants.length === 0 ? (
-        <div className="text-center py-8 border border-dashed border-[var(--border-default)] rounded-lg">
-          <p className="text-xs text-[var(--text-muted)]">
-            Nenhum combatente ativo. Clique em <strong>&quot;+ Combatente&quot;</strong> ou clone do <strong>Bestiário</strong>.
+        <div className="text-center py-8 border border-dashed border-zinc-800 rounded-xl">
+          <p className="text-xs text-zinc-500">
+            Nenhum combatente ativo. Clique em <strong className="text-zinc-300">&quot;Combatente&quot;</strong> ou clone do <strong className="text-zinc-300">Bestiário</strong>.
           </p>
         </div>
       ) : (

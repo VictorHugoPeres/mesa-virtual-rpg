@@ -24,3 +24,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 3. **Fluxo de Trabalho e Git:**
    - Não execute `git commit` nem `git push` automaticamente; o usuário testa e commita após cada etapa.
    - Preserve integralmente o `.gitignore` (especialmente `referencias/`, `*.db`, `.env`).
+
+4. **Design System Minimalista Dark:**
+   - Siga estritamente as diretrizes documentadas em `docs/DESIGN_SYSTEM.md`.
+   - Base neutra (`#09090b` / cards `#111216` com `border-white/[0.08]`, textos `zinc-100`/`zinc-400`/`zinc-500`).
+   - Cor primária da marca (`rose-600`/`red-600`) exclusiva para a logo e botões de ação primária (+ Criar).
+   - Botões de ferramentas e navegação uniformizados em estilo neutro (`bg-zinc-900/90 hover:bg-zinc-800 border-white/10 text-zinc-200` com ícones monocromáticos `text-zinc-400`), eliminando botões coloridos espalhados.
+   - Cores semânticas reservadas exclusivamente aos dados de jogo (PV `rose-500`, PE `sky-500`, Defesa `zinc-300`, Ativo/Online `emerald-500`).
