@@ -49,3 +49,27 @@ export async function PUT(
     return NextResponse.json({ error: "Erro ao atualizar dados da campanha" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    // Remove em transação segura todas as entidades vinculadas antes da campanha
+    await prisma.$transaction([
+      prisma.diceLog.deleteMany({ where: { campaignId: id } }),
+      prisma.tacticalMap.deleteMany({ where: { campaignId: id } }),
+      prisma.mediaAsset.deleteMany({ where: { campaignId: id } }),
+      prisma.character.deleteMany({ where: { campaignId: id } }),
+      prisma.session.deleteMany({ where: { campaignId: id } }),
+      prisma.campaign.delete({ where: { id } }),
+    ]);
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("Erro ao excluir campanha:", err);
+    return NextResponse.json({ error: "Erro ao excluir campanha" }, { status: 500 });
+  }
+}

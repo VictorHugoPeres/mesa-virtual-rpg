@@ -106,7 +106,7 @@ export default async function MasterPage({
           <div className="flex items-center justify-between">
             <h2 className="text-sm sm:text-base font-semibold text-zinc-100 flex items-center gap-2">
               <User className="w-4 h-4 text-zinc-400" />
-              Personagens Jogadores ({playerCharacters.length})
+              Personagens da Campanha ({playerCharacters.length})
             </h2>
             <NewCharacterModal campaignId={campaign.id} />
           </div>

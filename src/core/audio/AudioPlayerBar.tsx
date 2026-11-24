@@ -156,11 +156,11 @@ export function AudioPlayerBar() {
         <button
           type="button"
           onClick={openDrawer}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-white/20 text-zinc-200 hover:text-white transition-all cursor-pointer shadow-xs active:scale-95"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-white/20 text-zinc-200 hover:text-white transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
           title="Abrir Mesa de Som Completa (playlists e efeitos sonoros)"
         >
-          <Music className="w-3.5 h-3.5 text-pink-400" />
-          <span>Mesa</span>
+          <Music className="w-3.5 h-3.5 text-pink-400 shrink-0" />
+          <span className="whitespace-nowrap">Mesa de Som</span>
         </button>
       </div>
     </aside>

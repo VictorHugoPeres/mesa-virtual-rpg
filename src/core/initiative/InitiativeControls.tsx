@@ -145,6 +145,8 @@ export function InitiativeControls({
   const btnNeutro =
     "inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-medium bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-white/20 text-zinc-200 hover:text-white transition-all shadow-xs cursor-pointer select-none active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed";
 
+  const hasCombatants = combatState.participants.length > 0;
+
   return (
     <>
       <div className="flex flex-wrap items-center gap-1.5">
@@ -152,10 +154,14 @@ export function InitiativeControls({
         <button
           type="button"
           onClick={() => setShowAddModal(true)}
-          className={btnNeutro}
+          className={
+            hasCombatants
+              ? btnNeutro
+              : "inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-medium bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/40 text-zinc-100 transition-all shadow-xs cursor-pointer select-none active:scale-95"
+          }
           title="Adicionar jogador, ameaça ou combatente rápido"
         >
-          <Plus className="w-3.5 h-3.5 text-zinc-400" />
+          <Plus className={`w-3.5 h-3.5 ${hasCombatants ? "text-zinc-400" : "text-rose-400"}`} />
           <span>Combatente</span>
         </button>
 
@@ -163,7 +169,7 @@ export function InitiativeControls({
         <button
           type="button"
           onClick={rollPendingInitiatives}
-          disabled={!combatState.participants.length}
+          disabled={!hasCombatants}
           className={btnNeutro}
           title="Rolar iniciativa apenas para quem está pendente (preserva iniciativas já roladas)"
         >
@@ -175,7 +181,7 @@ export function InitiativeControls({
         <button
           type="button"
           onClick={resetInitiatives}
-          disabled={!combatState.participants.length}
+          disabled={!hasCombatants}
           className={btnNeutro}
           title="Zerar iniciativas de todos os participantes para nova cena"
         >
@@ -187,7 +193,7 @@ export function InitiativeControls({
         <button
           type="button"
           onClick={sortByInitiative}
-          disabled={!combatState.participants.length}
+          disabled={!hasCombatants}
           className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-xs font-medium bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] text-zinc-400 hover:text-white transition-all shadow-xs cursor-pointer select-none active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
           title="Ordenar turnos por iniciativa (maior → menor)"
         >
@@ -198,13 +204,21 @@ export function InitiativeControls({
         <button
           type="button"
           onClick={startOrPauseCombat}
-          disabled={!combatState.participants.length}
-          className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold transition-all shadow-xs cursor-pointer select-none active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
-            !combatState.isActive
-              ? "bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-950/40"
-              : "bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] text-zinc-200 hover:text-white"
+          disabled={!hasCombatants}
+          className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold transition-all shadow-xs select-none ${
+            !hasCombatants
+              ? "bg-zinc-800/60 text-zinc-500 cursor-not-allowed border border-white/5 opacity-60"
+              : !combatState.isActive
+              ? "bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-950/40 cursor-pointer active:scale-95"
+              : "bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] text-zinc-200 hover:text-white cursor-pointer active:scale-95"
           }`}
-          title={combatState.isActive ? "Pausar Combate" : "Iniciar Combate"}
+          title={
+            !hasCombatants
+              ? "Adicione combatentes para iniciar o combate"
+              : combatState.isActive
+              ? "Pausar Combate"
+              : "Iniciar Combate"
+          }
         >
           {combatState.isActive ? (
             <>
@@ -213,7 +227,11 @@ export function InitiativeControls({
             </>
           ) : (
             <>
-              <Play className="w-3.5 h-3.5 text-white fill-white" />
+              <Play
+                className={`w-3.5 h-3.5 ${
+                  hasCombatants ? "text-white fill-white" : "text-zinc-500 fill-zinc-500"
+                }`}
+              />
               <span>Iniciar</span>
             </>
           )}
@@ -223,15 +241,15 @@ export function InitiativeControls({
         <button
           type="button"
           onClick={nextTurn}
-          disabled={!combatState.participants.length}
-          className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold transition-all shadow-xs cursor-pointer select-none active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
-            combatState.isActive
-              ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-950/40"
-              : "bg-[#14161A] border border-[#23272F] text-zinc-500"
+          disabled={!hasCombatants}
+          className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold transition-all shadow-xs select-none ${
+            hasCombatants && combatState.isActive
+              ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-950/40 cursor-pointer active:scale-95"
+              : "bg-[#14161A] border border-[#23272F] text-zinc-600 cursor-not-allowed opacity-60"
           }`}
           title="Avançar para o próximo combatente"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${combatState.isActive ? "text-white" : "text-zinc-600"}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${hasCombatants && combatState.isActive ? "text-white" : "text-zinc-600"}`} />
           <span>Próx. Turno</span>
         </button>
 

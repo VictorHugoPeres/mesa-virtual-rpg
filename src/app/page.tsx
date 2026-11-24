@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import Link from "next/link";
-import { Users, Calendar } from "lucide-react";
 import { NewCampaignModal } from "@/components/NewCampaignModal";
+import { CampaignCard } from "@/components/CampaignCard";
 import { BrandLogo, D20Icon } from "@/components/BrandLogo";
 
 export const dynamic = "force-dynamic";
@@ -39,54 +38,9 @@ export default async function HomePage() {
           </div>
         ) : (
           <div className="grid gap-3.5">
-            {campaigns.map((campaign) => {
-              const systemLabel =
-                campaign.systemId === "feiticeiros-e-maldicoes"
-                  ? "Feiticeiros e Maldições"
-                  : campaign.systemId;
-
-              return (
-                <Link
-                  key={campaign.id}
-                  href={`/mestre/${campaign.id}`}
-                  className="group block p-5 rounded-xl border border-white/[0.08]
-                             bg-[#111216] hover:bg-[#16171d] hover:border-white/15
-                             transition-all duration-200"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-zinc-100 group-hover:text-white transition-colors">
-                        {campaign.name}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-                        Sistema:{" "}
-                        <span className="text-zinc-300 font-medium">
-                          {systemLabel}
-                        </span>
-                      </p>
-                    </div>
-                    <span className="text-xs text-zinc-500 mt-1 font-mono">
-                      {new Date(campaign.createdAt).toLocaleDateString("pt-BR")}
-                    </span>
-                  </div>
-
-                  <div className="flex gap-6 mt-4 text-xs sm:text-sm text-zinc-400">
-                    <span className="flex items-center gap-1.5">
-                      <Users className="w-4 h-4 text-zinc-500" />
-                      {campaign.characters.length}{" "}
-                      {campaign.characters.length === 1
-                        ? "personagem"
-                        : "personagens"}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-4 h-4 text-zinc-500" />
-                      {campaign.sessions.length}{" "}
-                      {campaign.sessions.length === 1 ? "sessão" : "sessões"}
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
+            {campaigns.map((campaign) => (
+              <CampaignCard key={campaign.id} campaign={campaign} />
+            ))}
           </div>
         )}
       </section>
