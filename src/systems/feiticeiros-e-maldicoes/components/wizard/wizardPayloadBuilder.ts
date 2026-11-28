@@ -1,5 +1,6 @@
 import {
   AttributeKey,
+  ATTRIBUTE_KEYS,
   SPEC_TABLE,
   createDefaultCharacter,
   FMCharacterData,
@@ -21,10 +22,20 @@ import {
 } from "../../data/equipment";
 
 export function calculateFinalAttributes(state: WizardState): Record<AttributeKey, number> {
-  const isRestringido = state.origin === "Restringido";
   const res: Record<AttributeKey, number> = { ...state.baseAttributes };
+  
+  if (state.attributeBonuses && Object.keys(state.attributeBonuses).length > 0) {
+    (ATTRIBUTE_KEYS as readonly AttributeKey[]).forEach((key) => {
+      res[key] = (res[key] || 0) + (state.attributeBonuses?.[key] || 0);
+    });
+    return res;
+  }
+
+  const isRestringido = state.origin === "Restringido";
   if (isRestringido) {
-    res.FOR = (res.FOR || 10) + 2;
+    res.FOR = (res.FOR || 10) + 1;
+    res.DEX = (res.DEX || 10) + 1;
+    res.CON = (res.CON || 10) + 1;
     res[state.bonusPlus2] = (res[state.bonusPlus2] || 10) + 2;
   } else {
     res[state.bonusPlus2] = (res[state.bonusPlus2] || 10) + 2;
@@ -49,11 +60,34 @@ export function buildCharacterSheet(state: WizardState): FMCharacterData {
 
   const sheet = createDefaultCharacter(state.name.trim(), state.type, state.specialization, state.origin);
   sheet.attributes = finalAttrs;
-  sheet.keyAttribute = state.techniqueAttribute;
+  sheet.clan = state.clan || "";
+  sheet.keyAttribute = state.keyAttribute || state.techniqueAttribute;
   sheet.hp = { current: hpMax, max: hpMax, temp: 0 };
   sheet.energy = { current: peMax, max: peMax, temp: 0 };
   sheet.integrity = { current: hpMax, max: hpMax, temp: 0 };
   sheet.movement = isRestringido ? 12 : 9;
+
+  if (state.anatomyTrait) {
+    sheet.features.push({
+      id: "feat-anatomy",
+      name: `Anatomia: ${state.anatomyTrait}`,
+      current: 1,
+      max: 1,
+      cost: "-",
+      description: "Característica de Anatomia (1º Nível) de Feto Amaldiçoado Híbrido.",
+    });
+  }
+
+  if (state.level1Choice) {
+    sheet.features.push({
+      id: "feat-level1-spec",
+      name: state.level1Choice,
+      current: 1,
+      max: 1,
+      cost: "-",
+      description: `Escolha de 1º Nível da Especialização ${state.specialization}.`,
+    });
+  }
 
   for (const skillName of state.trainedSkills) {
     if (sheet.skills[skillName]) {

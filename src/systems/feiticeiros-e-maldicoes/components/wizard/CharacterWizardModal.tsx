@@ -116,20 +116,43 @@ export function CharacterWizardModal({
           {currentStep === 1 && (
             <StepOrigin
               selectedOrigin={state.origin}
-              onSelectOrigin={(orig) => setState((prev) => ({ ...prev, origin: orig }))}
+              onSelectOrigin={(orig) => {
+                setState((prev) => {
+                  const next = { ...prev, origin: orig };
+                  if (orig === "Restringido") {
+                    next.specialization = "Restringido";
+                  } else if (prev.specialization === "Restringido") {
+                    next.specialization = "Lutador";
+                  }
+                  if (orig === "Sem Técnica" && prev.specialization === "Especialista em Técnica") {
+                    next.specialization = "Lutador";
+                  }
+                  return next;
+                });
+              }}
+              selectedClan={state.clan}
+              onSelectClan={(clan) => setState((prev) => ({ ...prev, clan }))}
+              selectedAnatomy={state.anatomyTrait}
+              onSelectAnatomy={(trait) => setState((prev) => ({ ...prev, anatomyTrait: trait }))}
             />
           )}
 
           {currentStep === 2 && (
             <StepSpecialization
+              origin={state.origin}
               selectedSpec={state.specialization}
               onSelectSpec={(spec) => setState((prev) => ({ ...prev, specialization: spec }))}
+              selectedKeyAttribute={state.keyAttribute}
+              onSelectKeyAttribute={(attr) => setState((prev) => ({ ...prev, keyAttribute: attr }))}
+              selectedLevel1Choice={state.level1Choice}
+              onSelectLevel1Choice={(choice) => setState((prev) => ({ ...prev, level1Choice: choice }))}
             />
           )}
 
           {currentStep === 3 && (
             <StepAttributes
               origin={state.origin}
+              clan={state.clan}
               specialization={state.specialization}
               method={state.attributeMethod}
               setMethod={(m) => setState((prev) => ({ ...prev, attributeMethod: m }))}
@@ -139,6 +162,8 @@ export function CharacterWizardModal({
               setBonusPlus2={(attr) => setState((prev) => ({ ...prev, bonusPlus2: attr }))}
               bonusPlus1={state.bonusPlus1}
               setBonusPlus1={(attr) => setState((prev) => ({ ...prev, bonusPlus1: attr }))}
+              attributeBonuses={state.attributeBonuses}
+              setAttributeBonuses={(bonuses) => setState((prev) => ({ ...prev, attributeBonuses: bonuses }))}
             />
           )}
 

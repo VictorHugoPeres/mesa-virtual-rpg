@@ -16,6 +16,7 @@ import { AttributeCard } from "./AttributeCard";
 
 interface StepAttributesProps {
   origin: Origin;
+  clan?: string;
   specialization: Specialization;
   method: AttributeMethod;
   setMethod: (m: AttributeMethod) => void;
@@ -25,6 +26,8 @@ interface StepAttributesProps {
   setBonusPlus2: (attr: AttributeKey) => void;
   bonusPlus1: AttributeKey;
   setBonusPlus1: (attr: AttributeKey) => void;
+  attributeBonuses?: Partial<Record<AttributeKey, number>>;
+  setAttributeBonuses?: (bonuses: Partial<Record<AttributeKey, number>>) => void;
 }
 
 const POINT_COSTS: Record<number, number> = {
@@ -44,48 +47,32 @@ const FIXED_POOL = [15, 14, 13, 12, 10, 8];
 
 function getSpecSlotOrder(spec: Specialization): Record<AttributeKey, number> {
   switch (spec) {
-    case "Lutador":
-      return { FOR: 0, CON: 1, DEX: 2, SAB: 3, PRE: 4, INT: 5 };
-    case "Especialista em Combate":
-      return { FOR: 0, DEX: 1, CON: 2, SAB: 3, INT: 4, PRE: 5 };
-    case "Especialista em Técnica":
-      return { INT: 0, CON: 1, SAB: 2, DEX: 3, PRE: 4, FOR: 5 };
-    case "Controlador":
-      return { PRE: 0, SAB: 1, CON: 2, DEX: 3, INT: 4, FOR: 5 };
-    case "Suporte":
-      return { SAB: 0, PRE: 1, CON: 2, DEX: 3, INT: 4, FOR: 5 };
-    case "Restringido":
-      return { FOR: 0, DEX: 1, CON: 2, SAB: 3, PRE: 4, INT: 5 };
-    default:
-      return { FOR: 0, CON: 1, DEX: 2, INT: 3, SAB: 4, PRE: 5 };
+    case "Lutador": return { FOR: 0, CON: 1, DEX: 2, SAB: 3, PRE: 4, INT: 5 };
+    case "Especialista em Combate": return { FOR: 0, DEX: 1, CON: 2, SAB: 3, INT: 4, PRE: 5 };
+    case "Especialista em Técnica": return { INT: 0, CON: 1, SAB: 2, DEX: 3, PRE: 4, FOR: 5 };
+    case "Controlador": return { PRE: 0, SAB: 1, CON: 2, DEX: 3, INT: 4, FOR: 5 };
+    case "Suporte": return { SAB: 0, PRE: 1, CON: 2, DEX: 3, INT: 4, FOR: 5 };
+    case "Restringido": return { FOR: 0, DEX: 1, CON: 2, SAB: 3, PRE: 4, INT: 5 };
+    default: return { FOR: 0, CON: 1, DEX: 2, INT: 3, SAB: 4, PRE: 5 };
   }
 }
 
-function deriveInitialSlots(
-  baseAttrs: Record<AttributeKey, number>,
-  pool: number[]
-): Record<AttributeKey, number | null> {
-  const result: Record<AttributeKey, number | null> = {
-    FOR: null, DEX: null, CON: null, INT: null, SAB: null, PRE: null,
-  };
+function deriveInitialSlots(baseAttrs: Record<AttributeKey, number>, pool: number[]) {
+  const result: Record<AttributeKey, number | null> = { FOR: null, DEX: null, CON: null, INT: null, SAB: null, PRE: null };
   const used = new Set<number>();
-
   (ATTRIBUTE_KEYS as readonly AttributeKey[]).forEach((key) => {
     const val = baseAttrs[key];
     if (val > 0) {
       const idx = pool.findIndex((pVal, pIdx) => pVal === val && !used.has(pIdx));
-      if (idx !== -1) {
-        result[key] = idx;
-        used.add(idx);
-      }
+      if (idx !== -1) { result[key] = idx; used.add(idx); }
     }
   });
-
   return result;
 }
 
 export function StepAttributes({
   origin,
+  clan,
   specialization,
   method,
   setMethod,
@@ -95,6 +82,8 @@ export function StepAttributes({
   setBonusPlus2,
   bonusPlus1,
   setBonusPlus1,
+  attributeBonuses = {},
+  setAttributeBonuses,
 }: StepAttributesProps) {
   const isRestringido = origin === "Restringido";
   const [rolledPool, setRolledPool] = useState<number[]>([]);
@@ -104,25 +93,17 @@ export function StepAttributes({
     deriveInitialSlots(baseAttributes, currentPool)
   );
 
-  const pointsSpent = Object.values(baseAttributes).reduce((acc, val) => {
-    return acc + (POINT_COSTS[val] ?? 0);
-  }, 0);
+  const pointsSpent = Object.values(baseAttributes).reduce((acc, val) => acc + (POINT_COSTS[val] ?? 0), 0);
   const remainingPoints = 17 - pointsSpent;
 
   function roll4d6DropLowest(): number {
-    const rolls = [
-      Math.floor(Math.random() * 6) + 1,
-      Math.floor(Math.random() * 6) + 1,
-      Math.floor(Math.random() * 6) + 1,
-      Math.floor(Math.random() * 6) + 1,
-    ].sort((a, b) => a - b);
+    const rolls = Array.from({ length: 4 }, () => Math.floor(Math.random() * 6) + 1).sort((a, b) => a - b);
     return rolls[1] + rolls[2] + rolls[3];
   }
 
   function applySuggestedValues(pool: number[]) {
     const p = [...pool].sort((a, b) => b - a);
     const order = getSpecSlotOrder(specialization);
-
     const newAssignments: Record<AttributeKey, number | null> = { ...order };
     const newAttrs: Record<AttributeKey, number> = {
       FOR: p[order.FOR] || 0,
@@ -132,7 +113,6 @@ export function StepAttributes({
       SAB: p[order.SAB] || 0,
       PRE: p[order.PRE] || 0,
     };
-
     setSlotAssignments(newAssignments);
     setBaseAttributes(newAttrs);
   }
@@ -180,9 +160,12 @@ export function StepAttributes({
   function getFinalValue(key: AttributeKey): number {
     const base = baseAttributes[key] || 0;
     if (base === 0) return 0;
+    if (attributeBonuses && Object.keys(attributeBonuses).length > 0) {
+      return base + (attributeBonuses[key] || 0);
+    }
     let bonus = 0;
     if (isRestringido) {
-      if (key === "FOR") bonus += 2;
+      if (key === "FOR" || key === "DEX" || key === "CON") bonus += 1;
       if (key === bonusPlus2) bonus += 2;
     } else {
       if (key === bonusPlus2) bonus += 2;
@@ -194,13 +177,13 @@ export function StepAttributes({
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-base font-bold text-[var(--text-primary)]">Passo 3: Distribuição de Atributos</h3>
-        <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-          Distribua os atributos e configure os bônus da Origem ({origin}). Cada dado só pode ser alocado em um atributo.
+        <h3 className="text-base font-bold text-zinc-100">Passo 3: Distribuição de Atributos</h3>
+        <p className="text-xs text-zinc-400 mt-0.5">
+          Distribua os atributos e configure os bônus da Origem ({origin}). Inclui Presença (PRE) e tabela v2.5.
         </p>
       </div>
 
-      <div className="flex gap-2 p-1 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)]">
+      <div className="flex gap-2 p-1 rounded-xl bg-[#0B0C0E] border border-[#23272F]">
         <button
           type="button"
           onClick={() => {
@@ -209,7 +192,7 @@ export function StepAttributes({
             setBaseAttributes({ FOR: 0, DEX: 0, CON: 0, INT: 0, SAB: 0, PRE: 0 });
           }}
           className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-            method === "fixed" ? "bg-blue-600 text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            method === "fixed" ? "bg-rose-600 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"
           }`}
         >
           Valores Fixos
@@ -222,10 +205,10 @@ export function StepAttributes({
             setBaseAttributes({ FOR: 10, DEX: 10, CON: 10, INT: 10, SAB: 10, PRE: 10 });
           }}
           className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-            method === "pointBuy" ? "bg-blue-600 text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            method === "pointBuy" ? "bg-rose-600 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"
           }`}
         >
-          Compra (17 pts)
+          Compra (17 pts v2.5)
         </button>
         <button
           type="button"
@@ -234,11 +217,10 @@ export function StepAttributes({
             handleRollAll();
           }}
           className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-            method === "roll" ? "bg-blue-600 text-white shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            method === "roll" ? "bg-rose-600 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"
           }`}
         >
-          <Dices className="w-3.5 h-3.5" />
-          Rolar 4d6
+          <Dices className="w-3.5 h-3.5" /> Rolar 4d6
         </button>
       </div>
 
@@ -276,9 +258,9 @@ export function StepAttributes({
       )}
 
       {method === "pointBuy" && (
-        <div className="flex items-center justify-between p-2.5 rounded-lg bg-blue-950/40 border border-blue-900/50 text-xs">
-          <span className="text-blue-200">Pontos Restantes para Comprar:</span>
-          <span className={`font-bold px-2 py-0.5 rounded ${remainingPoints < 0 ? "bg-red-900 text-red-200" : "bg-blue-800 text-blue-100"}`}>
+        <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#0B0C0E] border border-[#23272F] text-xs">
+          <span className="text-zinc-300">Pontos Restantes para Comprar (17 pts):</span>
+          <span className={`font-bold font-mono px-2 py-0.5 rounded ${remainingPoints < 0 ? "bg-rose-950 text-rose-300" : "bg-[#14161A] text-emerald-400 border border-emerald-900/40"}`}>
             {remainingPoints} / 17
           </span>
         </div>
@@ -305,10 +287,13 @@ export function StepAttributes({
 
       <OriginBonusPicker
         origin={origin}
+        clan={clan}
         bonusPlus2={bonusPlus2}
         setBonusPlus2={setBonusPlus2}
         bonusPlus1={bonusPlus1}
         setBonusPlus1={setBonusPlus1}
+        attributeBonuses={attributeBonuses}
+        setAttributeBonuses={setAttributeBonuses}
       />
     </div>
   );

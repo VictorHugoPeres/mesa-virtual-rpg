@@ -9,12 +9,17 @@ export const INITIAL_WIZARD_STATE: WizardState = {
   type: "PC",
   concept: "",
   origin: "Inato",
+  clan: "",
+  anatomyTrait: "",
   specialization: "Lutador",
+  keyAttribute: "FOR",
+  level1Choice: "Sequência de Golpes",
   attributeMethod: "fixed",
   baseAttributes: { FOR: 0, DEX: 0, CON: 0, INT: 0, SAB: 0, PRE: 0 },
   bonusPlus2: "FOR",
   bonusPlus1: "CON",
-  trainedSkills: ["Fortitude", "Atletismo", "Luta"],
+  attributeBonuses: { FOR: 2, CON: 1 },
+  trainedSkills: ["Fortitude", "Atletismo"],
   techniqueName: "Proporções 7:3",
   techniqueDesc: "Cria um ponto fraco artificial dividindo a anatomia na proporção 7:3.",
   techniqueAttribute: "SAB",
@@ -44,6 +49,27 @@ export const INITIAL_WIZARD_STATE: WizardState = {
 };
 
 export function canAdvanceStep(step: number, state: WizardState): boolean {
+  if (step === 1) {
+    if (state.origin === "Herdado" && !state.clan) {
+      return false;
+    }
+    if (state.origin === "Feto Amaldiçoado Híbrido" && !state.anatomyTrait) {
+      return false;
+    }
+  }
+
+  if (step === 2) {
+    if (state.origin === "Restringido" && state.specialization !== "Restringido") {
+      return false;
+    }
+    if (state.origin !== "Restringido" && state.specialization === "Restringido") {
+      return false;
+    }
+    if (state.origin === "Sem Técnica" && state.specialization === "Especialista em Técnica") {
+      return false;
+    }
+  }
+
   if (step === 3) {
     const vals = Object.values(state.baseAttributes);
     if (state.attributeMethod === "fixed") {
