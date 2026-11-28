@@ -27,4 +27,12 @@ export interface InnateTechnique {
   description: string;
   basicFunction: string;
   spells: ReadySpell[];
+  domainExpansion?: {
+    name: string;
+    type: string;
+    cost: number;
+    description: string;
+  };
 }
+
+export type TechniquePreset = InnateTechnique;

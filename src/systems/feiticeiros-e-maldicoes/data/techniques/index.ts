@@ -1,6 +1,6 @@
 /**
  * Índice Geral do Catálogo de Técnicas Inatas Prontas
- * F&M v2.0 / Enciclopédia Amaldiçoada
+ * F&M v2.5 / Enciclopédia Amaldiçoada
  */
 
 import { InnateTechnique } from "./types";
@@ -80,7 +80,7 @@ export function getTechniquesByCategory(category: string): InnateTechnique[] {
 }
 
 /**
- * Filtra técnicas pelo atributo-chave sugerido (FOR, DEX, CON, INT, SAB, CAR)
+ * Filtra técnicas pelo atributo-chave sugerido (FOR, DEX, CON, INT, SAB, PRE)
  */
 export function getTechniquesByAttribute(attr: string): InnateTechnique[] {
   return READY_TECHNIQUES.filter((t) => t.suggestedAttribute === attr);

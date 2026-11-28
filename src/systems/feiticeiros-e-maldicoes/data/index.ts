@@ -4,3 +4,5 @@ export * from "./level1Features";
 export * from "./techniqueCreationRules";
 export * from "./equipment";
 export * from "./techniques";
+export * from "./martialTechniques";
+export * from "./newShadowStyle";
