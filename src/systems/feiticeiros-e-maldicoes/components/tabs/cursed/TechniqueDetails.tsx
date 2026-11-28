@@ -12,8 +12,9 @@ import {
 } from "@/systems/feiticeiros-e-maldicoes";
 import { useDice } from "@/core/dice/DiceContext";
 import { useDialog } from "@/core/ui";
-import { Sparkles, Dices, BookOpen } from "lucide-react";
-import { TechniqueCatalogModal } from "../../techniques";
+import { Sparkles, BookOpen, Shield, Swords } from "lucide-react";
+import { TechniqueCatalogModal, ShadowStyleModal } from "../../techniques";
+import { MagicStatsGrid } from "./MagicStatsGrid";
 import { generateId } from "@/lib/id";
 
 interface TechniqueDetailsProps {
@@ -34,6 +35,9 @@ export function TechniqueDetails({
   const { openRoller } = useDice();
   const { toast } = useDialog();
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
+  const [isShadowOpen, setIsShadowOpen] = useState(false);
+  const isRestringido = data.origin === "Restringido" || data.specialization === "Restringido";
+  const isSemTecnica = data.origin === "Sem Técnica";
   const prof = getProficiencyBonus(data.level);
   const cp = data.cursedProfile;
 
@@ -48,6 +52,7 @@ export function TechniqueDetails({
     attribute: any;
     description: string;
     selectedSpells: any[];
+    domainExpansion?: any;
   }) {
     onChange((prev) => {
       const newSpells: SpellDef[] = techData.selectedSpells.map((s) => ({
@@ -61,6 +66,15 @@ export function TechniqueDetails({
         effect: s.description || "",
       }));
 
+      const domain = techData.domainExpansion
+        ? {
+            name: techData.domainExpansion.name,
+            type: techData.domainExpansion.type,
+            cost: techData.domainExpansion.cost,
+            description: techData.domainExpansion.description,
+          }
+        : prev.cursedProfile.domainExpansion;
+
       return {
         ...prev,
         cursedProfile: {
@@ -69,6 +83,7 @@ export function TechniqueDetails({
           techniqueDesc: techData.description,
           techniqueAttribute: techData.attribute,
           spells: [...prev.cursedProfile.spells, ...newSpells],
+          domainExpansion: domain,
         },
       };
     });
@@ -88,18 +103,46 @@ export function TechniqueDetails({
 
   return (
     <div className="p-4 rounded-xl bg-[#14161A] border border-[#23272F]">
-      <div className="flex items-center justify-between gap-2 mb-4">
+      <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-rose-400" />
-          <h3 className="text-base font-semibold text-zinc-100">Técnica Amaldiçoada & Atributos Mágicos</h3>
+          {isRestringido ? (
+            <Swords className="w-5 h-5 text-amber-400" />
+          ) : (
+            <Sparkles className="w-5 h-5 text-rose-400" />
+          )}
+          <h3 className="text-base font-semibold text-zinc-100">
+            {isRestringido
+              ? "Estilo Físico & Habilidades Marciais"
+              : isSemTecnica
+              ? "Fundamentos de Energia & Estilo da Sombra"
+              : "Técnica Amaldiçoada & Atributos Mágicos"}
+          </h3>
         </div>
-        <button
-          type="button"
-          onClick={() => setIsCatalogOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-white/20 text-zinc-200 hover:text-white transition-all cursor-pointer shadow-xs active:scale-95"
-        >
-          <BookOpen className="w-3.5 h-3.5 text-amber-400" /> Catálogo de Técnicas
-        </button>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsShadowOpen(true)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all cursor-pointer shadow-xs active:scale-95 ${
+              isSemTecnica
+                ? "bg-indigo-950/40 hover:bg-indigo-900/50 border-indigo-500/40 text-indigo-300 hover:text-white"
+                : "bg-[#14161A] hover:bg-[#1A1D24] border-[#23272F] hover:border-white/20 text-zinc-300 hover:text-white"
+            }`}
+            title="Consultar posturas e técnicas do Novo Estilo da Sombra"
+          >
+            <Shield className="w-3.5 h-3.5 text-indigo-400" /> Estilo da Sombra
+          </button>
+
+          {!isRestringido && (
+            <button
+              type="button"
+              onClick={() => setIsCatalogOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-white/20 text-zinc-200 hover:text-white transition-all cursor-pointer shadow-xs active:scale-95"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-amber-400" /> Catálogo de Técnicas
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
@@ -165,57 +208,19 @@ export function TechniqueDetails({
         </div>
       </div>
 
-      {/* Cards de CD e Ataque Mágico Clicável v2.5 */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 rounded-lg bg-[#0B0C0E] border border-[#23272F] mb-4">
-        <div className="text-center">
-          <p className="text-[10px] uppercase font-bold text-zinc-400">
-            CD de Resistência (v2.5)
-          </p>
-          <p className="text-2xl font-bold text-sky-400">{calcDC}</p>
-          <p className="text-[10px] text-zinc-500 font-mono">
-            10 + ⌊N/2⌋ (+{halfLevel}) + BT (+{prof}) + Mod ({techAttrMod >= 0 ? `+${techAttrMod}` : techAttrMod})
-          </p>
-        </div>
-
-        {/* Acerto Mágico Clicável */}
-        <button
-          type="button"
-          onClick={handleRollSpellAttack}
-          className="text-center p-1.5 rounded-lg border border-transparent hover:border-emerald-500/50 hover:bg-[#14161A] transition-all cursor-pointer group"
-          title="Clique para rolar Acerto Mágico (1d20 + bônus)"
-        >
-          <div className="flex items-center justify-center gap-1">
-            <p className="text-[10px] uppercase font-bold text-zinc-400 group-hover:text-emerald-300">
-              Acerto de Feitiço
-            </p>
-            <Dices className="w-3 h-3 text-emerald-400 opacity-60 group-hover:opacity-100" />
-          </div>
-          <p className="text-2xl font-bold text-emerald-400">
-            {calcAttack >= 0 ? `+${calcAttack}` : calcAttack}
-          </p>
-          <p className="text-[10px] text-zinc-500 font-mono">
-            Mod ({techAttrMod >= 0 ? `+${techAttrMod}` : techAttrMod}) + ⌊N/2⌋ (+{halfLevel}) + BT (+{prof})
-          </p>
-        </button>
-
-        <div className="text-center">
-          <p className="text-[10px] uppercase font-bold text-zinc-400">
-            Bônus de Treino (BT)
-          </p>
-          <p className="text-2xl font-bold text-zinc-200">+{prof}</p>
-          <p className="text-[10px] text-zinc-500 font-mono">Nível {data.level}</p>
-        </div>
-
-        <div className="text-center">
-          <p className="text-[10px] uppercase font-bold text-zinc-400">
-            Modificador ({techAttr})
-          </p>
-          <p className="text-2xl font-bold text-zinc-200">
-            {techAttrMod >= 0 ? `+${techAttrMod}` : techAttrMod}
-          </p>
-          <p className="text-[10px] text-zinc-500 font-mono">Valor {data.attributes[techAttr] ?? 10}</p>
-        </div>
-      </div>
+      {/* Cards de CD e Ataque Mágico Clicável v2.5 / Estilo do Restringido */}
+      <MagicStatsGrid
+        level={data.level}
+        calcDC={calcDC}
+        calcAttack={calcAttack}
+        halfLevel={halfLevel}
+        prof={prof}
+        techAttr={techAttr}
+        techAttrMod={techAttrMod}
+        techAttrValue={data.attributes[techAttr] ?? 10}
+        isRestringido={isRestringido}
+        onRollSpellAttack={handleRollSpellAttack}
+      />
 
       <div>
         <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
@@ -240,6 +245,29 @@ export function TechniqueDetails({
         isOpen={isCatalogOpen}
         onClose={() => setIsCatalogOpen(false)}
         onApplyTechnique={handleApplyFromCatalog}
+      />
+
+      <ShadowStyleModal
+        isOpen={isShadowOpen}
+        onClose={() => setIsShadowOpen(false)}
+        characterLevel={data.level}
+        onApplySpell={(spell) => {
+          onChange((prev) => ({
+            ...prev,
+            cursedProfile: {
+              ...prev.cursedProfile,
+              spells: [
+                ...prev.cursedProfile.spells,
+                {
+                  id: generateId("spell"),
+                  ...spell,
+                },
+              ],
+            },
+          }));
+          toast.success(`"${spell.name}" adicionada aos feitiços/habilidades!`);
+          setIsShadowOpen(false);
+        }}
       />
     </div>
   );

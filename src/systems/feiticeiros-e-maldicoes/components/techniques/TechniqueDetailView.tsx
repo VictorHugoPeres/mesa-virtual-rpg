@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { InnateTechnique, ReadySpell } from "../../data/techniques";
 import { getUnlockedSpellLevels } from "../../data/techniqueCreationRules";
 import { AttributeKey } from "../../constants";
-import { Sparkles, Check, Lock, Shield, BookOpen, AlertCircle } from "lucide-react";
+import { Sparkles, Check, Lock, Shield, BookOpen, AlertCircle, Flame } from "lucide-react";
 
 interface TechniqueDetailViewProps {
   technique: InnateTechnique;
@@ -15,6 +15,12 @@ interface TechniqueDetailViewProps {
     attribute: AttributeKey;
     description: string;
     selectedSpells: ReadySpell[];
+    domainExpansion?: {
+      name: string;
+      type: string;
+      cost: number;
+      description: string;
+    };
   }) => void;
   onBack?: () => void;
 }
@@ -54,6 +60,7 @@ export function TechniqueDetailView({
       attribute: technique.suggestedAttribute,
       description: technique.description,
       selectedSpells: chosen,
+      domainExpansion: technique.domainExpansion,
     });
   }
 
@@ -124,6 +131,22 @@ export function TechniqueDetailView({
             </span>
             <p className="text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap">
               {technique.basicFunction}
+            </p>
+          </div>
+        )}
+
+        {technique.domainExpansion && (
+          <div className="p-3.5 rounded-xl bg-purple-950/25 border border-purple-500/35 text-xs space-y-1.5 shadow-xs">
+            <div className="flex items-center justify-between flex-wrap gap-1.5">
+              <span className="font-bold text-purple-300 flex items-center gap-1.5">
+                <Flame className="w-4 h-4 text-purple-400" /> Expansão de Domínio: {technique.domainExpansion.name}
+              </span>
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-purple-900/50 text-purple-300 border border-purple-700/50">
+                {technique.domainExpansion.type} • {technique.domainExpansion.cost} PE
+              </span>
+            </div>
+            <p className="text-zinc-300 leading-relaxed whitespace-pre-wrap text-[11px] pt-0.5">
+              {technique.domainExpansion.description}
             </p>
           </div>
         )}

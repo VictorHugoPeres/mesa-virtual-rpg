@@ -193,6 +193,9 @@ export function calcSuggestedPE(
   keyAttrMod: number,
   options?: PESuggestionOptions
 ): number {
+  if (specialization === "Restringido" || options?.origin === "Restringido") {
+    return Math.max(0, level * 4); // Estamina oficial v2.5: Nível * 4
+  }
   const spec = SPEC_TABLE[specialization] || SPEC_TABLE["Lutador"];
   let total = level * spec.pePerLevel;
   if (spec.addsAttributeToPE) {

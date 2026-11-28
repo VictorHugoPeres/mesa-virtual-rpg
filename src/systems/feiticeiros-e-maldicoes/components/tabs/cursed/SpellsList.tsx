@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { FMCharacterData, SpellDef } from "@/systems/feiticeiros-e-maldicoes";
-import { Plus, Sparkles, BookOpen, Wand2 } from "lucide-react";
+import { Wand2, Swords } from "lucide-react";
 import { useDice } from "@/core/dice/DiceContext";
 import { useDialog } from "@/core/ui";
 import { SpellRowItem } from "./SpellRowItem";
-import { TechniqueCatalogModal, GuidedSpellBuilderModal } from "../../techniques";
+import { SpellsHeaderControls } from "./SpellsHeaderControls";
+import { SpellsModalsManager } from "./SpellsModalsManager";
 import { getMaxSpellsByCharacterLevel } from "@/systems/feiticeiros-e-maldicoes/data/techniqueCreationRules";
 import { generateId } from "@/lib/id";
 
@@ -27,22 +28,29 @@ export function SpellsList({
 }: SpellsListProps) {
   const { openRoller } = useDice();
   const { toast } = useDialog();
+  const isRestringido = data.origin === "Restringido" || data.specialization === "Restringido";
   const cp = data.cursedProfile;
   const maxSpells = getMaxSpellsByCharacterLevel(data.level);
 
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
+  const [isMartialOpen, setIsMartialOpen] = useState(false);
+  const [isShadowOpen, setIsShadowOpen] = useState(false);
 
   function handleCastSpell(spell: SpellDef) {
-    if ((data.energy?.current ?? 0) < spell.peCost) {
-      toast.warning(`PE Insuficiente! Você possui ${data.energy?.current ?? 0} PE, mas "${spell.name}" requer ${spell.peCost} PE.`);
+    const currentResource = data.energy?.current ?? 0;
+    const resLabel = isRestringido ? "EST" : "PE";
+    const resName = isRestringido ? "Estamina" : "PE";
+
+    if (currentResource < spell.peCost) {
+      toast.warning(`${resName} Insuficiente! Você possui ${currentResource} ${resLabel}, mas "${spell.name}" requer ${spell.peCost} ${resLabel}.`);
       return;
     }
 
-    const nextPE = Math.max(0, (data.energy?.current ?? 0) - spell.peCost);
+    const nextEnergy = Math.max(0, currentResource - spell.peCost);
     onChange((prev) => ({
       ...prev,
-      energy: { ...prev.energy, current: nextPE },
+      energy: { ...prev.energy, current: nextEnergy },
     }));
 
     if (campaignId) {
@@ -54,16 +62,16 @@ export function SpellsList({
           campaignId,
           characterId,
           roller: characterName || "Personagem",
-          formula: `${spell.peCost} PE`,
-          rawRoll: `Conjurou: ${spell.name} (-${spell.peCost} PE)`,
+          formula: `${spell.peCost} ${resLabel}`,
+          rawRoll: `${isRestringido ? "Usou Manobra" : "Conjurou"}: ${spell.name} (-${spell.peCost} ${resLabel})`,
           modifier: 0,
           total: spell.peCost,
-          label: `Feitiço: ${spell.name}`,
+          label: `${isRestringido ? "Manobra" : "Feitiço"}: ${spell.name}`,
           isCritical: false,
           isFumble: false,
           showOnTv: true,
         }),
-      }).catch((e) => console.warn("Erro ao registrar feitiço:", e));
+      }).catch((e) => console.warn("Erro ao registrar habilidade:", e));
     }
 
     const diceMatch = spell.effect?.match(/(\d*d\d+(?:\s*[+-]\s*\d+)?)/i);
@@ -90,14 +98,9 @@ export function SpellsList({
     });
   }
 
-  function handleApplyFromCatalog(techData: {
-    name: string;
-    attribute: any;
-    description: string;
-    selectedSpells: any[];
-  }) {
+  function handleApplyFromCatalog(techData: any) {
     onChange((prev) => {
-      const newSpells: SpellDef[] = techData.selectedSpells.map((s) => ({
+      const newSpells: SpellDef[] = techData.selectedSpells.map((s: any) => ({
         id: generateId("spell"),
         name: s.name,
         level: s.level,
@@ -108,6 +111,15 @@ export function SpellsList({
         effect: s.description || "",
       }));
 
+      const domain = techData.domainExpansion
+        ? {
+            name: techData.domainExpansion.name,
+            type: techData.domainExpansion.type,
+            cost: techData.domainExpansion.cost,
+            description: techData.domainExpansion.description,
+          }
+        : prev.cursedProfile.domainExpansion;
+
       return {
         ...prev,
         cursedProfile: {
@@ -116,110 +128,82 @@ export function SpellsList({
           techniqueDesc: techData.description,
           techniqueAttribute: techData.attribute,
           spells: [...prev.cursedProfile.spells, ...newSpells],
+          domainExpansion: domain,
         },
       };
     });
     toast.success(`Técnica "${techData.name}" e feitiços aplicados com sucesso!`);
   }
 
-  function handleSaveFromBuilder(newSpell: {
-    name: string;
-    level: number;
-    peCost: number;
-    action: string;
-    range: string;
-    duration: string;
-    effect: string;
-  }) {
-    const spell: SpellDef = {
-      id: generateId("spell"),
-      ...newSpell,
-    };
-
+  function handleSaveFromBuilder(newSpell: any) {
+    const spell: SpellDef = { id: generateId("spell"), ...newSpell };
     onChange((prev) => ({
       ...prev,
-      cursedProfile: {
-        ...prev.cursedProfile,
-        spells: [...prev.cursedProfile.spells, spell],
-      },
+      cursedProfile: { ...prev.cursedProfile, spells: [...prev.cursedProfile.spells, spell] },
     }));
     toast.success(`Feitiço "${spell.name}" adicionado ao grimório!`);
   }
 
+  function handleAddTechniqueItem(item: any, successMsg: string) {
+    onChange((prev) => ({
+      ...prev,
+      cursedProfile: {
+        ...prev.cursedProfile,
+        spells: [...prev.cursedProfile.spells, { id: generateId("spell"), ...item }],
+      },
+    }));
+    toast.success(successMsg);
+  }
+
   return (
     <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)] space-y-4">
-      {/* Header com Controles */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-              Feitiços & Liberações ({cp.spells.length} / {maxSpells} slots)
-            </h3>
-            {cp.spells.length >= maxSpells && (
-              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-950/60 text-amber-300 border border-amber-800/40">
-                Limite do Nível Atingido
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">
-            Golpes, disparos e manifestações da sua técnica amaldiçoada (Nível {data.level})
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setIsCatalogOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-white/20 text-zinc-200 hover:text-white transition-all cursor-pointer shadow-xs active:scale-95"
-          >
-            <BookOpen className="w-3.5 h-3.5 text-amber-400" /> Catálogo da Obra
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsBuilderOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-sm shadow-rose-950/30 transition-all cursor-pointer active:scale-95"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-white" /> + Feitiço Guiado (F&M 2.5)
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              onChange((prev) => ({
-                ...prev,
-                cursedProfile: {
-                  ...prev.cursedProfile,
-                  spells: [
-                    ...prev.cursedProfile.spells,
-                    {
-                      id: generateId("spell"),
-                      name: "Novo Feitiço",
-                      level: 1,
-                      peCost: 2,
-                      action: "Ação Comum",
-                      range: "12m",
-                      duration: "Instantânea",
-                      effect: "",
-                    },
-                  ],
+      <SpellsHeaderControls
+        isRestringido={isRestringido}
+        spellCount={cp.spells.length}
+        maxSpells={maxSpells}
+        characterLevel={data.level}
+        onOpenCatalog={() => setIsCatalogOpen(true)}
+        onOpenBuilder={() => setIsBuilderOpen(true)}
+        onOpenMartial={() => setIsMartialOpen(true)}
+        onOpenShadow={() => setIsShadowOpen(true)}
+        onAddQuick={() => {
+          onChange((prev) => ({
+            ...prev,
+            cursedProfile: {
+              ...prev.cursedProfile,
+              spells: [
+                ...prev.cursedProfile.spells,
+                {
+                  id: generateId("spell"),
+                  name: isRestringido ? "Nova Manobra" : "Novo Feitiço",
+                  level: 1,
+                  peCost: 2,
+                  action: "Ação Comum",
+                  range: isRestringido ? "Corpo a corpo" : "12m",
+                  duration: "Instantânea",
+                  effect: "",
                 },
-              }));
-            }}
-            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-white/20 text-zinc-300 hover:text-white transition-all cursor-pointer shadow-xs active:scale-95"
-            title="Criar feitiço em branco para preenchimento manual"
-          >
-            <Plus className="w-3.5 h-3.5 text-zinc-400" /> Rápido
-          </button>
-        </div>
-      </div>
+              ],
+            },
+          }));
+        }}
+      />
 
-      {/* Lista de Feitiços */}
       {cp.spells.length === 0 ? (
         <div className="p-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-secondary)]/30 rounded-xl space-y-2">
-          <Wand2 className="w-8 h-8 mx-auto opacity-30 stroke-1" />
-          <p className="font-semibold text-[var(--text-secondary)]">Nenhum feitiço cadastrado no grimório.</p>
-          <p>Utilize o <strong>Catálogo da Obra</strong> para importar feitiços prontos ou o <strong>Construtor Guiado (F&M 2.5)</strong> para criar um novo.</p>
+          {isRestringido ? (
+            <>
+              <Swords className="w-8 h-8 mx-auto opacity-30 stroke-1 text-amber-400" />
+              <p className="font-semibold text-[var(--text-secondary)]">Nenhuma manobra cadastrada no arsenal.</p>
+              <p>Abra o <strong>Arsenal Marcial</strong> para adicionar golpes e manobras do Restringido Celestial.</p>
+            </>
+          ) : (
+            <>
+              <Wand2 className="w-8 h-8 mx-auto opacity-30 stroke-1" />
+              <p className="font-semibold text-[var(--text-secondary)]">Nenhum feitiço cadastrado no grimório.</p>
+              <p>Utilize o <strong>Catálogo da Obra</strong> para importar feitiços prontos ou crie um novo.</p>
+            </>
+          )}
         </div>
       ) : (
         <div className="space-y-3">
@@ -228,6 +212,7 @@ export function SpellsList({
               key={spell.id || idx}
               spell={spell}
               index={idx}
+              isRestringido={isRestringido}
               onCast={handleCastSpell}
               onRollDice={handleRollDice}
               onUpdate={(i, updater) => {
@@ -251,23 +236,29 @@ export function SpellsList({
         </div>
       )}
 
-      {/* Modais Integrados */}
-      <TechniqueCatalogModal
-        isOpen={isCatalogOpen}
-        onClose={() => setIsCatalogOpen(false)}
+      <SpellsModalsManager
+        isCatalogOpen={isCatalogOpen}
+        onCloseCatalog={() => setIsCatalogOpen(false)}
+        isBuilderOpen={isBuilderOpen}
+        onCloseBuilder={() => setIsBuilderOpen(false)}
+        isMartialOpen={isMartialOpen}
+        onCloseMartial={() => setIsMartialOpen(false)}
+        isShadowOpen={isShadowOpen}
+        onCloseShadow={() => setIsShadowOpen(false)}
         characterLevel={data.level}
         maxSpells={maxSpells}
-        onApplyTechnique={handleApplyFromCatalog}
-      />
-
-      <GuidedSpellBuilderModal
-        isOpen={isBuilderOpen}
-        onClose={() => setIsBuilderOpen(false)}
-        characterLevel={data.level}
         currentSpellCount={cp.spells.length}
-        maxSpells={maxSpells}
-        techniqueAttribute={cp.techniqueAttribute as any}
+        techniqueAttribute={cp.techniqueAttribute}
+        onApplyTechnique={handleApplyFromCatalog}
         onSaveSpell={handleSaveFromBuilder}
+        onAddMartialTechnique={(tech) => {
+          handleAddTechniqueItem(tech, `Manobra "${tech.name}" adicionada ao Arsenal!`);
+          setIsMartialOpen(false);
+        }}
+        onAddShadowTechnique={(spell) => {
+          handleAddTechniqueItem(spell, `"${spell.name}" adicionada ao grimório!`);
+          setIsShadowOpen(false);
+        }}
       />
     </div>
   );

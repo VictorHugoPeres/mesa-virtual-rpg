@@ -202,6 +202,8 @@ export function CharacterWizardModal({
               setTechniqueAttribute={(tAttr) => setState((prev) => ({ ...prev, techniqueAttribute: tAttr }))}
               spells={state.spells}
               setSpells={(sp) => setState((prev) => ({ ...prev, spells: sp }))}
+              domainExpansion={state.domainExpansion}
+              setDomainExpansion={(de) => setState((prev) => ({ ...prev, domainExpansion: de }))}
               level1FeatId={state.level1FeatId}
               onSelectLevel1Feat={(id, name, type, desc) =>
                 setState((prev) => ({

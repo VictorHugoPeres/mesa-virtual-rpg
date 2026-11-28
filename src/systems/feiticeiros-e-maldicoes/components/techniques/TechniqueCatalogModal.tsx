@@ -5,7 +5,9 @@ import { Portal } from "@/core/ui";
 import { READY_TECHNIQUES, TECHNIQUE_CATEGORIES, InnateTechnique, ReadySpell } from "../../data/techniques";
 import { TechniqueDetailView } from "./TechniqueDetailView";
 import { AttributeKey, ATTRIBUTE_KEYS } from "../../constants";
-import { BookOpen, X, Search, Sparkles, Filter } from "lucide-react";
+import { BookOpen, X, Search, Sparkles, Filter, Swords, Shield } from "lucide-react";
+import { MartialTechniquesModal } from "./MartialTechniquesModal";
+import { ShadowStyleModal } from "./ShadowStyleModal";
 
 interface TechniqueCatalogModalProps {
   isOpen: boolean;
@@ -17,7 +19,14 @@ interface TechniqueCatalogModalProps {
     attribute: AttributeKey;
     description: string;
     selectedSpells: ReadySpell[];
+    domainExpansion?: {
+      name: string;
+      type: string;
+      cost: number;
+      description: string;
+    };
   }) => void;
+  onApplySpell?: (spell: any) => void;
 }
 
 export function TechniqueCatalogModal({
@@ -26,12 +35,15 @@ export function TechniqueCatalogModal({
   characterLevel = 1,
   maxSpells = 2,
   onApplyTechnique,
+  onApplySpell,
 }: TechniqueCatalogModalProps) {
   const [selectedTechId, setSelectedTechId] = useState<string>("ilimitado");
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("todos");
   const [selectedAttr, setSelectedAttr] = useState<string>("todos");
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
+  const [isMartialOpen, setIsMartialOpen] = useState(false);
+  const [isShadowOpen, setIsShadowOpen] = useState(false);
 
   if (!isOpen) return null;
 
@@ -55,6 +67,7 @@ export function TechniqueCatalogModal({
     attribute: AttributeKey;
     description: string;
     selectedSpells: ReadySpell[];
+    domainExpansion?: any;
   }) {
     onApplyTechnique(techData);
     onClose();
@@ -83,13 +96,33 @@ export function TechniqueCatalogModal({
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsShadowOpen(true)}
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-indigo-500/40 text-indigo-300 hover:text-indigo-200 transition-all cursor-pointer"
+                title="Explorar o Novo Estilo da Sombra e Domínio Simples"
+              >
+                <Shield className="w-3.5 h-3.5" /> Estilo da Sombra
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsMartialOpen(true)}
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-[#14161A] hover:bg-[#1A1D24] border border-[#23272F] hover:border-amber-500/40 text-amber-300 hover:text-amber-200 transition-all cursor-pointer"
+                title="Explorar o Arsenal Marcial do Restringido"
+              >
+                <Swords className="w-3.5 h-3.5" /> Arsenal Marcial
+              </button>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Corpo: Grade Dividida (Lista Lateral + Detalhes) */}
@@ -200,6 +233,28 @@ export function TechniqueCatalogModal({
           </div>
         </div>
       </div>
+
+      <MartialTechniquesModal
+        isOpen={isMartialOpen}
+        onClose={() => setIsMartialOpen(false)}
+        characterLevel={characterLevel}
+        onAddTechnique={onApplySpell ? (tech) => {
+          onApplySpell(tech);
+          setIsMartialOpen(false);
+          onClose();
+        } : undefined}
+      />
+
+      <ShadowStyleModal
+        isOpen={isShadowOpen}
+        onClose={() => setIsShadowOpen(false)}
+        characterLevel={characterLevel}
+        onApplySpell={onApplySpell ? (spell) => {
+          onApplySpell(spell);
+          setIsShadowOpen(false);
+          onClose();
+        } : undefined}
+      />
     </Portal>
   );
 }

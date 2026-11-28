@@ -6,6 +6,7 @@ import { Sparkles, Dices, Trash2 } from "lucide-react";
 interface SpellRowItemProps {
   spell: SpellDef;
   index: number;
+  isRestringido?: boolean;
   onCast: (spell: SpellDef) => void;
   onRollDice?: (label: string, diceFormula: string) => void;
   onUpdate: (index: number, updater: (prev: SpellDef) => SpellDef) => void;
@@ -15,6 +16,7 @@ interface SpellRowItemProps {
 export function SpellRowItem({
   spell,
   index,
+  isRestringido,
   onCast,
   onRollDice,
   onUpdate,
@@ -56,14 +58,16 @@ export function SpellRowItem({
 
         <div>
           <label className="block text-[9px] uppercase font-bold text-[var(--text-muted)] mb-0.5">
-            Custo (PE)
+            {isRestringido ? "Custo (EST)" : "Custo (PE)"}
           </label>
           <input
             type="number"
             min={0}
             value={spell.peCost}
             onChange={(e) => onUpdate(index, (s) => ({ ...s, peCost: parseInt(e.target.value) || 0 }))}
-            className="w-full text-center px-2 py-1 text-xs font-bold text-blue-400 rounded bg-[var(--bg-card)] border border-[var(--border-default)]"
+            className={`w-full text-center px-2 py-1 text-xs font-bold rounded bg-[var(--bg-card)] border border-[var(--border-default)] ${
+              isRestringido ? "text-amber-400" : "text-blue-400"
+            }`}
           />
         </div>
 
@@ -133,9 +137,11 @@ export function SpellRowItem({
           <button
             type="button"
             onClick={() => onCast(spell)}
-            className="flex items-center gap-1.5 px-3.5 py-1 text-xs font-bold rounded bg-blue-600 hover:bg-blue-500 text-white shadow-sm transition-colors cursor-pointer"
+            className={`flex items-center gap-1.5 px-3.5 py-1 text-xs font-bold rounded text-white shadow-sm transition-colors cursor-pointer ${
+              isRestringido ? "bg-amber-600 hover:bg-amber-500" : "bg-blue-600 hover:bg-blue-500"
+            }`}
           >
-            <Sparkles className="w-3.5 h-3.5" /> Usar (-{spell.peCost} PE)
+            <Sparkles className="w-3.5 h-3.5" /> Usar (-{spell.peCost} {isRestringido ? "EST" : "PE"})
           </button>
         </div>
       </div>

@@ -35,6 +35,12 @@ export interface WizardState {
   techniqueDesc: string;
   techniqueAttribute: AttributeKey;
   spells: WizardSpell[];
+  domainExpansion?: {
+    name: string;
+    type: string;
+    cost: number;
+    description: string;
+  };
   level1FeatId?: string;
   level1FeatName?: string;
   level1FeatType?: "talento" | "aptidao";

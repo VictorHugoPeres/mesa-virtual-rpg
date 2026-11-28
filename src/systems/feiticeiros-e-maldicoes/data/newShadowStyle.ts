@@ -122,3 +122,11 @@ export function getShadowModificationsByType(
 ): SimpleDomainModification[] {
   return SIMPLE_DOMAIN_MODIFICATIONS.filter((m) => m.type === type);
 }
+
+export const NEW_SHADOW_STYLE_TECHNIQUES: SimpleDomainModification[] = SIMPLE_DOMAIN_MODIFICATIONS.filter(
+  (m) => m.type === "Técnica de Estilo Especial"
+);
+
+export const SIMPLE_DOMAIN_MODS_ONLY: SimpleDomainModification[] = SIMPLE_DOMAIN_MODIFICATIONS.filter(
+  (m) => m.type === "Modificação de Domínio Simples"
+);

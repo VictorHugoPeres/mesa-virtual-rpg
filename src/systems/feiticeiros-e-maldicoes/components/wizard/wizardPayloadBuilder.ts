@@ -59,7 +59,7 @@ export function buildCharacterSheet(state: WizardState): FMCharacterData {
 
   const hpMax = calcSuggestedHP(state.specialization, 1, conMod, state.clan);
   const peMax = isRestringido
-    ? 0
+    ? 4 // Estamina do Restringido no nível 1 (4 pontos)
     : calcSuggestedPE(state.specialization, 1, keyAttrMod, { origin: state.origin, clan: state.clan });
 
   const sheet = createDefaultCharacter(state.name.trim(), state.type, state.specialization, state.origin);
@@ -168,7 +168,14 @@ export function buildCharacterSheet(state: WizardState): FMCharacterData {
       duration: "Instantânea",
       effect: s.description,
     })),
-    domainExpansion: { name: "", type: "Letal", description: "", cost: 10 },
+    domainExpansion: state.domainExpansion
+      ? {
+          name: state.domainExpansion.name,
+          type: state.domainExpansion.type,
+          description: state.domainExpansion.description,
+          cost: state.domainExpansion.cost,
+        }
+      : { name: "", type: "Letal", description: "", cost: 10 },
   };
 
   // Armas equipadas
