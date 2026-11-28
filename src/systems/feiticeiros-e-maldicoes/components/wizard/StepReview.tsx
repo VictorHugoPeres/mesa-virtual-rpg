@@ -3,12 +3,15 @@
 import {
   AttributeKey,
   ATTRIBUTE_KEYS,
-  SPEC_TABLE,
+  ATTRIBUTE_LABELS,
   getModifier,
+  calcDefense,
   calcSpellDC,
+  calcSuggestedHP,
+  calcSuggestedPE,
 } from "@/systems/feiticeiros-e-maldicoes";
 import { WizardState } from "./wizardTypes";
-import { WIZARD_WEAPONS, WIZARD_TOOLKITS } from "./wizardPresets";
+import { calculateFinalAttributes } from "./wizardPayloadBuilder";
 import {
   WEAPONS_CATALOG,
   UNIFORMS_CATALOG,
@@ -16,7 +19,8 @@ import {
   TOOL_KITS_CATALOG,
   GENERAL_GEAR_CATALOG,
 } from "../../data/equipment";
-import { Loader2, Check } from "lucide-react";
+import { WIZARD_WEAPONS, WIZARD_TOOLKITS } from "./wizardPresets";
+import { Loader2, Check, Shield, Heart, Zap, Award, Swords, Sparkles, Dna } from "lucide-react";
 
 interface StepReviewProps {
   state: WizardState;
@@ -33,39 +37,31 @@ export function StepReview({
   isSubmitting,
   error,
 }: StepReviewProps) {
-  const isRestringido = state.origin === "Restringido";
-  const specInfo = SPEC_TABLE[state.specialization] || SPEC_TABLE["Lutador"];
+  const isRestringido = state.origin === "Restringido" || state.specialization === "Restringido";
+  const finalAttrs = calculateFinalAttributes(state);
 
-  function getFinalValue(key: AttributeKey): number {
-    let bonus = 0;
-    if (isRestringido) {
-      if (key === "FOR") bonus += 2;
-      if (key === state.bonusPlus2) bonus += 2;
-    } else {
-      if (key === state.bonusPlus2) bonus += 2;
-      if (key === state.bonusPlus1) bonus += 1;
-    }
-    return (state.baseAttributes[key] || 10) + bonus;
-  }
-
-  const conMod = getModifier(getFinalValue("CON"));
-  const dexMod = getModifier(getFinalValue("DEX"));
-  const sabMod = getModifier(getFinalValue("SAB"));
-  const techAttrVal = getFinalValue(state.techniqueAttribute);
-  const techMod = getModifier(techAttrVal);
+  const conMod = getModifier(finalAttrs.CON);
+  const dexMod = getModifier(finalAttrs.DEX);
+  const sabMod = getModifier(finalAttrs.SAB);
+  const keyAttr = state.keyAttribute || state.techniqueAttribute || "FOR";
+  const keyAttrMod = getModifier(finalAttrs[keyAttr] || 10);
 
   const uniformItem = UNIFORMS_CATALOG.find((u) => u.id === (state.selectedUniform || "uniforme-comum"));
   const shieldItem = SHIELDS_CATALOG.find((s) => s.id === state.selectedShield);
   const uniformCa = uniformItem ? uniformItem.caBonus : 0;
   const shieldCa = shieldItem ? shieldItem.caBonus : 0;
 
-  const maxHP = specInfo.hpBase + conMod;
-  const maxPE = isRestringido ? 0 : specInfo.pePerLevel + (specInfo.addsAttributeToPE ? Math.max(0, techMod) : 0);
-  const totalDefense = 10 + dexMod + uniformCa + shieldCa;
+  const maxHP = calcSuggestedHP(state.specialization, 1, conMod, state.clan);
+  const maxPE = isRestringido
+    ? 0
+    : calcSuggestedPE(state.specialization, 1, keyAttrMod, { origin: state.origin, clan: state.clan });
+
+  // Defesa v2.5: 10 + DES + floor(N/2) + Uniforme + Escudo
+  const halfLevel = Math.floor(1 / 2); // 0 no Nível 1
+  const totalDefense = 10 + dexMod + halfLevel + uniformCa + shieldCa;
   const initiative = dexMod;
   const attention = 10 + sabMod + (state.trainedSkills.includes("Percepção") ? 2 : 0);
-  const spellDC = calcSpellDC(1, techAttrVal);
-  const movement = isRestringido ? 12 : 9;
+  const spellDC = calcSpellDC(1, finalAttrs[state.techniqueAttribute] || 10);
 
   const weaponNames = state.selectedWeapons.map(
     (wId) => WEAPONS_CATALOG.find((w) => w.id === wId)?.name || WIZARD_WEAPONS.find((w) => w.id === wId)?.name || wId
@@ -80,168 +76,214 @@ export function StepReview({
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-base font-bold text-[var(--text-primary)]">Passo 7: Detalhes & Revisão Final</h3>
-        <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-          Dê um nome ao seu feiticeiro, revise os cálculos automáticos da ficha e confirme a criação.
+        <h3 className="text-base font-bold text-zinc-100">Passo 7: Detalhes & Revisão Final</h3>
+        <p className="text-xs text-zinc-400 mt-0.5">
+          Dê um nome ao seu feiticeiro, revise os cálculos automáticos e confirme a criação da ficha.
         </p>
       </div>
 
       {error && (
-        <div className="p-3 text-xs rounded-lg bg-red-950/60 border border-red-800 text-red-200">
+        <div className="p-3 text-xs rounded-lg bg-rose-950/60 border border-rose-800 text-rose-200">
           {error}
         </div>
       )}
 
-      <div className="p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-default)] space-y-3">
+      {/* Identificação Básica */}
+      <div className="p-4 rounded-xl bg-[#14161A] border border-[#23272F] space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="md:col-span-2">
-            <label className="block text-xs font-semibold text-[var(--text-secondary)] uppercase mb-1">
+            <label className="block text-xs font-semibold text-zinc-300 uppercase mb-1">
               Nome do Personagem *
             </label>
             <input
               type="text"
               required
-              placeholder="Ex: Yuji Itadori, Maki Zenin..."
+              placeholder="Ex: Yuji Itadori, Maki Zenin, Megumi Fushiguro..."
               value={state.name}
               onChange={(e) => setState((prev) => ({ ...prev, name: e.target.value }))}
-              className="w-full px-3 py-2 text-xs rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] text-[var(--text-primary)] font-semibold focus:outline-none focus:border-blue-500"
-              autoFocus
+              className="w-full px-3 py-2 text-xs rounded-lg bg-[#0B0C0E] border border-[#23272F] text-zinc-100 font-semibold focus:outline-none focus:border-rose-600"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[var(--text-secondary)] uppercase mb-1">
+            <label className="block text-xs font-semibold text-zinc-300 uppercase mb-1">
               Tipo de Personagem
             </label>
             <select
               value={state.type}
               onChange={(e) => setState((prev) => ({ ...prev, type: e.target.value as "PC" | "NPC" }))}
-              className="w-full px-3 py-2 text-xs rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] text-[var(--text-primary)] focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 text-xs rounded-lg bg-[#0B0C0E] border border-[#23272F] text-zinc-100 focus:outline-none"
             >
-              <option value="PC">Personagem Jogador (PC)</option>
-              <option value="NPC">NPC / Aliado / Ameaça</option>
+              <option value="PC">Jogador (PC)</option>
+              <option value="NPC">NPC / Aliado</option>
             </select>
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-[var(--text-secondary)] uppercase mb-1">
-            Conceito / Ideais do Personagem (Opcional)
+          <label className="block text-xs font-semibold text-zinc-300 uppercase mb-1">
+            Conceito & Ideais do Personagem
           </label>
           <input
             type="text"
-            placeholder="Ex: Lutar para que ninguém morra sem ter uma escolha digna."
+            placeholder="Ex: Lutar para que ninguém morra sozinho; Buscar a força absoluta..."
             value={state.concept}
             onChange={(e) => setState((prev) => ({ ...prev, concept: e.target.value }))}
-            className="w-full px-3 py-2 text-xs rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] text-[var(--text-primary)] focus:outline-none focus:border-blue-500"
+            className="w-full px-3 py-2 text-xs rounded-lg bg-[#0B0C0E] border border-[#23272F] text-zinc-100"
           />
         </div>
       </div>
 
-      <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)] space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[var(--border-default)]">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-950 text-blue-300 border border-blue-800">
-              Origem: {state.origin}
-            </span>
-            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-950 text-amber-300 border border-amber-800">
-              Classe: {state.specialization}
-            </span>
-          </div>
-          <span className="text-xs font-bold text-[var(--text-muted)]">Nível 1 • 4° Grau</span>
+      {/* Grid de Estatísticas Finais v2.5 */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div className="p-3 rounded-xl bg-[#14161A] border border-[#23272F]">
+          <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1 mb-1">
+            <Heart className="w-3.5 h-3.5 text-rose-500" /> PV Máximo
+          </span>
+          <span className="text-base font-bold text-zinc-100">{maxHP}</span>
+          <span className="text-[10px] text-zinc-500 block font-mono">1º Nível</span>
         </div>
 
-        <div className="grid grid-cols-6 gap-2 text-center">
+        <div className="p-3 rounded-xl bg-[#14161A] border border-[#23272F]">
+          <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1 mb-1">
+            <Zap className={`w-3.5 h-3.5 ${isRestringido ? "text-amber-400" : "text-sky-400"}`} />
+            {isRestringido ? "Estamina" : "PE Máximo"}
+          </span>
+          <span className="text-base font-bold text-zinc-100">
+            {isRestringido ? "4 (1x4)" : maxPE}
+          </span>
+          <span className="text-[10px] text-zinc-500 block font-mono">
+            {isRestringido ? "Vigor Físico" : "Energia"}
+          </span>
+        </div>
+
+        <div className="p-3 rounded-xl bg-[#14161A] border border-[#23272F]">
+          <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1 mb-1">
+            <Shield className="w-3.5 h-3.5 text-zinc-300" /> Defesa (CA)
+          </span>
+          <span className="text-base font-bold text-zinc-100">{totalDefense}</span>
+          <span className="text-[10px] text-zinc-500 block font-mono" title="10 + DES + ⌊N/2⌋ + Uniforme + Escudo">
+            10+{dexMod}+{halfLevel}+{uniformCa}+{shieldCa}
+          </span>
+        </div>
+
+        <div className="p-3 rounded-xl bg-[#14161A] border border-[#23272F]">
+          <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1 mb-1">
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" /> {isRestringido ? "Atenção" : "CD Técnica"}
+          </span>
+          <span className="text-base font-bold text-zinc-100">
+            {isRestringido ? attention : spellDC}
+          </span>
+          <span className="text-[10px] text-zinc-500 block font-mono">
+            {isRestringido ? `Inic: +${initiative}` : `10 + 2(BT) + ${getModifier(finalAttrs[state.techniqueAttribute] || 10)}`}
+          </span>
+        </div>
+      </div>
+
+      {/* Grid de Atributos Finais */}
+      <div className="p-3.5 rounded-xl bg-[#14161A] border border-[#23272F]">
+        <span className="text-xs font-bold uppercase tracking-wider text-zinc-300 block mb-2">
+          Atributos Finais (Base + Bônus de Origem)
+        </span>
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center text-xs">
           {ATTRIBUTE_KEYS.map((k: AttributeKey) => {
-            const val = getFinalValue(k);
+            const val = finalAttrs[k] || 10;
             const mod = getModifier(val);
-            const modStr = mod >= 0 ? `+${mod}` : `${mod}`;
+            const isKey = k === keyAttr;
             return (
-              <div key={k} className="p-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)]">
-                <span className="text-[10px] text-[var(--text-muted)] font-bold block">{k}</span>
-                <span className="text-sm font-bold text-[var(--text-primary)] block">{val}</span>
-                <span className="text-[11px] font-bold text-emerald-400 block">{modStr}</span>
+              <div
+                key={k}
+                className={`p-2 rounded-lg border ${
+                  isKey ? "bg-rose-950/30 border-rose-600/60" : "bg-[#0B0C0E] border-[#23272F]"
+                }`}
+              >
+                <span className="text-[10px] font-bold text-zinc-400 block">{ATTRIBUTE_LABELS[k]}</span>
+                <span className="text-sm font-bold text-zinc-100 font-mono">{val}</span>
+                <span className={`text-[10px] font-bold block ${mod >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                  {mod >= 0 ? `+${mod}` : mod}
+                </span>
               </div>
             );
           })}
         </div>
+      </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)]">
-            <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase block">Vida (PV)</span>
-            <span className="text-base font-bold text-rose-400">{maxHP}</span>
-            <span className="text-[10px] text-[var(--text-muted)] block">Dado: {specInfo.hitDie}</span>
-          </div>
-
-          <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)]">
-            <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase block">{isRestringido ? "Vigor" : "Energia (PE)"}</span>
-            <span className="text-base font-bold text-blue-400">{maxPE}</span>
-            <span className="text-[10px] text-[var(--text-muted)] block">Recurso</span>
-          </div>
-
-          <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)]">
-            <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase block">Defesa / CA</span>
-            <span className="text-base font-bold text-emerald-400">{totalDefense}</span>
-            <span className="text-[10px] text-[var(--text-muted)] block">
-              10 + DES{uniformCa ? ` +${uniformCa}` : ""}{shieldCa ? ` +${shieldCa}` : ""}
+      {/* Resumo de Origem, Clã, Especialização e Talentos */}
+      <div className="p-3.5 rounded-xl bg-[#14161A] border border-[#23272F] space-y-2 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <span className="text-zinc-500 block text-[10px] uppercase font-bold">Origem & Linhagem</span>
+            <span className="text-zinc-200 font-semibold text-xs">
+              {state.origin} {state.clan ? `(Clã ${state.clan})` : ""}
             </span>
+            {state.anatomyTrait && (
+              <span className="text-amber-400 text-[11px] block flex items-center gap-1 mt-0.5">
+                <Dna className="w-3 h-3" /> Anatomia: {state.anatomyTrait}
+              </span>
+            )}
           </div>
 
-          <div className="p-2.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-default)]">
-            <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase block">Iniciativa / Mov.</span>
-            <span className="text-base font-bold text-amber-400">+{initiative} / {movement}m</span>
-            <span className="text-[10px] text-[var(--text-muted)] block">Atenção: {attention}</span>
+          <div>
+            <span className="text-zinc-500 block text-[10px] uppercase font-bold">Especialização</span>
+            <span className="text-zinc-200 font-semibold text-xs">
+              {state.specialization} {state.level1Choice ? `(${state.level1Choice})` : ""}
+            </span>
+            {state.level1FeatName && (
+              <span className="text-rose-400 text-[11px] block flex items-center gap-1 mt-0.5">
+                <Award className="w-3 h-3" /> {state.level1FeatName}
+              </span>
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-2 border-t border-[var(--border-default)]">
-          <div>
-            <span className="font-bold text-[var(--text-secondary)] block mb-1">
-              {isRestringido ? "Habilidades:" : `Técnica: ${state.techniqueName || "Inominada"} (CD ${spellDC})`}
-            </span>
-            <p className="text-[var(--text-muted)] line-clamp-2">{state.techniqueDesc || "Sem descrição."}</p>
-            <div className="mt-1 flex flex-wrap gap-1">
-              {state.spells.map((s) => (
-                <span key={s.name} className="px-1.5 py-0.5 rounded bg-[var(--bg-secondary)] border border-[var(--border-default)] text-[10px] text-indigo-300">
-                  {s.name} ({s.cost} {isRestringido ? "Vigor" : "PE"})
+        <div className="pt-2 border-t border-[#23272F]">
+          <span className="text-zinc-500 block text-[10px] uppercase font-bold mb-1">
+            Perícias Treinadas ({state.trainedSkills.length}) {state.expertSkills && state.expertSkills.length > 0 ? `• Mestres: ${state.expertSkills.join(", ")}` : ""}
+          </span>
+          <div className="flex flex-wrap gap-1">
+            {state.trainedSkills.map((sk) => {
+              const isExpert = state.expertSkills?.includes(sk);
+              return (
+                <span
+                  key={sk}
+                  className={`text-[10px] px-2 py-0.5 rounded border font-medium ${
+                    isExpert
+                      ? "bg-amber-950/60 border-amber-800 text-amber-300 font-bold"
+                      : "bg-[#0B0C0E] border-[#23272F] text-zinc-300"
+                  }`}
+                >
+                  {sk} {isExpert ? "★ Mestre" : ""}
                 </span>
-              ))}
-            </div>
+              );
+            })}
           </div>
+        </div>
 
-          <div>
-            <span className="font-bold text-[var(--text-secondary)] block mb-1">Equipamentos & Ferramentas:</span>
-            <p className="text-[var(--text-muted)]">
-              {[
-                weaponNames.length > 0 ? `Armas: ${weaponNames.join(", ")}` : "Sem armas",
-                uniformName,
-                shieldName ? `Escudo: ${shieldName}` : null,
-                `Kit: ${kitName}`,
-                gearNames.length > 0 ? `Geral: ${gearNames.join(", ")}` : null,
-              ].filter(Boolean).join(" • ")}
-            </p>
-            <span className="font-bold text-[var(--text-secondary)] block mt-2 mb-0.5">Perícias ({state.trainedSkills.length}):</span>
-            <p className="text-[var(--text-muted)] truncate">{state.trainedSkills.join(", ")}</p>
-          </div>
+        <div className="pt-2 border-t border-[#23272F]">
+          <span className="text-zinc-500 block text-[10px] uppercase font-bold mb-1">Equipamento Inicial</span>
+          <p className="text-zinc-300 text-[11px]">
+            <strong>Armas:</strong> {weaponNames.join(", ") || "Nenhuma"} • <strong>Proteção:</strong> {uniformName}
+            {shieldName ? ` + ${shieldName}` : ""} • <strong>Kit:</strong> {kitName}
+            {gearNames.length > 0 ? ` • ${gearNames.join(", ")}` : ""}
+          </p>
         </div>
       </div>
 
-      <div className="pt-2 flex justify-end">
+      {/* Botão de Criação Final */}
+      <div className="pt-2">
         <button
           type="button"
-          disabled={!state.name.trim() || isSubmitting}
+          disabled={isSubmitting || !state.name.trim()}
           onClick={onSubmit}
-          className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 px-4 rounded-xl font-bold text-sm bg-rose-600 hover:bg-rose-500 disabled:opacity-40 text-white shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Criando Personagem...
+              <Loader2 className="w-4 h-4 animate-spin" /> Criando Feiticeiro no Banco...
             </>
           ) : (
             <>
-              <Check className="w-4 h-4" />
-              Finalizar e Criar Personagem
+              <Check className="w-4 h-4" /> Concluir e Criar Personagem (F&M v2.5)
             </>
           )}
         </button>

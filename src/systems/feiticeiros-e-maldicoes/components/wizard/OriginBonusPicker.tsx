@@ -16,11 +16,22 @@ interface OriginBonusPickerProps {
   setAttributeBonuses?: (bonuses: Partial<Record<AttributeKey, number>>) => void;
 }
 
-const CLAN_PLUS2_OPTIONS: Record<string, AttributeKey[]> = {
-  Gojo: ["INT", "PRE"],
-  Zenin: ["FOR", "DEX"],
-  Kamo: ["CON"],
-  Inumaki: ["PRE", "CON"],
+const CLAN_BONUS_RULES: Record<string, { plus2: AttributeKey[]; pairedPlus1?: Partial<Record<AttributeKey, AttributeKey>> }> = {
+  Gojo: {
+    plus2: ["INT", "SAB"],
+    pairedPlus1: { INT: "SAB", SAB: "INT" },
+  },
+  Inumaki: {
+    plus2: ["INT", "PRE"],
+    pairedPlus1: { INT: "PRE", PRE: "INT" },
+  },
+  Kamo: {
+    plus2: ["CON", "SAB"],
+    pairedPlus1: { CON: "SAB", SAB: "CON" },
+  },
+  Zenin: {
+    plus2: ["FOR", "DEX", "CON", "INT", "SAB", "PRE"],
+  },
 };
 
 export function OriginBonusPicker({
@@ -39,32 +50,37 @@ export function OriginBonusPicker({
   const isCorpoMutante = origin === "Corpo Amaldiçoado Mutante";
   const isHerdado = origin === "Herdado";
 
-  // Clã options
-  const allowedPlus2 = isHerdado && clan && CLAN_PLUS2_OPTIONS[clan]
-    ? CLAN_PLUS2_OPTIONS[clan]
-    : (ATTRIBUTE_KEYS as readonly AttributeKey[]);
+  const clanRule = isHerdado && clan ? CLAN_BONUS_RULES[clan] : null;
+  const allowedPlus2 = clanRule ? clanRule.plus2 : (ATTRIBUTE_KEYS as readonly AttributeKey[]);
 
-  // Garantir que bonusPlus2 seja válido para o clã
+  // Garantir que bonusPlus2 e bonusPlus1 respeitem a regra do clã
   useEffect(() => {
-    if (isHerdado && clan && CLAN_PLUS2_OPTIONS[clan]) {
-      const allowed = CLAN_PLUS2_OPTIONS[clan];
-      if (!allowed.includes(bonusPlus2)) {
-        setBonusPlus2(allowed[0]);
+    if (clanRule) {
+      let currentPlus2 = bonusPlus2;
+      if (!clanRule.plus2.includes(currentPlus2)) {
+        currentPlus2 = clanRule.plus2[0];
+        setBonusPlus2(currentPlus2);
+      }
+      const paired = clanRule.pairedPlus1?.[currentPlus2];
+      if (paired && bonusPlus1 !== paired) {
+        setBonusPlus1(paired);
       }
     }
-  }, [isHerdado, clan, bonusPlus2, setBonusPlus2]);
+  }, [clanRule, bonusPlus2, bonusPlus1, setBonusPlus2, setBonusPlus1]);
 
-  // Sincronizar attributeBonuses para Inato / Derivado / Herdado / Feto
+  // Sincronizar attributeBonuses para Inato / Derivado / Herdado / Feto apenas se houver diferença
   useEffect(() => {
     if (!setAttributeBonuses) return;
 
     if (!isRestringido && !isSemTecnicaOrMaldicao && !isReencarnadoOrFantoche && !isCorpoMutante) {
-      setAttributeBonuses({
-        [bonusPlus2]: 2,
-        [bonusPlus1]: 1,
-      });
+      if (attributeBonuses[bonusPlus2] !== 2 || attributeBonuses[bonusPlus1] !== 1 || Object.keys(attributeBonuses).length !== 2) {
+        setAttributeBonuses({
+          [bonusPlus2]: 2,
+          [bonusPlus1]: 1,
+        });
+      }
     }
-  }, [origin, bonusPlus2, bonusPlus1, isRestringido, isSemTecnicaOrMaldicao, isReencarnadoOrFantoche, isCorpoMutante, setAttributeBonuses]);
+  }, [origin, bonusPlus2, bonusPlus1, isRestringido, isSemTecnicaOrMaldicao, isReencarnadoOrFantoche, isCorpoMutante, attributeBonuses, setAttributeBonuses]);
 
   return (
     <div className="p-4 rounded-xl bg-[#14161A] border border-[#23272F] space-y-3">
@@ -136,14 +152,16 @@ export function OriginBonusPicker({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           <div>
             <label className="block text-[11px] text-zinc-400 mb-1">
-              Bônus Primário (+2): {isHerdado && clan ? `(Restrito ao ${clan})` : ""}
+              Bônus Primário (+2): {isHerdado && clan ? `(Regra Clã ${clan})` : ""}
             </label>
             <select
               value={bonusPlus2}
               onChange={(e) => {
                 const val = e.target.value as AttributeKey;
                 setBonusPlus2(val);
-                if (val === bonusPlus1) {
+                if (clanRule?.pairedPlus1 && clanRule.pairedPlus1[val]) {
+                  setBonusPlus1(clanRule.pairedPlus1[val]);
+                } else if (val === bonusPlus1) {
                   const fallback = (ATTRIBUTE_KEYS as readonly AttributeKey[]).find((k) => k !== val) || "CON";
                   setBonusPlus1(fallback);
                 }
@@ -159,20 +177,29 @@ export function OriginBonusPicker({
           </div>
 
           <div>
-            <label className="block text-[11px] text-zinc-400 mb-1">Bônus Secundário (+1):</label>
-            <select
-              value={bonusPlus1}
-              onChange={(e) => setBonusPlus1(e.target.value as AttributeKey)}
-              className="w-full px-2.5 py-1.5 rounded-lg bg-[#0B0C0E] border border-[#23272F] text-zinc-200 text-xs font-semibold cursor-pointer"
-            >
-              {(ATTRIBUTE_KEYS as readonly AttributeKey[])
-                .filter((k) => k !== bonusPlus2)
-                .map((k) => (
-                  <option key={k} value={k}>
-                    {ATTRIBUTE_LABELS[k]} (+1)
-                  </option>
-                ))}
-            </select>
+            <label className="block text-[11px] text-zinc-400 mb-1">
+              Bônus Secundário (+1): {clanRule?.pairedPlus1 ? `(Fixado pelo Clã ${clan})` : ""}
+            </label>
+            {clanRule?.pairedPlus1 ? (
+              <div className="w-full px-2.5 py-1.5 rounded-lg bg-[#0B0C0E] border border-indigo-900/40 text-indigo-300 text-xs font-semibold flex items-center justify-between">
+                <span>{ATTRIBUTE_LABELS[bonusPlus1]} (+1)</span>
+                <span className="text-[10px] text-zinc-500 font-mono">Regra v2.5</span>
+              </div>
+            ) : (
+              <select
+                value={bonusPlus1}
+                onChange={(e) => setBonusPlus1(e.target.value as AttributeKey)}
+                className="w-full px-2.5 py-1.5 rounded-lg bg-[#0B0C0E] border border-[#23272F] text-zinc-200 text-xs font-semibold cursor-pointer"
+              >
+                {(ATTRIBUTE_KEYS as readonly AttributeKey[])
+                  .filter((k) => k !== bonusPlus2)
+                  .map((k) => (
+                    <option key={k} value={k}>
+                      {ATTRIBUTE_LABELS[k]} (+1)
+                    </option>
+                  ))}
+              </select>
+            )}
           </div>
         </div>
       )}

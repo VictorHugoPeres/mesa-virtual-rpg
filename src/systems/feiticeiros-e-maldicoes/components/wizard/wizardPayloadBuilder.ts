@@ -9,6 +9,8 @@ import {
   calcAttention,
   calcInitiative,
   calcSpellDC,
+  calcSuggestedHP,
+  calcSuggestedPE,
 } from "@/systems/feiticeiros-e-maldicoes";
 import { WizardState } from "./wizardTypes";
 import { WIZARD_WEAPONS } from "./wizardPresets";
@@ -49,19 +51,21 @@ export function buildCharacterSheet(state: WizardState): FMCharacterData {
   const forMod = getModifier(finalAttrs.FOR);
   const dexMod = getModifier(finalAttrs.DEX);
   const conMod = getModifier(finalAttrs.CON);
-  const techAttrVal = finalAttrs[state.techniqueAttribute] || 10;
-  const techMod = getModifier(techAttrVal);
-  const isRestringido = state.origin === "Restringido";
-  const specInfo = SPEC_TABLE[state.specialization] || SPEC_TABLE["Lutador"];
+  const chosenKeyAttr = state.keyAttribute || state.techniqueAttribute || "FOR";
+  const keyAttrVal = finalAttrs[chosenKeyAttr] || 10;
+  const keyAttrMod = getModifier(keyAttrVal);
+  const isRestringido = state.origin === "Restringido" || state.specialization === "Restringido";
   const specProf = SPECIALIZATION_PROFICIENCIES[state.specialization] || SPECIALIZATION_PROFICIENCIES["Lutador"];
 
-  const hpMax = specInfo.hpBase + conMod;
-  const peMax = isRestringido ? 0 : specInfo.pePerLevel + (specInfo.addsAttributeToPE ? Math.max(0, techMod) : 0);
+  const hpMax = calcSuggestedHP(state.specialization, 1, conMod, state.clan);
+  const peMax = isRestringido
+    ? 0
+    : calcSuggestedPE(state.specialization, 1, keyAttrMod, { origin: state.origin, clan: state.clan });
 
   const sheet = createDefaultCharacter(state.name.trim(), state.type, state.specialization, state.origin);
   sheet.attributes = finalAttrs;
   sheet.clan = state.clan || "";
-  sheet.keyAttribute = state.keyAttribute || state.techniqueAttribute;
+  sheet.keyAttribute = chosenKeyAttr;
   sheet.hp = { current: hpMax, max: hpMax, temp: 0 };
   sheet.energy = { current: peMax, max: peMax, temp: 0 };
   sheet.integrity = { current: hpMax, max: hpMax, temp: 0 };
@@ -89,9 +93,49 @@ export function buildCharacterSheet(state: WizardState): FMCharacterData {
     });
   }
 
+  if (state.level1FeatName) {
+    sheet.features.push({
+      id: `feat-level1-${state.level1FeatId || "origem"}`,
+      name: `${state.level1FeatType === "aptidao" ? "Aptidão: " : "Talento: "}${state.level1FeatName}`,
+      current: 1,
+      max: 1,
+      cost: "-",
+      description: state.level1FeatDesc || "Concedido no 1º Nível pela Origem.",
+    });
+  }
+
+  // Testes de Resistência
+  if (state.chosenSavingThrow && sheet.skills[state.chosenSavingThrow]) {
+    sheet.skills[state.chosenSavingThrow].trained = true;
+  }
+  if (isRestringido) {
+    if (sheet.skills["Fortitude"]) sheet.skills["Fortitude"].trained = true;
+    if (sheet.skills["Reflexos"]) sheet.skills["Reflexos"].trained = true;
+  }
+
+  // Perícias Treinadas
   for (const skillName of state.trainedSkills) {
-    if (sheet.skills[skillName]) {
+    if (!sheet.skills[skillName]) {
+      sheet.skills[skillName] = { trained: true, expert: false, otherBonus: 0 };
+    } else {
       sheet.skills[skillName].trained = true;
+    }
+  }
+
+  // Perícias Mestre
+  for (const skillName of state.expertSkills || []) {
+    if (!sheet.skills[skillName]) {
+      sheet.skills[skillName] = { trained: true, expert: true, otherBonus: 0 };
+    } else {
+      sheet.skills[skillName].trained = true;
+      sheet.skills[skillName].expert = true;
+    }
+  }
+
+  // Ofícios
+  for (const craftName of state.craftSkills || []) {
+    if (!sheet.skills[craftName]) {
+      sheet.skills[craftName] = { trained: true, expert: false, otherBonus: 0 };
     }
   }
 
@@ -110,8 +154,8 @@ export function buildCharacterSheet(state: WizardState): FMCharacterData {
     techniqueName: state.techniqueName,
     techniqueDesc: state.techniqueDesc,
     techniqueAttribute: state.techniqueAttribute,
-    techniqueDC: calcSpellDC(1, techAttrVal),
-    techniqueAttack: 2 + techMod,
+    techniqueDC: calcSpellDC(1, finalAttrs[state.techniqueAttribute] || 10),
+    techniqueAttack: 2 + getModifier(finalAttrs[state.techniqueAttribute] || 10),
     techniqueSkill: "Feitiçaria",
     aptitudes: { aura: 0, control: 0, domain: 0, barrier: 0, rct: 0, special: 0 },
     spells: state.spells.map((s, idx) => ({

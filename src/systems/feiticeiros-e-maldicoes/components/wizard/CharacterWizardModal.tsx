@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { X, ArrowLeft, ArrowRight, Wand2, AlertCircle } from "lucide-react";
 import { Portal } from "@/core/ui";
@@ -33,6 +33,10 @@ export function CharacterWizardModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [state, setState] = useState(INITIAL_WIZARD_STATE);
+
+  const handleSetAttributeBonuses = useCallback((bonuses: Partial<Record<string, number>>) => {
+    setState((prev) => ({ ...prev, attributeBonuses: bonuses as any }));
+  }, []);
 
   if (!isOpen) return null;
 
@@ -163,7 +167,7 @@ export function CharacterWizardModal({
               bonusPlus1={state.bonusPlus1}
               setBonusPlus1={(attr) => setState((prev) => ({ ...prev, bonusPlus1: attr }))}
               attributeBonuses={state.attributeBonuses}
-              setAttributeBonuses={(bonuses) => setState((prev) => ({ ...prev, attributeBonuses: bonuses }))}
+              setAttributeBonuses={handleSetAttributeBonuses}
             />
           )}
 
@@ -171,14 +175,25 @@ export function CharacterWizardModal({
             <StepSkills
               specialization={state.specialization}
               origin={state.origin}
+              clan={state.clan}
+              attributes={state.baseAttributes}
+              chosenTR={state.chosenSavingThrow}
+              setChosenTR={(tr) => setState((prev) => ({ ...prev, chosenSavingThrow: tr }))}
+              skillBonusAttribute={state.skillBonusAttribute || "INT"}
+              setSkillBonusAttribute={(attr) => setState((prev) => ({ ...prev, skillBonusAttribute: attr }))}
               trainedSkills={state.trainedSkills}
               setTrainedSkills={(skills) => setState((prev) => ({ ...prev, trainedSkills: skills }))}
+              expertSkills={state.expertSkills}
+              setExpertSkills={(skills) => setState((prev) => ({ ...prev, expertSkills: skills }))}
+              craftSkills={state.craftSkills}
+              setCraftSkills={(crafts) => setState((prev) => ({ ...prev, craftSkills: crafts }))}
             />
           )}
 
           {currentStep === 5 && (
             <StepTechnique
               origin={state.origin}
+              specialization={state.specialization}
               techniqueName={state.techniqueName}
               setTechniqueName={(tName) => setState((prev) => ({ ...prev, techniqueName: tName }))}
               techniqueDesc={state.techniqueDesc}
@@ -187,6 +202,16 @@ export function CharacterWizardModal({
               setTechniqueAttribute={(tAttr) => setState((prev) => ({ ...prev, techniqueAttribute: tAttr }))}
               spells={state.spells}
               setSpells={(sp) => setState((prev) => ({ ...prev, spells: sp }))}
+              level1FeatId={state.level1FeatId}
+              onSelectLevel1Feat={(id, name, type, desc) =>
+                setState((prev) => ({
+                  ...prev,
+                  level1FeatId: id,
+                  level1FeatName: name,
+                  level1FeatType: type,
+                  level1FeatDesc: desc,
+                }))
+              }
             />
           )}
 
